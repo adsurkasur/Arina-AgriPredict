@@ -17,51 +17,31 @@ export function InteractiveDataTable() {
     limit: 10,
     search: '',
     sortKey: 'date',
-    sortOrder: 'desc',
+    sortOrder: 'asc',
   });
+  const debouncedParams = useDebounce(queryParams, 300);
+  const { data, isLoading, error } = useDemands(debouncedParams);
 
-  const debouncedSearch = useDebounce(queryParams.search || '', 300);
-  const debouncedParams = { ...queryParams, search: debouncedSearch };
+  function handleParamsChange(params: Partial<DemandQueryParams>) {
+    setQueryParams((prev) => ({ ...prev, ...params }));
+  }
 
-  const { data, isLoading, error, refetch } = useDemands(debouncedParams);
+  function handleSortChange(key: string, direction: 'asc' | 'desc') {
+    setQueryParams((prev) => ({ ...prev, sortKey: key, sortOrder: direction }));
+  }
 
-  const handleParamsChange = (updates: Partial<DemandQueryParams>) => {
-    setQueryParams(prev => ({ ...prev, ...updates }));
-  };
-
-  const handlePageChange = (page: number) => {
-    handleParamsChange({ page });
-  };
-
-  const handleSortChange = (sortKey: string) => {
-    const sortOrder = queryParams.sortKey === sortKey && queryParams.sortOrder === 'asc' 
-      ? 'desc' 
-      : 'asc';
-    handleParamsChange({ sortKey, sortOrder });
-  };
+  function handlePageChange(page: number) {
+    setQueryParams((prev) => ({ ...prev, page }));
+  }
 
   if (error) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Database className="h-5 w-5" />
-            <span>Sales Data</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ErrorDisplay
-            title="Failed to load sales data"
-            message={error.message || 'An error occurred while fetching data'}
-            onRetry={() => refetch()}
-          />
-        </CardContent>
-      </Card>
+      <ErrorDisplay message={error.message || 'Unknown error'} />
     );
   }
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full min-h-0 overflow-auto">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center space-x-2">
           <Database className="h-5 w-5 text-primary" />
@@ -70,25 +50,25 @@ export function InteractiveDataTable() {
         <TableToolbar
           searchValue={queryParams.search || ''}
           onSearchChange={(search) => handleParamsChange({ search, page: 1 })}
-          totalItems={data?.pagination.totalItems || 0}
+          totalItems={data?.pagination?.totalItems || 0}
         />
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col space-y-4">
+      <CardContent className="flex-1 flex flex-col min-h-0 space-y-4 overflow-auto">
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center min-h-0">
             <LoadingSpinner size="lg" text="Loading sales data..." />
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 min-h-0 overflow-auto max-h-[40vh]">
               <DataTableView
                 data={data?.data || []}
                 sortConfig={{
                   key: queryParams.sortKey || '',
                   direction: queryParams.sortOrder || 'asc'
                 }}
-                onSort={handleSortChange}
+                onSort={(key) => handleSortChange(key, queryParams.sortOrder)}
               />
             </div>
 
