@@ -42,7 +42,7 @@ export function AgriPredictWorkspace() {
                 </div>
 
                 {/* Chart */}
-                <div className="flex-shrink-0 w-full overflow-x-auto" aria-label="Demand Forecast Chart">
+                <div className="flex-shrink-0 w-full" aria-label="Demand Forecast Chart">
                   <ErrorBoundary>
                     <DemandChart
                       demandData={allDemandsData?.data || []}

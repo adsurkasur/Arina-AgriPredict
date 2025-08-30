@@ -124,7 +124,7 @@ export function DemandChart({
           <span>Demand Trends & Forecast</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="w-full overflow-x-auto">
+  <CardContent className="w-full overflow-hidden">
         <ErrorBoundary>
           <div className="h-80 w-full" role="region" aria-label="Demand chart" tabIndex={0}>
             <ResponsiveContainer width="100%" height="100%">
