@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
-import { navigationMenuTriggerStyle } from "./navigation-menu-style"
+import { navigationMenuTriggerStyle } from "./navigation-menu-utils"
 import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -38,9 +38,9 @@ const NavigationMenuTrigger = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Trigger
-    ref={ref}
-    className={cn(navigationMenuTriggerStyle(), "group", className)}
+    <NavigationMenuPrimitive.Trigger
+      ref={ref}
+      className={cn(navigationMenuTriggerStyle, "group", className)}
     {...props}
   >
     {children}{" "}
@@ -106,7 +106,6 @@ NavigationMenuIndicator.displayName =
   NavigationMenuPrimitive.Indicator.displayName
 
 export {
-  navigationMenuTriggerStyle,
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
@@ -115,4 +114,4 @@ export {
   NavigationMenuLink,
   NavigationMenuIndicator,
   NavigationMenuViewport,
-}
+};

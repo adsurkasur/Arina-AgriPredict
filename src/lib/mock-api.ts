@@ -9,49 +9,71 @@ import {
   Product
 } from '@/types/api';
 
-// Mock data storage
-const mockDemands: DemandRecord[] = [
-  {
-    id: '1',
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    productName: 'Red Chili',
-    productId: 'red-chili',
-    quantity: 150,
-    price: 8.50,
-  },
-  {
-    id: '2',
-    date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    productName: 'Onions',
-    productId: 'onions',
-    quantity: 200,
-    price: 3.20,
-  },
-  {
-    id: '3',
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    productName: 'Tomatoes',
-    productId: 'tomatoes',
-    quantity: 180,
-    price: 4.75,
-  },
-  {
-    id: '4',
-    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    productName: 'Red Chili',
-    productId: 'red-chili',
-    quantity: 120,
-    price: 8.75,
-  },
-  {
-    id: '5',
-    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    productName: 'Potatoes',
-    productId: 'potatoes',
-    quantity: 300,
-    price: 2.80,
-  },
-];
+
+// LocalStorage helpers
+const DEMANDS_KEY = 'agriBuddy:demands';
+function getLocalDemands(): DemandRecord[] {
+  const raw = typeof window !== 'undefined' ? window.localStorage.getItem(DEMANDS_KEY) : null;
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  // If not present, seed with initial data
+  const initial = [
+    {
+      id: '1',
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      productName: 'Red Chili',
+      productId: 'red-chili',
+      quantity: 150,
+      price: 8.50,
+    },
+    {
+      id: '2',
+      date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      productName: 'Onions',
+      productId: 'onions',
+      quantity: 200,
+      price: 3.20,
+    },
+    {
+      id: '3',
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      productName: 'Tomatoes',
+      productId: 'tomatoes',
+      quantity: 180,
+      price: 4.75,
+    },
+    {
+      id: '4',
+      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      productName: 'Red Chili',
+      productId: 'red-chili',
+      quantity: 120,
+      price: 8.75,
+    },
+    {
+      id: '5',
+      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      productName: 'Potatoes',
+      productId: 'potatoes',
+      quantity: 300,
+      price: 2.80,
+    },
+  ];
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(DEMANDS_KEY, JSON.stringify(initial));
+  }
+  return initial;
+}
+function setLocalDemands(data: DemandRecord[]) {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(DEMANDS_KEY, JSON.stringify(data));
+  }
+}
 
 const mockProducts: Product[] = [
   { id: 'red-chili', name: 'Red Chili', category: 'Spices', unit: 'kg' },
@@ -74,7 +96,8 @@ export const mockApi = {
     const { page = 1, limit = 10, search = '', sortKey = 'date', sortOrder = 'desc' } = params;
     
     // Filter by search
-  const filtered = mockDemands.filter(demand => 
+  const demands = getLocalDemands();
+  const filtered = demands.filter(demand => 
       demand.productName.toLowerCase().includes(search.toLowerCase()) ||
       demand.productId.toLowerCase().includes(search.toLowerCase())
     );
@@ -127,19 +150,23 @@ export const mockApi = {
       price: data.price,
     };
     
-    mockDemands.unshift(newRecord);
+  const demands = getLocalDemands();
+  demands.unshift(newRecord);
+  setLocalDemands(demands);
     return newRecord;
   },
 
   async deleteDemand(id: string): Promise<void> {
     await delay(200);
     
-    const index = mockDemands.findIndex(d => d.id === id);
+  const demands = getLocalDemands();
+  const index = demands.findIndex(d => d.id === id);
     if (index === -1) {
       throw new Error('Record not found');
     }
     
-    mockDemands.splice(index, 1);
+  demands.splice(index, 1);
+  setLocalDemands(demands);
   },
 
   async generateForecast(productId: string, days: number): Promise<ForecastResponse> {

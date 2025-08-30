@@ -23,13 +23,13 @@ export function AgriPredictWorkspace() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-6">
+  <div className="min-h-screen bg-background overflow-y-auto">
+  <div className="w-full p-6 space-y-6">
         {/* Header */}
         <WorkspaceHeader />
 
         {/* Main Content - Resizable Layout */}
-        <div className="h-[calc(100vh-200px)]">
+  <div className="h-[calc(100vh-200px)] overflow-y-auto">
           <PanelGroup direction="horizontal" className="h-full">
             {/* Left Panel - Data Management */}
             <Panel defaultSize={60} minSize={40} className="pr-3">
@@ -42,7 +42,7 @@ export function AgriPredictWorkspace() {
                 </div>
 
                 {/* Chart */}
-                <div className="h-1/3" aria-label="Demand Forecast Chart">
+                <div className="h-1/3 w-full overflow-x-auto" aria-label="Demand Forecast Chart">
                   <ErrorBoundary>
                     <DemandChart
                       demandData={allDemandsData?.data || []}
