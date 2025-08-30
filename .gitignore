@@ -7,6 +7,27 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+
+# Build output
+.next/
+out/
+build/
+dist/
+dist-ssr/
+coverage/
+
+# Environment files
+.env*
+
+# Dependency directories
+node_modules/
+
+# Package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
 node_modules
 dist
 dist-ssr
