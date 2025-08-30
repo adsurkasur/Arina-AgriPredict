@@ -23,26 +23,26 @@ export function AgriPredictWorkspace() {
   };
 
   return (
-  <div className="min-h-screen bg-background overflow-y-auto">
-  <div className="w-full p-6 space-y-6">
-        {/* Header */}
-        <WorkspaceHeader />
+  <div className="min-h-screen h-screen bg-background">
+    <div className="w-full h-full p-6 flex flex-col">
+      {/* Header */}
+      <WorkspaceHeader />
 
-        {/* Main Content - Resizable Layout */}
-  <div className="h-[calc(100vh-200px)] overflow-y-auto">
-          <PanelGroup direction="horizontal" className="h-full">
+      {/* Main Content - Resizable Layout */}
+      <div className="flex-1 min-h-0">
+        <PanelGroup direction="horizontal" className="h-full min-h-0">
             {/* Left Panel - Data Management */}
-            <Panel defaultSize={60} minSize={40} className="pr-3">
-              <div className="h-full space-y-6">
+            <Panel defaultSize={60} minSize={40} className="pr-3 h-full min-h-0 flex flex-col">
+              <div className="flex-1 min-h-0 overflow-y-auto flex flex-col space-y-6">
                 {/* Data Table */}
-                <div className="h-2/3" aria-label="Sales Data Table">
+                <div className="flex-shrink-0" aria-label="Sales Data Table">
                   <ErrorBoundary>
                     <InteractiveDataTable />
                   </ErrorBoundary>
                 </div>
 
                 {/* Chart */}
-                <div className="h-1/3 w-full overflow-x-auto" aria-label="Demand Forecast Chart">
+                <div className="flex-shrink-0 w-full overflow-x-auto" aria-label="Demand Forecast Chart">
                   <ErrorBoundary>
                     <DemandChart
                       demandData={allDemandsData?.data || []}
