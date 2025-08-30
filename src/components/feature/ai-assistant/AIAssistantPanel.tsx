@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from './MessageBubble';
 import { SuggestionChips } from './SuggestionChips';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Bot, Send, Trash2 } from 'lucide-react';
 
 export function AIAssistantPanel() {
@@ -85,11 +86,11 @@ export function AIAssistantPanel() {
     .slice(-1)[0]?.suggestions || [];
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full" aria-label="AI Assistant Panel" role="region">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
-            <Bot className="h-5 w-5 text-primary" />
+            <Bot className="h-5 w-5 text-primary" aria-hidden="true" />
             <span>AI Assistant</span>
           </CardTitle>
           {chatMessages.length > 0 && (
@@ -98,85 +99,84 @@ export function AIAssistantPanel() {
               size="sm"
               onClick={clearChat}
               className="h-8"
+              aria-label="Clear chat history"
             >
-              <Trash2 className="h-3 w-3 mr-1" />
+              <Trash2 className="h-3 w-3 mr-1" aria-hidden="true" />
               Clear
             </Button>
           )}
         </div>
       </CardHeader>
-
       <CardContent className="flex-1 flex flex-col space-y-4">
-        {/* Messages Area */}
-        <ScrollArea className="flex-1 pr-4">
-          <div className="space-y-4">
-            {chatMessages.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium">AI Assistant Ready</p>
-                <p className="text-sm">
-                  Ask me to analyze data, create records, or generate forecasts
-                </p>
-              </div>
-            ) : (
-              chatMessages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
-              ))
-            )}
-            
-            {/* Typing Indicator */}
-            {isAiTyping && (
-              <div className="ai-message-assistant max-w-xs p-3 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-                    <div className="w-2 h-2 bg-current rounded-full animate-pulse delay-75" />
-                    <div className="w-2 h-2 bg-current rounded-full animate-pulse delay-150" />
-                  </div>
-                  <span className="text-xs text-muted-foreground">AI is thinking...</span>
+        <ErrorBoundary>
+          {/* Messages Area */}
+          <ScrollArea className="flex-1 pr-4" role="log" aria-live="polite" aria-label="Chat messages">
+            <div className="space-y-4">
+              {chatMessages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8" aria-label="AI Assistant Ready">
+                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
+                  <p className="text-lg font-medium">AI Assistant Ready</p>
+                  <p className="text-sm">
+                    Ask me to analyze data, create records, or generate forecasts
+                  </p>
                 </div>
-              </div>
-            )}
-            
-            <div ref={scrollAreaRef} />
+              ) : (
+                chatMessages.map((message) => (
+                  <MessageBubble key={message.id} message={message} />
+                ))
+              )}
+              {/* Typing Indicator */}
+              {isAiTyping && (
+                <div className="ai-message-assistant max-w-xs p-3 rounded-lg" aria-label="AI is thinking">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
+                      <div className="w-2 h-2 bg-current rounded-full animate-pulse delay-75" />
+                      <div className="w-2 h-2 bg-current rounded-full animate-pulse delay-150" />
+                    </div>
+                    <span className="text-xs text-muted-foreground">AI is thinking...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={scrollAreaRef} />
+            </div>
+          </ScrollArea>
+          {/* Suggestions */}
+          {latestSuggestions.length > 0 && (
+            <SuggestionChips
+              suggestions={latestSuggestions}
+              onSuggestionClick={handleSuggestionClick}
+              aria-label="AI suggestions"
+            />
+          )}
+          {/* Input Area */}
+          <div className="space-y-2">
+            <Textarea
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me to analyze data, create records, or generate forecasts..."
+              className="min-h-[80px] resize-none transition-smooth"
+              disabled={chatMutation.isPending}
+              aria-label="Chat input"
+            />
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-muted-foreground">
+                Press Enter to send, Shift+Enter for new line
+              </p>
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || chatMutation.isPending}
+                size="sm"
+                className="transition-smooth"
+                aria-label="Send message"
+              >
+                <Send className="h-4 w-4 mr-2" aria-hidden="true" />
+                Send
+              </Button>
+            </div>
           </div>
-        </ScrollArea>
-
-        {/* Suggestions */}
-        {latestSuggestions.length > 0 && (
-          <SuggestionChips
-            suggestions={latestSuggestions}
-            onSuggestionClick={handleSuggestionClick}
-          />
-        )}
-
-        {/* Input Area */}
-        <div className="space-y-2">
-          <Textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me to analyze data, create records, or generate forecasts..."
-            className="min-h-[80px] resize-none transition-smooth"
-            disabled={chatMutation.isPending}
-          />
-          
-          <div className="flex justify-between items-center">
-            <p className="text-xs text-muted-foreground">
-              Press Enter to send, Shift+Enter for new line
-            </p>
-            
-            <Button
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || chatMutation.isPending}
-              size="sm"
-              className="transition-smooth"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Send
-            </Button>
-          </div>
-        </div>
+        </ErrorBoundary>
       </CardContent>
     </Card>
   );

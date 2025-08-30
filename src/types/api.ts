@@ -89,7 +89,7 @@ export interface Product {
 export interface ApiError {
   message: string;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
 // API Response wrapper

@@ -10,7 +10,7 @@ import {
 } from '@/types/api';
 
 // Mock data storage
-let mockDemands: DemandRecord[] = [
+const mockDemands: DemandRecord[] = [
   {
     id: '1',
     date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -74,7 +74,7 @@ export const mockApi = {
     const { page = 1, limit = 10, search = '', sortKey = 'date', sortOrder = 'desc' } = params;
     
     // Filter by search
-    let filtered = mockDemands.filter(demand => 
+  const filtered = mockDemands.filter(demand => 
       demand.productName.toLowerCase().includes(search.toLowerCase()) ||
       demand.productId.toLowerCase().includes(search.toLowerCase())
     );
@@ -203,7 +203,7 @@ Based on historical data analysis, here are the key insights for the ${days}-day
     
     let response = '';
     let actionTaken: ChatResponse['response']['actionTaken'] = 'NONE';
-    let requiresRefetch = false;
+  const requiresRefetch = false;
     let suggestions: string[] = [];
     
     if (lowerMessage.includes('delete') || lowerMessage.includes('remove')) {

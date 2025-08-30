@@ -36,10 +36,11 @@ export function useCreateDemand() {
         description: "The new demand record has been created.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast({
         title: "Error adding record",
-        description: error.message || "Failed to create demand record.",
+        description: message || "Failed to create demand record.",
         variant: "destructive",
       });
     },
@@ -60,10 +61,11 @@ export function useUpdateDemand() {
         description: "The demand record has been updated.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast({
         title: "Error updating record",
-        description: error.message || "Failed to update demand record.",
+        description: message || "Failed to update demand record.",
         variant: "destructive",
       });
     },
@@ -83,10 +85,11 @@ export function useDeleteDemand() {
         description: "The demand record has been removed.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast({
         title: "Error deleting record",
-        description: error.message || "Failed to delete demand record.",
+        description: message || "Failed to delete demand record.",
         variant: "destructive",
       });
     },
@@ -99,10 +102,11 @@ export function useForecast() {
   
   return useMutation({
     mutationFn: (data: ForecastRequest) => forecastApi.generateForecast(data),
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast({
         title: "Error generating forecast",
-        description: error.message || "Failed to generate forecast.",
+        description: message || "Failed to generate forecast.",
         variant: "destructive",
       });
     },
@@ -122,10 +126,11 @@ export function useChat() {
         queryClient.invalidateQueries({ queryKey: ['demands'] });
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast({
         title: "Error sending message",
-        description: error.message || "Failed to communicate with AI assistant.",
+        description: message || "Failed to communicate with AI assistant.",
         variant: "destructive",
       });
     },

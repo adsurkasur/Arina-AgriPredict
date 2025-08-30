@@ -13,7 +13,7 @@ export interface DataTableState {
 }
 
 export interface FormFieldState {
-  value: any;
+  value: unknown;
   error: string | null;
   touched: boolean;
   loading: boolean;

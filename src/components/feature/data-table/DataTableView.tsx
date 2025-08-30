@@ -14,6 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+type PendingRow = {
+  date: Date;
+  productId: string;
+  quantity: number;
+  price: number;
+};
+
 interface DataTableViewProps {
   data: DemandRecord[];
   sortConfig: {
@@ -21,6 +28,7 @@ interface DataTableViewProps {
     direction: 'asc' | 'desc';
   } | null;
   onSort: (key: string) => void;
+  pendingRow?: PendingRow | null;
 }
 
 interface SortHeaderProps {
@@ -49,8 +57,11 @@ function SortHeader({ label, sortKey, currentSort, onSort }: SortHeaderProps) {
   );
 }
 
-export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) {
+export function DataTableView({ data, sortConfig, onSort, pendingRow }: DataTableViewProps) {
   const deleteMutation = useDeleteDemand();
+
+  // Accept pendingRow prop for optimistic UI
+  // ...existing code...
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
@@ -65,62 +76,49 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
     }).format(amount);
   };
 
-  if (data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground">
-        <div className="text-center">
-          <p className="text-lg font-medium">No data found</p>
-          <p className="text-sm">Add your first sales record below</p>
-        </div>
-      </div>
-    );
-  }
+  // ...existing code...
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border" role="table" aria-label="Sales Data Table">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[120px]">
-              <SortHeader
-                label="Date"
-                sortKey="date"
-                currentSort={sortConfig}
-                onSort={onSort}
-              />
-            </TableHead>
-            <TableHead>
-              <SortHeader
-                label="Product"
-                sortKey="productName"
-                currentSort={sortConfig}
-                onSort={onSort}
-              />
-            </TableHead>
-            <TableHead className="text-right">
-              <SortHeader
-                label="Quantity"
-                sortKey="quantity"
-                currentSort={sortConfig}
-                onSort={onSort}
-              />
-            </TableHead>
-            <TableHead className="text-right">
-              <SortHeader
-                label="Price"
-                sortKey="price"
-                currentSort={sortConfig}
-                onSort={onSort}
-              />
-            </TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            {/* ...existing code... */}
           </TableRow>
         </TableHeader>
         <TableBody>
+          {/* Pending row for optimistic UI */}
+          {pendingRow && (
+            <TableRow
+              key="pending"
+              className="animate-pulse opacity-60 bg-primary/10"
+              aria-live="polite"
+            >
+              <TableCell className="font-medium">
+                {format(pendingRow.date, 'MMM dd, yyyy')}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">Pending...</span>
+                </div>
+              </TableCell>
+              <TableCell className="text-right font-mono">
+                {pendingRow.quantity.toLocaleString()}
+              </TableCell>
+              <TableCell className="text-right font-mono">
+                {formatCurrency(pendingRow.price)}
+              </TableCell>
+              <TableCell className="text-right font-mono font-semibold">
+                {formatCurrency(pendingRow.quantity * pendingRow.price)}
+              </TableCell>
+              <TableCell>
+                <span className="text-xs text-muted-foreground">Pending...</span>
+              </TableCell>
+            </TableRow>
+          )}
+          {/* ...existing code... */}
           {data.map((record) => {
             const total = record.quantity * record.price;
-            
             return (
               <TableRow
                 key={record.id}

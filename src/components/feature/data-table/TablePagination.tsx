@@ -59,9 +59,9 @@ export function TablePagination({
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <nav className="flex items-center justify-between" role="navigation" aria-label="Table pagination">
       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-        <span>
+        <span aria-live="polite">
           Showing {startItem} to {endItem} of {totalItems} entries
         </span>
       </div>
@@ -69,7 +69,7 @@ export function TablePagination({
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2">
           <span className="text-sm text-muted-foreground">Rows per page</span>
-          <Select defaultValue="10">
+          <Select defaultValue="10" aria-label="Rows per page">
             <SelectTrigger className="h-8 w-16">
               <SelectValue />
             </SelectTrigger>
@@ -87,15 +87,16 @@ export function TablePagination({
           </span>
         </div>
 
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1" role="group" aria-label="Pagination controls">
           <Button
             variant="outline"
             size="sm"
             onClick={goToFirstPage}
             disabled={currentPage === 1}
             className="h-8 w-8 p-0"
+            aria-label="First page"
           >
-            <ChevronsLeft className="h-4 w-4" />
+            <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
           
           <Button
@@ -104,8 +105,9 @@ export function TablePagination({
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
             className="h-8 w-8 p-0"
+            aria-label="Previous page"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
 
           {getVisiblePages().map((page, index) => (
@@ -116,6 +118,7 @@ export function TablePagination({
               onClick={() => typeof page === 'number' && onPageChange(page)}
               disabled={page === '...'}
               className="h-8 w-8 p-0"
+              aria-label={typeof page === 'number' ? `Go to page ${page}` : 'Ellipsis'}
             >
               {page}
             </Button>
@@ -127,8 +130,9 @@ export function TablePagination({
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
             className="h-8 w-8 p-0"
+            aria-label="Next page"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Button>
           
           <Button
@@ -137,11 +141,12 @@ export function TablePagination({
             onClick={goToLastPage}
             disabled={currentPage === totalPages}
             className="h-8 w-8 p-0"
+            aria-label="Last page"
           >
-            <ChevronsRight className="h-4 w-4" />
+            <ChevronsRight className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

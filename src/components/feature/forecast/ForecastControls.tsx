@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, Calendar, Target } from 'lucide-react';
 import { useForecast } from '@/hooks/useApiHooks';
 import { useProducts } from '@/hooks/useApiHooks';
@@ -24,21 +24,18 @@ interface ForecastControlsProps {
 export function ForecastControls({ onForecastGenerated }: ForecastControlsProps) {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [forecastDays, setForecastDays] = useState<number>(14);
-  
   const { data: products = [] } = useProducts();
   const forecastMutation = useForecast();
   const { setForecasting, setForecastConfig } = useAppStore();
 
   const handleGenerateForecast = () => {
     if (!selectedProductId) return;
-
     setForecasting(true);
     setForecastConfig({ 
       selectedProductId, 
       forecastDays, 
       showForecast: true 
     });
-
     forecastMutation.mutate(
       { productId: selectedProductId, days: forecastDays },
       {
@@ -57,10 +54,10 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
   return (
-    <Card>
+    <Card aria-label="Forecast Controls">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-accent" />
+          <TrendingUp className="h-5 w-5 text-accent" aria-hidden="true" />
           <span>Generate Forecast</span>
         </CardTitle>
       </CardHeader>
@@ -74,16 +71,17 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
             value={selectedProductId} 
             onValueChange={setSelectedProductId}
             disabled={forecastMutation.isPending}
+            aria-label="Select product to forecast"
           >
             <SelectTrigger id="product-select">
               <div className="flex items-center">
-                <Target className="mr-2 h-4 w-4" />
+                <Target className="mr-2 h-4 w-4" aria-hidden="true" />
                 <SelectValue placeholder="Choose a product to forecast" />
               </div>
             </SelectTrigger>
             <SelectContent>
               {products.map((product) => (
-                <SelectItem key={product.id} value={product.id}>
+                <SelectItem key={product.id} value={product.id} aria-label={product.name}>
                   <div className="flex items-center space-x-2">
                     <span className="font-medium">{product.name}</span>
                     <span className="text-xs text-muted-foreground">
@@ -102,7 +100,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
             Forecast Period (Days)
           </Label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="forecast-days"
               type="number"
@@ -112,6 +110,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
               onChange={(e) => setForecastDays(parseInt(e.target.value) || 14)}
               className="pl-10"
               disabled={forecastMutation.isPending}
+              aria-label="Forecast period in days"
             />
           </div>
           <p className="text-xs text-muted-foreground">
@@ -125,12 +124,13 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
           disabled={isDisabled}
           className="w-full transition-smooth"
           size="lg"
+          aria-label="Generate forecast"
         >
           {forecastMutation.isPending ? (
             <LoadingSpinner size="sm" text="Generating..." />
           ) : (
             <>
-              <TrendingUp className="mr-2 h-4 w-4" />
+              <TrendingUp className="mr-2 h-4 w-4" aria-hidden="true" />
               Generate Forecast
             </>
           )}
@@ -138,7 +138,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
 
         {/* Selected Product Info */}
         {selectedProduct && (
-          <div className="p-3 bg-muted rounded-lg">
+          <div className="p-3 bg-muted rounded-lg" aria-label="Selected product info">
             <p className="text-sm font-medium text-foreground">
               Selected: {selectedProduct.name}
             </p>

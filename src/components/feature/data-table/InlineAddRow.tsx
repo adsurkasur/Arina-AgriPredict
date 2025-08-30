@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,8 +39,11 @@ type FormData = z.infer<typeof formSchema>;
 
 export function InlineAddRow() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [pendingRow, setPendingRow] = useState<FormData | null>(null);
   const createMutation = useCreateDemand();
   const { data: products = [] } = useProducts();
+  const firstFieldRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -58,21 +61,32 @@ export function InlineAddRow() {
   const selectedProductId = watch('productId');
 
   const onSubmit = (data: FormData) => {
+    setPending(true);
+    setPendingRow(data);
     const requestData: CreateDemandRequest = {
       date: data.date.toISOString(),
       productId: data.productId,
       quantity: data.quantity,
       price: data.price,
     };
-
     createMutation.mutate(requestData, {
       onSuccess: () => {
+        setPending(false);
+        setPendingRow(null);
         reset();
+        setTimeout(() => {
+          firstFieldRef.current?.focus();
+        }, 100);
+      },
+      onError: () => {
+        setPending(false);
+        setPendingRow(null);
+        // Optionally repopulate form with previous data
       },
     });
   };
 
-  const isPending = createMutation.isPending;
+  const isPending = pending || createMutation.isPending;
 
   return (
     <Card className="border-primary/20 bg-primary/5">
@@ -170,6 +184,9 @@ export function InlineAddRow() {
                   errors.quantity && "border-destructive"
                 )}
                 {...register('quantity', { valueAsNumber: true })}
+                ref={firstFieldRef}
+                aria-required="true"
+                aria-invalid={!!errors.quantity}
               />
               {errors.quantity && (
                 <p className="text-xs text-destructive">{errors.quantity.message}</p>
@@ -203,6 +220,8 @@ export function InlineAddRow() {
                 type="submit"
                 disabled={!isValid || isPending}
                 className="w-full transition-smooth"
+                aria-disabled={!isValid || isPending}
+                aria-label="Add sales record"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 {isPending ? 'Adding...' : 'Add Record'}

@@ -8,6 +8,7 @@ import { DemandChart } from '../forecast/DemandChart';
 import { ForecastControls } from '../forecast/ForecastControls';
 import { AIAssistantPanel } from '../ai-assistant/AIAssistantPanel';
 import { GripVertical } from 'lucide-react';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export function AgriPredictWorkspace() {
   const [forecastData, setForecastData] = useState<ForecastResponse | null>(null);
@@ -33,17 +34,21 @@ export function AgriPredictWorkspace() {
             <Panel defaultSize={60} minSize={40} className="pr-3">
               <div className="h-full space-y-6">
                 {/* Data Table */}
-                <div className="h-2/3">
-                  <InteractiveDataTable />
+                <div className="h-2/3" aria-label="Sales Data Table">
+                  <ErrorBoundary>
+                    <InteractiveDataTable />
+                  </ErrorBoundary>
                 </div>
 
                 {/* Chart */}
-                <div className="h-1/3">
-                  <DemandChart
-                    demandData={allDemandsData?.data || []}
-                    forecastData={forecastData?.forecastData}
-                    selectedProductId={selectedProductId}
-                  />
+                <div className="h-1/3" aria-label="Demand Forecast Chart">
+                  <ErrorBoundary>
+                    <DemandChart
+                      demandData={allDemandsData?.data || []}
+                      forecastData={forecastData?.forecastData}
+                      selectedProductId={selectedProductId}
+                    />
+                  </ErrorBoundary>
                 </div>
               </div>
             </Panel>
@@ -57,15 +62,19 @@ export function AgriPredictWorkspace() {
             <Panel defaultSize={40} minSize={30} className="pl-3">
               <div className="h-full space-y-6">
                 {/* Forecast Controls */}
-                <div className="h-auto">
-                  <ForecastControls 
-                    onForecastGenerated={handleForecastGenerated}
-                  />
+                <div className="h-auto" aria-label="Forecast Controls">
+                  <ErrorBoundary>
+                    <ForecastControls 
+                      onForecastGenerated={handleForecastGenerated}
+                    />
+                  </ErrorBoundary>
                 </div>
 
                 {/* AI Assistant */}
-                <div className="flex-1 h-0">
-                  <AIAssistantPanel />
+                <div className="flex-1 h-0" aria-label="AI Assistant Panel">
+                  <ErrorBoundary>
+                    <AIAssistantPanel />
+                  </ErrorBoundary>
                 </div>
               </div>
             </Panel>

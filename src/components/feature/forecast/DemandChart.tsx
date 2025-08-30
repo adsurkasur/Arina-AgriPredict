@@ -12,6 +12,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { DemandRecord, ForecastDataPoint } from '@/types/api';
 import { ChartSkeleton } from '@/components/common/Skeleton';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Activity } from 'lucide-react';
 
@@ -45,7 +46,7 @@ export function DemandChart({
       acc[date].actualDemand += record.quantity;
       acc[date].totalValue += record.quantity * record.price;
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, { date: string; actualDemand: number; totalValue: number }>);
 
     const demandEntries = Object.values(demandByDate);
 
@@ -116,74 +117,79 @@ export function DemandChart({
   }
 
   return (
-    <Card className="chart-container">
+    <Card className="chart-container" aria-label="Demand Trends & Forecast">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Activity className="h-5 w-5 text-primary" />
+          <Activity className="h-5 w-5 text-primary" aria-hidden="true" />
           <span>Demand Trends & Forecast</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke="hsl(var(--chart-grid))"
-                opacity={0.3}
-              />
-              <XAxis 
-                dataKey="displayDate"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}`}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--popover))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                }}
-                labelStyle={{ color: 'hsl(var(--foreground))' }}
-              />
-              <Legend />
-              
-              {/* Actual demand line */}
-              <Line
-                type="monotone"
-                dataKey="actualDemand"
-                stroke="hsl(var(--chart-demand))"
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--chart-demand))', strokeWidth: 2, r: 4 }}
-                name="Actual Demand"
-                connectNulls={false}
-              />
-              
-              {/* Forecast line */}
-              {forecastData && (
+  <ErrorBoundary>
+          <div className="h-80 w-full" role="region" aria-label="Demand chart" tabIndex={0}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} aria-label="Line chart of demand and forecast">
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="hsl(var(--chart-grid))"
+                  opacity={0.3}
+                />
+                <XAxis 
+                  dataKey="displayDate"
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  aria-label="Date axis"
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value}`}
+                  aria-label="Demand axis"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--popover))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  aria-label="Chart tooltip"
+                />
+                <Legend aria-label="Chart legend" />
+                {/* Actual demand line */}
                 <Line
                   type="monotone"
-                  dataKey="forecastDemand"
-                  stroke="hsl(var(--chart-forecast))"
+                  dataKey="actualDemand"
+                  stroke="hsl(var(--chart-demand))"
                   strokeWidth={2}
-                  strokeDasharray="5 5"
-                  dot={{ fill: 'hsl(var(--chart-forecast))', strokeWidth: 2, r: 4 }}
-                  name="Forecast"
+                  dot={{ fill: 'hsl(var(--chart-demand))', strokeWidth: 2, r: 4 }}
+                  name="Actual Demand"
                   connectNulls={false}
+                  aria-label="Actual demand line"
                 />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+                {/* Forecast line */}
+                {forecastData && (
+                  <Line
+                    type="monotone"
+                    dataKey="forecastDemand"
+                    stroke="hsl(var(--chart-forecast))"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={{ fill: 'hsl(var(--chart-forecast))', strokeWidth: 2, r: 4 }}
+                    name="Forecast"
+                    connectNulls={false}
+                    aria-label="Forecast line"
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ErrorBoundary>
       </CardContent>
     </Card>
   );

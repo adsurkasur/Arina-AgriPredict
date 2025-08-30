@@ -10,13 +10,12 @@ export function SuggestionChips({ suggestions, onSuggestionClick }: SuggestionCh
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" role="group" aria-label="AI suggested actions">
       <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-        <Lightbulb className="h-3 w-3" />
+        <Lightbulb className="h-3 w-3" aria-hidden="true" />
         <span>Suggested actions:</span>
       </div>
-      
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="list">
         {suggestions.map((suggestion, index) => (
           <Button
             key={index}
@@ -24,6 +23,9 @@ export function SuggestionChips({ suggestions, onSuggestionClick }: SuggestionCh
             size="sm"
             onClick={() => onSuggestionClick(suggestion)}
             className="ai-suggestion-chip text-xs h-8 px-3 transition-smooth hover:scale-105"
+            role="listitem"
+            tabIndex={0}
+            aria-label={`Suggestion: ${suggestion}`}
           >
             {suggestion}
           </Button>
