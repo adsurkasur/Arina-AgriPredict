@@ -60,10 +60,10 @@ export function AgriPredictWorkspace() {
             </PanelResizeHandle>
 
             {/* Right Panel - AI Assistant & Controls */}
-            <Panel defaultSize={40} minSize={30} className="pl-3">
-              <div className="h-full space-y-6">
-                {/* Forecast Controls */}
-                <div className="h-auto" aria-label="Forecast Controls">
+            <Panel defaultSize={40} minSize={30} className="pl-3 h-full min-h-0 flex flex-col">
+              <div className="flex-1 min-h-0 overflow-y-auto flex flex-col space-y-6">
+                {/* Forecast Controls Card */}
+                <div className="flex-shrink-0" aria-label="Forecast Controls">
                   <ErrorBoundary>
                     <ForecastControls 
                       onForecastGenerated={handleForecastGenerated}
@@ -71,8 +71,8 @@ export function AgriPredictWorkspace() {
                   </ErrorBoundary>
                 </div>
 
-                {/* AI Assistant */}
-                <div className="flex-1 h-0" aria-label="AI Assistant Panel">
+                {/* AI Assistant Card */}
+                <div className="flex-shrink-0 max-h-[60vh] overflow-y-auto" aria-label="AI Assistant Panel">
                   <ErrorBoundary>
                     <AIAssistantPanel />
                   </ErrorBoundary>
