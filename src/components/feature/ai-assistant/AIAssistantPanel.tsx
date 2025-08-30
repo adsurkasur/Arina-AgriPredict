@@ -1,0 +1,183 @@
+import { useState, useRef, useEffect } from 'react';
+import { useChat } from '@/hooks/useApiHooks';
+import { useAppStore } from '@/store/zustand-store';
+import { Message } from '@/types/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MessageBubble } from './MessageBubble';
+import { SuggestionChips } from './SuggestionChips';
+import { Bot, Send, Trash2 } from 'lucide-react';
+
+export function AIAssistantPanel() {
+  const [inputMessage, setInputMessage] = useState('');
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
+  const { 
+    chatMessages, 
+    isAiTyping, 
+    addChatMessage, 
+    setAiTyping, 
+    clearChat 
+  } = useAppStore();
+  
+  const chatMutation = useChat();
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages, isAiTyping]);
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || chatMutation.isPending) return;
+
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: inputMessage.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    // Add user message optimistically
+    addChatMessage(userMessage);
+    setInputMessage('');
+    setAiTyping(true);
+
+    try {
+      const response = await chatMutation.mutateAsync({
+        message: userMessage.content,
+        history: chatMessages,
+      });
+
+      const aiMessage: Message = {
+        id: response.response.id,
+        role: 'assistant',
+        content: response.response.content,
+        timestamp: new Date().toISOString(),
+        suggestions: response.response.suggestions,
+      };
+
+      addChatMessage(aiMessage);
+    } catch (error) {
+      // Error is handled by the mutation hook
+      console.error('Chat error:', error);
+    } finally {
+      setAiTyping(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputMessage(suggestion);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const latestSuggestions = chatMessages
+    .filter(msg => msg.role === 'assistant' && msg.suggestions?.length)
+    .slice(-1)[0]?.suggestions || [];
+
+  return (
+    <Card className="flex flex-col h-full">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-2">
+            <Bot className="h-5 w-5 text-primary" />
+            <span>AI Assistant</span>
+          </CardTitle>
+          {chatMessages.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearChat}
+              className="h-8"
+            >
+              <Trash2 className="h-3 w-3 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex-1 flex flex-col space-y-4">
+        {/* Messages Area */}
+        <ScrollArea className="flex-1 pr-4">
+          <div className="space-y-4">
+            {chatMessages.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">
+                <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium">AI Assistant Ready</p>
+                <p className="text-sm">
+                  Ask me to analyze data, create records, or generate forecasts
+                </p>
+              </div>
+            ) : (
+              chatMessages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))
+            )}
+            
+            {/* Typing Indicator */}
+            {isAiTyping && (
+              <div className="ai-message-assistant max-w-xs p-3 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-current rounded-full animate-pulse delay-75" />
+                    <div className="w-2 h-2 bg-current rounded-full animate-pulse delay-150" />
+                  </div>
+                  <span className="text-xs text-muted-foreground">AI is thinking...</span>
+                </div>
+              </div>
+            )}
+            
+            <div ref={scrollAreaRef} />
+          </div>
+        </ScrollArea>
+
+        {/* Suggestions */}
+        {latestSuggestions.length > 0 && (
+          <SuggestionChips
+            suggestions={latestSuggestions}
+            onSuggestionClick={handleSuggestionClick}
+          />
+        )}
+
+        {/* Input Area */}
+        <div className="space-y-2">
+          <Textarea
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Ask me to analyze data, create records, or generate forecasts..."
+            className="min-h-[80px] resize-none transition-smooth"
+            disabled={chatMutation.isPending}
+          />
+          
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-muted-foreground">
+              Press Enter to send, Shift+Enter for new line
+            </p>
+            
+            <Button
+              onClick={handleSendMessage}
+              disabled={!inputMessage.trim() || chatMutation.isPending}
+              size="sm"
+              className="transition-smooth"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Send
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
