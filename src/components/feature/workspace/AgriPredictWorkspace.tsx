@@ -1,3 +1,4 @@
+"use client";
 import { useState } from 'react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { useDemands } from '@/hooks/useApiHooks';
