@@ -22,6 +22,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: unknown) {
     // Log error to monitoring service if needed
+    // For now, just output to console to avoid unused variable error
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   handleRetry = () => {
