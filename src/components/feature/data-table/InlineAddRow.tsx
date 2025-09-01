@@ -40,7 +40,6 @@ type FormData = z.infer<typeof formSchema>;
 export function InlineAddRow() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pending, setPending] = useState(false);
-  const [pendingRow, setPendingRow] = useState<FormData | null>(null);
   const createMutation = useCreateDemand();
   const { data: products = [] } = useProducts();
   const firstFieldRef = useRef<HTMLInputElement>(null);
@@ -62,7 +61,7 @@ export function InlineAddRow() {
 
   const onSubmit = (data: FormData) => {
     setPending(true);
-    setPendingRow(data);
+  // ...existing code...
     const requestData: CreateDemandRequest = {
       date: data.date.toISOString(),
       productId: data.productId,
@@ -72,7 +71,7 @@ export function InlineAddRow() {
     createMutation.mutate(requestData, {
       onSuccess: () => {
         setPending(false);
-        setPendingRow(null);
+  // ...existing code...
         reset();
         setTimeout(() => {
           firstFieldRef.current?.focus();
@@ -80,7 +79,7 @@ export function InlineAddRow() {
       },
       onError: () => {
         setPending(false);
-        setPendingRow(null);
+  // ...existing code...
         // Optionally repopulate form with previous data
       },
     });
