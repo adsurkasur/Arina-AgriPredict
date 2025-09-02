@@ -84,7 +84,7 @@ export function DemandChart({
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Activity className="h-5 w-5" />
-            <span>Demand Trends</span>
+            <span>Demand Chart</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -100,7 +100,7 @@ export function DemandChart({
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Activity className="h-5 w-5 text-primary" />
-            <span>Demand Trends</span>
+            <span>Demand Chart</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -117,11 +117,11 @@ export function DemandChart({
   }
 
   return (
-    <Card className="chart-container" aria-label="Demand Trends & Forecast">
+    <Card className="chart-container" aria-label="Demand Chart">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Activity className="h-5 w-5 text-primary" aria-hidden="true" />
-          <span>Demand Trends & Forecast</span>
+          <span>Demand Chart</span>
         </CardTitle>
       </CardHeader>
   <CardContent className="w-full overflow-hidden">

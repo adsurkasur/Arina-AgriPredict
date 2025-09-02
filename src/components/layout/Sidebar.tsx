@@ -10,8 +10,6 @@ import {
   Database,
   TrendingUp,
   MessageSquare,
-  Menu,
-  X,
   Leaf
 } from "lucide-react";
 
@@ -45,31 +43,33 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className={cn("flex flex-col h-full bg-card border-r", className)}>
+    <div
+      className={cn(
+        "flex flex-col h-full bg-card border-r transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-16" : "w-80",
+        className
+      )}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+      <div className={cn("flex items-center border-b transition-all duration-300", isCollapsed ? "justify-center p-3" : "justify-between p-4")}>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="flex items-center space-x-2 group transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-1"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground group-hover:bg-primary/90 transition-colors duration-200">
             <Leaf className="h-4 w-4" />
           </div>
           {!isCollapsed && (
-            <div>
-              <h2 className="text-lg font-semibold">AgriPredict</h2>
+            <div className="transition-all duration-300 ease-in-out">
+              <h2 className="text-lg font-semibold whitespace-nowrap">AgriPredict</h2>
             </div>
           )}
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8 p-0"
-        >
-          {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-        </Button>
+        </button>
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 px-3 py-4">
+      <ScrollArea className={cn("flex-1 transition-all duration-300", isCollapsed ? "px-2 py-4" : "px-3 py-4")}>
         <nav className="space-y-2">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
@@ -78,16 +78,16 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start h-auto p-3",
-                    isCollapsed ? "px-2" : "px-3",
-                    isActive && "bg-secondary"
+                    "w-full justify-start h-auto transition-all duration-300 ease-in-out",
+                    isCollapsed ? "px-2 py-3" : "px-3 py-3",
+                    isActive && "bg-secondary shadow-sm"
                   )}
                 >
-                  <item.icon className="h-5 w-5 shrink-0" />
+                  <item.icon className="h-5 w-5 shrink-0 transition-all duration-200" />
                   {!isCollapsed && (
-                    <div className="ml-3 text-left">
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
+                    <div className="ml-3 text-left transition-all duration-300 ease-in-out">
+                      <div className="font-medium whitespace-nowrap">{item.name}</div>
+                      <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
                         {item.description}
                       </div>
                     </div>
@@ -101,14 +101,14 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Footer */}
       {!isCollapsed && (
-        <>
-          <Separator />
+        <div className="transition-all duration-300 ease-in-out">
+          <Separator className="mb-4 transition-all duration-300" />
           <div className="p-4">
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground leading-relaxed">
               Agricultural demand forecasting platform with AI-powered insights
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -8,14 +8,14 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background transition-all duration-300 ease-in-out">
       {/* Sidebar */}
-      <div className="w-80 flex-shrink-0">
+      <div className="flex-shrink-0">
         <Sidebar />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-auto transition-all duration-300 ease-in-out">
         {children}
       </div>
     </div>

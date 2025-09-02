@@ -33,11 +33,11 @@ All colors MUST be HSL for consistency and theming support.
     --muted: 40 20% 94%;
     --muted-foreground: 150 6% 45%;
 
-    /* Harvest Orange Accent */
-    --accent: 25 95% 53%;
+    /* Harvest Green Accent */
+    --accent: 142 76% 36%;
     --accent-foreground: 0 0% 98%;
-    --accent-hover: 25 95% 45%;
-    --accent-light: 25 95% 90%;
+    --accent-hover: 142 76% 30%;
+    --accent-light: 142 76% 85%;
 
     /* Data Visualization Colors */
     --chart-demand: 142 76% 36%;

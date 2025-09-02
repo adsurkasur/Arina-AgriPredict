@@ -58,7 +58,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
     <Card aria-label="Forecast Controls">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-accent" aria-hidden="true" />
+          <TrendingUp className="h-5 w-5 text-primary" aria-hidden="true" />
           <span>Generate Forecast</span>
         </CardTitle>
       </CardHeader>
