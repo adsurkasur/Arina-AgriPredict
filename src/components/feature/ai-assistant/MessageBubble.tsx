@@ -14,15 +14,15 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
   return (
     <div
-      className={cn("flex", isUser ? "justify-end" : "justify-start")}
+      className={cn("flex w-full", isUser ? "justify-end" : "justify-start")}
       role="listitem"
       aria-label={isUser ? "User message" : "Assistant message"}
       tabIndex={0}
     >
-      <div className={cn("flex max-w-[80%] space-x-2", isUser ? "flex-row-reverse space-x-reverse" : "flex-row")}> 
+      <div className={cn("flex max-w-2xl w-full space-x-3", isUser ? "flex-row-reverse space-x-reverse" : "flex-row")}>
         {/* Avatar */}
         <div className={cn(
-          "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+          "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1",
           isUser ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
         )} aria-hidden="true">
           {isUser ? (
@@ -36,9 +36,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div className="flex-1 min-w-0">
           <div
             className={cn(
-              "p-3 rounded-lg transition-smooth",
-              isUser 
-                ? "ai-message-user text-primary-foreground" 
+              "p-4 rounded-lg transition-smooth",
+              isUser
+                ? "ai-message-user text-primary-foreground"
                 : "ai-message-assistant"
             )}
             aria-live={isUser ? undefined : "polite"}
@@ -49,7 +49,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 {message.content}
               </p>
             ) : (
-              <MarkdownRenderer 
+              <MarkdownRenderer
                 content={message.content}
                 className="text-sm"
               />
@@ -57,7 +57,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
           {/* Timestamp */}
           <p className={cn(
-            "text-xs text-muted-foreground mt-1",
+            "text-xs text-muted-foreground mt-2",
             isUser ? "text-right" : "text-left"
           )} aria-label={`Sent at ${timestamp}`}>
             {timestamp}

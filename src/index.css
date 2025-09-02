@@ -41,7 +41,7 @@ All colors MUST be HSL for consistency and theming support.
 
     /* Data Visualization Colors */
     --chart-demand: 142 76% 36%;
-    --chart-forecast: 25 95% 53%;
+    --chart-forecast: 142 76% 40%;
     --chart-grid: 150 6% 85%;
     --chart-background: 0 0% 100%;
 
@@ -61,7 +61,7 @@ All colors MUST be HSL for consistency and theming support.
     /* AI Assistant Specific */
     --ai-bubble-user: 142 76% 36%;
     --ai-bubble-assistant: 35 25% 92%;
-    --ai-suggestion: 25 95% 95%;
+    --ai-suggestion: 142 76% 90%;
 
     /* Data States */
     --data-pending: 45 93% 47%;
@@ -111,13 +111,13 @@ All colors MUST be HSL for consistency and theming support.
     --muted: 150 10% 13%;
     --muted-foreground: 150 6% 65%;
 
-    --accent: 25 95% 58%;
+    --accent: 142 76% 45%;
     --accent-foreground: 150 15% 8%;
-    --accent-hover: 25 95% 65%;
-    --accent-light: 25 95% 15%;
+    --accent-hover: 142 76% 50%;
+    --accent-light: 142 76% 20%;
 
     --chart-demand: 142 76% 45%;
-    --chart-forecast: 25 95% 58%;
+    --chart-forecast: 142 76% 50%;
     --chart-grid: 150 6% 25%;
     --chart-background: 150 15% 10%;
 
@@ -134,7 +134,7 @@ All colors MUST be HSL for consistency and theming support.
 
     --ai-bubble-user: 142 76% 45%;
     --ai-bubble-assistant: 150 10% 15%;
-    --ai-suggestion: 25 95% 15%;
+    --ai-suggestion: 142 76% 20%;
 
     --data-pending: 45 93% 55%;
     --data-error: 0 84% 65%;

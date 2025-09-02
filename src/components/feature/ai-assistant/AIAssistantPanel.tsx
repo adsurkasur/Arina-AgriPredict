@@ -3,14 +3,13 @@ import { useChat } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Message } from '@/types/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from './MessageBubble';
 import { SuggestionChips } from './SuggestionChips';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Bot, Send, Trash2 } from 'lucide-react';
+import { Bot, Send } from 'lucide-react';
 
 export function AIAssistantPanel() {
   const [inputMessage, setInputMessage] = useLocalStorage('ai-assistant-input', '');
@@ -20,8 +19,7 @@ export function AIAssistantPanel() {
     chatMessages, 
     isAiTyping, 
     addChatMessage, 
-    setAiTyping, 
-    clearChat 
+    setAiTyping
   } = useAppStore();
   
   const chatMutation = useChat();
@@ -87,37 +85,18 @@ export function AIAssistantPanel() {
     .slice(-1)[0]?.suggestions || [];
 
   return (
-    <Card className="flex flex-col h-full" aria-label="AI Assistant Panel" role="region">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <Bot className="h-5 w-5 text-primary" aria-hidden="true" />
-            <span>AI Assistant</span>
-          </CardTitle>
-          {chatMessages.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearChat}
-              className="h-8"
-              aria-label="Clear chat history"
-            >
-              <Trash2 className="h-3 w-3 mr-1" aria-hidden="true" />
-              Clear
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col space-y-4">
+    <div className="flex flex-col h-full bg-background" aria-label="AI Assistant Panel" role="region">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-0">
         <ErrorBoundary>
           {/* Messages Area */}
-          <ScrollArea className="flex-1 pr-4" role="log" aria-live="polite" aria-label="Chat messages">
-            <div className="space-y-4">
+          <ScrollArea className="flex-1 p-4" role="log" aria-live="polite" aria-label="Chat messages">
+            <div className="max-w-4xl mx-auto space-y-6 h-full">
               {chatMessages.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8" aria-label="AI Assistant Ready">
-                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
-                  <p className="text-lg font-medium">AI Assistant Ready</p>
-                  <p className="text-sm">
+                <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center text-muted-foreground" aria-label="AI Assistant Ready">
+                  <Bot className="h-16 w-16 mx-auto mb-6 opacity-50" aria-hidden="true" />
+                  <h2 className="text-2xl font-semibold mb-2">AI Assistant Ready</h2>
+                  <p className="text-base max-w-md">
                     Ask me to analyze data, create records, or generate forecasts
                   </p>
                 </div>
@@ -142,43 +121,53 @@ export function AIAssistantPanel() {
               <div ref={scrollAreaRef} />
             </div>
           </ScrollArea>
+
           {/* Suggestions */}
           {latestSuggestions.length > 0 && (
-            <SuggestionChips
-              suggestions={latestSuggestions}
-              onSuggestionClick={handleSuggestionClick}
-              aria-label="AI suggestions"
-            />
+            <div className="px-4 pb-2">
+              <div className="max-w-4xl mx-auto">
+                <SuggestionChips
+                  suggestions={latestSuggestions}
+                  onSuggestionClick={handleSuggestionClick}
+                  aria-label="AI suggestions"
+                />
+              </div>
+            </div>
           )}
+
           {/* Input Area */}
-          <div className="space-y-2">
-            <Textarea
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me to analyze data, create records, or generate forecasts..."
-              className="min-h-[80px] resize-none transition-smooth"
-              disabled={chatMutation.isPending}
-              aria-label="Chat input"
-            />
-            <div className="flex justify-between items-center">
-              <p className="text-xs text-muted-foreground">
-                Press Enter to send, Shift+Enter for new line
-              </p>
-              <Button
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || chatMutation.isPending}
-                size="sm"
-                className="transition-smooth"
-                aria-label="Send message"
-              >
-                <Send className="h-4 w-4 mr-2" aria-hidden="true" />
-                Send
-              </Button>
+          <div className="p-4 border-t border-border bg-card/30 backdrop-blur-sm">
+            <div className="max-w-4xl mx-auto">
+              <div className="space-y-3">
+                <Textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me to analyze data, create records, or generate forecasts..."
+                  className="min-h-[80px] resize-none transition-smooth"
+                  disabled={chatMutation.isPending}
+                  aria-label="Chat input"
+                />
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-muted-foreground">
+                    Press Enter to send, Shift+Enter for new line
+                  </p>
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim() || chatMutation.isPending}
+                    size="sm"
+                    className="transition-smooth"
+                    aria-label="Send message"
+                  >
+                    <Send className="h-4 w-4 mr-2" aria-hidden="true" />
+                    Send
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </ErrorBoundary>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

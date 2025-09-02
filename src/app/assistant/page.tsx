@@ -3,12 +3,10 @@ import { AIAssistantPanel } from "@/components/feature/ai-assistant/AIAssistantP
 
 export default function AssistantPage() {
   return (
-    <div className="flex-1 p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* AI Assistant */}
-        <div aria-label="AI Assistant Panel">
-          <AIAssistantPanel />
-        </div>
+    <div className="flex-1 h-full">
+      {/* AI Assistant */}
+      <div className="h-full" aria-label="AI Assistant Panel">
+        <AIAssistantPanel />
       </div>
     </div>
   );
