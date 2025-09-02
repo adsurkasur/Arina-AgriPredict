@@ -300,7 +300,7 @@ All colors MUST be HSL for consistency and theming support.
 
   /* Ensure transition-smooth elements get proper will-change during transitions */
   .theme-transitioning .transition-smooth {
-    will-change: background-color, color, border-color, fill, stroke, opacity !important;
+    will-change: background-color, color, border-color, fill, stroke, opacity, box-shadow, outline-color !important;
   }
 
   /* Button and interactive element optimizations - UNIFIED */
@@ -326,9 +326,9 @@ All colors MUST be HSL for consistency and theming support.
     transition: background-color 0.3s ease-out,
                 color 0.3s ease-out,
                 border-color 0.3s ease-out,
-                box-shadow 0.15s ease-out,
-                placeholder-color 0.3s ease-out !important;
-    will-change: background-color, color, border-color, box-shadow;
+                box-shadow 0.3s ease-out,
+                outline-color 0.3s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow, outline-color;
     contain: layout style;
   }
 
@@ -514,8 +514,10 @@ All colors MUST be HSL for consistency and theming support.
                 border-color 0.3s ease-out,
                 fill 0.3s ease-out,
                 stroke 0.3s ease-out,
-                opacity 0.3s ease-out !important;
-    will-change: background-color, color, border-color, fill, stroke, opacity;
+                opacity 0.3s ease-out,
+                box-shadow 0.3s ease-out,
+                outline-color 0.3s ease-out !important;
+    will-change: background-color, color, border-color, fill, stroke, opacity, box-shadow, outline-color;
   }
 
   /* Specific animation types with performance optimizations - UNIFIED */
