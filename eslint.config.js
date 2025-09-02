@@ -8,7 +8,7 @@ import nextPlugin from "@next/eslint-plugin-next";
 
 export default [
   // Global ignore patterns
-  { ignores: ["dist", ".next", ".next/types", "node_modules"] },
+  { ignores: ["dist", ".next", ".next/types", "node_modules", "tailwind.config.ts"] },
 
   // TypeScript files (project-aware)
   {
