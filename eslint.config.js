@@ -18,7 +18,7 @@ export default [
         ecmaVersion: 2020,
         sourceType: "module",
   project: "./tsconfig.json",
-        tsconfigRootDir: new URL(".", import.meta.url).pathname,
+  tsconfigRootDir: process.cwd(),
       },
       globals: globals.browser,
     },
@@ -40,7 +40,7 @@ export default [
   {
     files: ["**/*.{js,jsx}"],
     languageOptions: {
-      parser: js.parsers.Babel, // use built-in JS parser from @eslint/js package
+      parser: js.parser, // use built-in JS parser from @eslint/js package
       ecmaVersion: 2020,
       globals: globals.browser,
     },
