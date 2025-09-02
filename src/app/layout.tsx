@@ -11,10 +11,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta property="og:title" content="AgriPredict - Agricultural Demand Forecasting" />
         <meta property="og:description" content="AI-powered agricultural demand forecasting platform for smarter farming decisions" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <meta property="og:image" content="/public/placeholder.svg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@lovable_dev" />
-        <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <meta name="twitter:image" content="/public/placeholder.svg" />
       </head>
       <body className="bg-background text-foreground min-h-screen">
         {children}

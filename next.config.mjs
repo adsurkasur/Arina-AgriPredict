@@ -3,7 +3,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['lovable.dev'],
+    domains: [],
   },
 };
 
