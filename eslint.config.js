@@ -4,6 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
+import nextPlugin from "@next/eslint-plugin-next";
 
 export default [
   // Global ignore patterns
@@ -26,10 +27,12 @@ export default [
       "@typescript-eslint": tsPlugin,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "@next/next": nextPlugin,
     },
     rules: {
       // bring in recommended React hooks rules
       ...reactHooks.configs.recommended.rules,
+      ...nextPlugin.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       // prefer type-aware unused var rule
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
