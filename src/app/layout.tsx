@@ -1,5 +1,7 @@
 import "../index.css";
 import { ReactNode } from "react";
+import { ClientProviders } from "@/components/providers/ClientProviders";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -17,7 +19,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="twitter:image" content="/public/placeholder.svg" />
       </head>
       <body className="bg-background text-foreground min-h-screen">
-        {children}
+        <ClientProviders>
+          <MainLayout>
+            {children}
+          </MainLayout>
+        </ClientProviders>
       </body>
     </html>
   );

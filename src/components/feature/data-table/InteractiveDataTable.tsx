@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useDemands } from '@/hooks/useApiHooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { DemandQueryParams } from '@/types/api';
@@ -12,7 +12,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Database } from 'lucide-react';
 
 export function InteractiveDataTable() {
-  const [queryParams, setQueryParams] = useState<DemandQueryParams>({
+  const [queryParams, setQueryParams] = useLocalStorage<DemandQueryParams>('data-table-params', {
     page: 1,
     limit: 10,
     search: '',

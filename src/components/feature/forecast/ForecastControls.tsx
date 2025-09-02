@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TrendingUp, Calendar, Target } from 'lucide-react';
 import { useForecast } from '@/hooks/useApiHooks';
 import { useProducts } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ForecastResponse } from '@/types/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,8 +23,8 @@ interface ForecastControlsProps {
 }
 
 export function ForecastControls({ onForecastGenerated }: ForecastControlsProps) {
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [forecastDays, setForecastDays] = useState<number>(14);
+  const [selectedProductId, setSelectedProductId] = useLocalStorage<string>('forecast-selected-product', '');
+  const [forecastDays, setForecastDays] = useLocalStorage<number>('forecast-days', 14);
   const { data: products = [] } = useProducts();
   const forecastMutation = useForecast();
   const { setForecasting, setForecastConfig } = useAppStore();

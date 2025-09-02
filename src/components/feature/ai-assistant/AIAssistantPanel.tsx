@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useChat } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Message } from '@/types/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Bot, Send, Trash2 } from 'lucide-react';
 
 export function AIAssistantPanel() {
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useLocalStorage('ai-assistant-input', '');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   
   const { 
