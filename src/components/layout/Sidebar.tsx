@@ -45,28 +45,45 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isTransitioning } = useTheme();
 
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-card border-r animate-slow",
+        "flex flex-col h-full bg-card border-r",
+        isTransitioning ? "transition-none" : "animate-slow",
         isCollapsed ? "w-16" : "w-80",
         className
       )}
+      style={{
+        // Performance: Hardware acceleration
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+        // Performance: Contain layout changes
+        contain: isTransitioning ? 'none' : 'layout style paint'
+      }}
     >
       {/* Header */}
-      <div className={cn("flex items-center border-b animate-normal", isCollapsed ? "justify-center p-3" : "justify-between p-4")}>
+      <div className={cn("flex items-center border-b", isTransitioning ? "transition-none" : "animate-normal", isCollapsed ? "justify-center p-3" : "justify-between p-4")}>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center space-x-2 animate-normal hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-1 hover:bg-green-100/30"
+          className={cn(
+            "flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-1",
+            isTransitioning ? "transition-none" : "animate-normal hover:scale-105",
+            "hover:bg-green-100/30"
+          )}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          style={{
+            // Performance: Optimize button interactions
+            willChange: isTransitioning ? 'auto' : 'transform',
+            contain: 'layout style'
+          }}
         >
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
             <Leaf className="h-4 w-4" />
           </div>
           {!isCollapsed && (
-            <div className="animate-slow">
+            <div className={isTransitioning ? "transition-none" : "animate-slow"}>
               <h2 className="text-lg font-semibold whitespace-nowrap hover:text-foreground">AgriPredict</h2>
             </div>
           )}
@@ -74,7 +91,7 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <ScrollArea className={cn("flex-1 animate-normal", isCollapsed ? "px-2 py-4" : "px-3 py-4")}>
+      <ScrollArea className={cn("flex-1", isTransitioning ? "transition-none" : "animate-normal", isCollapsed ? "px-2 py-4" : "px-3 py-4")}>
         <nav className="space-y-2">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
@@ -83,14 +100,20 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start h-auto animate-normal hover:bg-green-100/30 hover:text-foreground",
+                    "w-full justify-start h-auto hover:bg-green-100/30 hover:text-foreground",
+                    isTransitioning ? "transition-none" : "animate-normal",
                     isCollapsed ? "px-2 py-3" : "px-3 py-3",
                     isActive && "bg-secondary shadow-sm hover:text-secondary-foreground"
                   )}
+                  style={{
+                    // Performance: Optimize navigation buttons
+                    willChange: isTransitioning ? 'auto' : 'background-color, color',
+                    contain: 'layout style'
+                  }}
                 >
-                  <item.icon className="h-5 w-5 shrink-0 animate-fast" />
+                  <item.icon className={cn("h-5 w-5 shrink-0", isTransitioning ? "transition-none" : "animate-fast")} />
                   {!isCollapsed && (
-                    <div className="ml-3 text-left animate-normal">
+                    <div className={cn("ml-3 text-left", isTransitioning ? "transition-none" : "animate-normal")}>
                       <div className="font-medium whitespace-nowrap">{item.name}</div>
                       <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
                         {item.description}
@@ -106,8 +129,8 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Footer */}
       {!isCollapsed && (
-        <div className="animate-slow">
-          <Separator className="mb-4 animate-normal" />
+        <div className={isTransitioning ? "transition-none" : "animate-slow"}>
+          <Separator className={cn("mb-4", isTransitioning ? "transition-none" : "animate-normal")} />
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -118,6 +141,11 @@ export function Sidebar({ className }: SidebarProps) {
                 checked={theme === 'dark'}
                 onCheckedChange={toggleTheme}
                 aria-label="Toggle dark mode"
+                style={{
+                  // Performance: Optimize switch interactions
+                  willChange: isTransitioning ? 'auto' : 'background-color',
+                  contain: 'layout style'
+                }}
               />
             </div>
             <div className="text-xs text-muted-foreground leading-relaxed">

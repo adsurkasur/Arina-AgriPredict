@@ -85,15 +85,27 @@ export function AIAssistantPanel() {
     .slice(-1)[0]?.suggestions || [];
 
   return (
-    <div className="flex flex-col h-full bg-background" aria-label="AI Assistant Panel" role="region">
+    <div className="flex flex-col h-full bg-background" aria-label="AI Assistant Panel" role="region" style={{
+      // Performance: Hardware acceleration for main panel
+      transform: 'translateZ(0)',
+      backfaceVisibility: 'hidden',
+      contain: 'layout style paint'
+    }}>
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-0">
         <ErrorBoundary>
           {/* Messages Area */}
-          <ScrollArea className="flex-1 p-4" role="log" aria-live="polite" aria-label="Chat messages">
+          <ScrollArea className="flex-1 p-4" role="log" aria-live="polite" aria-label="Chat messages" style={{
+            // Performance: Optimize scroll area
+            contain: 'layout style'
+          }}>
             <div className="max-w-4xl mx-auto space-y-6 h-full">
               {chatMessages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center text-muted-foreground" aria-label="AI Assistant Ready">
+                <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center text-muted-foreground" aria-label="AI Assistant Ready" style={{
+                  // Performance: Optimize welcome screen
+                  willChange: 'color',
+                  contain: 'layout style'
+                }}>
                   <Bot className="h-16 w-16 mx-auto mb-6 opacity-50" aria-hidden="true" />
                   <h2 className="text-2xl font-semibold mb-2">AI Assistant Ready</h2>
                   <p className="text-base max-w-md">
@@ -107,7 +119,11 @@ export function AIAssistantPanel() {
               )}
               {/* Typing Indicator */}
               {isAiTyping && (
-                <div className="ai-message-assistant max-w-xs p-3 rounded-lg" aria-label="AI is thinking">
+                <div className="ai-message-assistant max-w-xs p-3 rounded-lg" aria-label="AI is thinking" style={{
+                  // Performance: Optimize typing indicator
+                  willChange: 'opacity',
+                  contain: 'layout style'
+                }}>
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
@@ -136,7 +152,11 @@ export function AIAssistantPanel() {
           )}
 
           {/* Input Area */}
-          <div className="p-4 border-t border-border bg-card/30 backdrop-blur-sm">
+          <div className="p-4 border-t border-border bg-card/30 backdrop-blur-sm" style={{
+            // Performance: Optimize input area
+            willChange: 'background-color, border-color',
+            contain: 'layout style'
+          }}>
             <div className="max-w-4xl mx-auto">
               <div className="space-y-3">
                 <Textarea
@@ -147,6 +167,11 @@ export function AIAssistantPanel() {
                   className="min-h-[80px] resize-none transition-smooth"
                   disabled={chatMutation.isPending}
                   aria-label="Chat input"
+                  style={{
+                    // Performance: Optimize textarea
+                    willChange: 'background-color, color, border-color',
+                    contain: 'layout style'
+                  }}
                 />
                 <div className="flex justify-between items-center">
                   <p className="text-xs text-muted-foreground">
@@ -158,6 +183,11 @@ export function AIAssistantPanel() {
                     size="sm"
                     className="transition-smooth"
                     aria-label="Send message"
+                    style={{
+                      // Performance: Optimize send button
+                      willChange: 'background-color, color, transform',
+                      contain: 'layout style'
+                    }}
                   >
                     <Send className="h-4 w-4 mr-2" aria-hidden="true" />
                     Send

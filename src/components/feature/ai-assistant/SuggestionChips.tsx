@@ -10,7 +10,10 @@ export function SuggestionChips({ suggestions, onSuggestionClick }: SuggestionCh
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="space-y-2" role="group" aria-label="AI suggested actions">
+    <div className="space-y-2" role="group" aria-label="AI suggested actions" style={{
+      // Performance: Optimize suggestion container
+      contain: 'layout style'
+    }}>
       <div className="flex items-center space-x-2 text-xs text-muted-foreground">
         <Lightbulb className="h-3 w-3" aria-hidden="true" />
         <span>Suggested actions:</span>
@@ -26,6 +29,11 @@ export function SuggestionChips({ suggestions, onSuggestionClick }: SuggestionCh
             role="listitem"
             tabIndex={0}
             aria-label={`Suggestion: ${suggestion}`}
+            style={{
+              // Performance: Optimize suggestion buttons
+              willChange: 'background-color, color, transform',
+              contain: 'layout style'
+            }}
           >
             {suggestion}
           </Button>

@@ -16,9 +16,28 @@ All colors MUST be HSL for consistency and theming support.
     --card-foreground: 150 8% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 150 8% 15%;
-
-    /* Agricultural Green Primary Palette */
+    --po  /* Card and surface optimizations - UNIFIED */
+  .theme-transitioning .card,
+  .theme-transitioning [class*="card"],
+  .theme-transitioning .sidebar,
+  .theme-transitioning .modal,
+  .theme-transitioning .popover {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                box-shadow 0.3s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow;
+    contain: layout style paint;
+  }und: 150 8  /* Enhanced icon and SVG optimizations - UNIFIED */
+  .theme-transitioning svg,
+  .theme-transitioning .icon,
+  .theme-transitioning [class*="icon"] {
+    transition: fill 0.3s ease-out,
+                stroke 0.3s ease-out,
+                opacity 0.15s ease-out !important;
+    will-change: fill, stroke, opacity;
+    contain: layout style;
+  }    /* Agricultural Green Primary Palette */
     --primary: 142 76% 36%;
     --primary-foreground: 0 0% 98%;
     --primary-hover: 142 76% 30%;
@@ -200,45 +219,345 @@ All colors MUST be HSL for consistency and theming support.
     @apply animate-pulse bg-muted rounded;
   }
 
-  /* Unified Animation System */
+  /* Performance-Optimized Animation System - UNIFIED DURATIONS */
   .animate-fast {
     @apply transition-all duration-150 ease-out;
+    will-change: transform, opacity;
   }
 
   .animate-normal {
-    @apply transition-all duration-200 ease-out;
+    @apply transition-all duration-300 ease-out;
+    will-change: transform, opacity;
   }
 
   .animate-slow {
-    @apply transition-all duration-300 ease-out;
+    @apply transition-all duration-500 ease-out;
+    will-change: transform, opacity;
   }
 
   .animate-extra-slow {
-    @apply transition-all duration-500 ease-out;
+    @apply transition-all duration-700 ease-out;
+    will-change: transform, opacity;
   }
 
-  /* Specific animation types */
+  /* Theme transition handling with UNIFIED durations */
+  :root {
+    --theme-transition: all 0.3s ease-out;
+  }
+
+  /* Hardware-accelerated theme transitions for all elements - UNIFIED */
+  .theme-transitioning * {
+    /* Use transform3d for hardware acceleration */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+
+    /* UNIFIED transition durations for optimal consistency */
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                fill 0.3s ease-out,
+                stroke 0.3s ease-out,
+                opacity 0.15s ease-out !important;
+
+    /* Performance hints */
+    will-change: background-color, color, border-color, opacity;
+    contain: layout style paint;
+  }
+
+  /* Specific component transitions with UNIFIED durations */
+  .theme-transitioning .bg-card,
+  .theme-transitioning .bg-background,
+  .theme-transitioning .bg-muted,
+  .theme-transitioning .bg-primary,
+  .theme-transitioning .bg-secondary,
+  .theme-transitioning .bg-popover,
+  .theme-transitioning .bg-accent {
+    transition: background-color 0.3s ease-out !important;
+    will-change: background-color;
+    contain: layout style;
+  }
+
+  .theme-transitioning .text-foreground,
+  .theme-transitioning .text-muted-foreground,
+  .theme-transitioning .text-primary,
+  .theme-transitioning .text-secondary,
+  .theme-transitioning .text-accent-foreground,
+  .theme-transitioning .text-destructive {
+    transition: color 0.3s ease-out !important;
+    will-change: color;
+    contain: layout style;
+  }
+
+  .theme-transitioning .border,
+  .theme-transitioning .border-border,
+  .theme-transitioning .border-input,
+  .theme-transitioning .border-muted {
+    transition: border-color 0.3s ease-out !important;
+    will-change: border-color;
+    contain: layout style;
+  }
+
+  /* Ensure transition-smooth elements get proper will-change during transitions */
+  .theme-transitioning .transition-smooth {
+    will-change: background-color, color, border-color, fill, stroke, opacity !important;
+  }
+
+  /* Button and interactive element optimizations - UNIFIED */
+  .theme-transitioning button,
+  .theme-transitioning .button,
+  .theme-transitioning [role="button"] {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                box-shadow 0.15s ease-out,
+                transform 0.15s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow, transform;
+    contain: layout style;
+  }
+
+  /* Enhanced form element optimizations - UNIFIED */
+  .theme-transitioning input,
+  .theme-transitioning textarea,
+  .theme-transitioning select,
+  .theme-transitioning [role="textbox"],
+  .theme-transitioning [role="combobox"],
+  .theme-transitioning [role="listbox"] {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                box-shadow 0.15s ease-out,
+                placeholder-color 0.3s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow;
+    contain: layout style;
+  }
+
+  /* Enhanced separator and divider optimizations - UNIFIED */
+  .theme-transitioning hr,
+  .theme-transitioning .separator,
+  .theme-transitioning [role="separator"],
+  .theme-transitioning .divider {
+    transition: background-color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                opacity 0.15s ease-out !important;
+    will-change: background-color, border-color, opacity;
+    contain: layout style;
+  }
+
+  /* Enhanced checkbox and radio optimizations - UNIFIED */
+  .theme-transitioning [role="checkbox"],
+  .theme-transitioning [role="radio"],
+  .theme-transitioning input[type="checkbox"],
+  .theme-transitioning input[type="radio"] {
+    transition: background-color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                box-shadow 0.15s ease-out !important;
+    will-change: background-color, border-color, box-shadow;
+    contain: layout style;
+  }
+
+  /* Enhanced slider and progress optimizations - UNIFIED */
+  .theme-transitioning [role="slider"],
+  .theme-transitioning [role="progressbar"],
+  .theme-transitioning progress {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out !important;
+    will-change: background-color, color;
+    contain: layout style;
+  }
+
+  /* Enhanced tab optimizations - UNIFIED */
+  .theme-transitioning [role="tab"],
+  .theme-transitioning [role="tablist"],
+  .theme-transitioning [role="tabpanel"] {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out !important;
+    will-change: background-color, color, border-color;
+    contain: layout style;
+  }
+
+  /* Enhanced dialog and modal optimizations - UNIFIED */
+  .theme-transitioning [role="dialog"],
+  .theme-transitioning [role="alertdialog"],
+  .theme-transitioning .modal,
+  .theme-transitioning .dialog {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                box-shadow 0.3s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow;
+    contain: layout style paint;
+  }
+
+  /* Enhanced focus and interaction states - UNIFIED */
+  .theme-transitioning *:focus,
+  .theme-transitioning *:focus-visible,
+  .theme-transitioning *:hover {
+    transition: background-color 0.15s ease-out,
+                color 0.15s ease-out,
+                border-color 0.15s ease-out,
+                box-shadow 0.15s ease-out,
+                outline-color 0.15s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow, outline-color;
+  }
+
+  /* Enhanced data state transitions - UNIFIED */
+  .theme-transitioning [data-state],
+  .theme-transitioning [data-disabled],
+  .theme-transitioning [data-checked],
+  .theme-transitioning [data-selected],
+  .theme-transitioning [data-active],
+  .theme-transitioning [data-open],
+  .theme-transitioning [data-closed] {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                opacity 0.15s ease-out,
+                transform 0.15s ease-out !important;
+    will-change: background-color, color, border-color, opacity, transform;
+    contain: layout style;
+  }
+
+  /* Enhanced placeholder text transitions - UNIFIED */
+  .theme-transitioning ::placeholder,
+  .theme-transitioning ::-webkit-input-placeholder,
+  .theme-transitioning ::-moz-placeholder,
+  .theme-transitioning :-ms-input-placeholder {
+    transition: color 0.3s ease-out !important;
+    will-change: color;
+  }
+
+  /* Enhanced scrollbar transitions - UNIFIED */
+  .theme-transitioning ::-webkit-scrollbar,
+  .theme-transitioning ::-webkit-scrollbar-thumb,
+  .theme-transitioning ::-webkit-scrollbar-track {
+    transition: background-color 0.3s ease-out !important;
+    will-change: background-color;
+  }
+
+  /* Card and surface optimizations - UNIFIED */
+  .theme-transitioning .card,
+  .theme-transitioning [class*="card"],
+  .theme-transitioning .sidebar,
+  .theme-transitioning .modal,
+  .theme-transitioning .popover {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                box-shadow 0.3s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow;
+    contain: layout style paint;
+  }
+
+  /* Text and typography optimizations - UNIFIED */
+  .theme-transitioning h1,
+  .theme-transitioning h2,
+  .theme-transitioning h3,
+  .theme-transitioning h4,
+  .theme-transitioning h5,
+  .theme-transitioning h6,
+  .theme-transitioning p,
+  .theme-transitioning span,
+  .theme-transitioning div {
+    transition: color 0.3s ease-out,
+                background-color 0.3s ease-out !important;
+    will-change: color, background-color;
+    contain: layout style;
+  }
+
+  /* Enhanced icon and SVG optimizations - UNIFIED */
+  .theme-transitioning svg,
+  .theme-transitioning .icon,
+  .theme-transitioning [class*="icon"] {
+    transition: fill 0.3s ease-out,
+                stroke 0.3s ease-out,
+                opacity 0.15s ease-out !important;
+    will-change: fill, stroke, opacity;
+    contain: layout style;
+  }
+
+  /* List and navigation optimizations - UNIFIED */
+  .theme-transitioning ul,
+  .theme-transitioning ol,
+  .theme-transitioning li,
+  .theme-transitioning nav,
+  .theme-transitioning .nav-item {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out !important;
+    will-change: background-color, color;
+    contain: layout style;
+  }
+
+  /* Performance: Clean up will-change after transitions */
+  *:not(.theme-transitioning) {
+    will-change: auto;
+  }
+
+  /* Global performance optimizations - UNIFIED */
+  * {
+    /* Use only essential transitions globally */
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out;
+  }
+
+  .transition-none {
+    transition: none !important;
+    will-change: auto !important;
+  }
+
+  /* Smooth transition class for theme switching - UNIFIED */
+  .transition-smooth {
+    transition: background-color 0.3s ease-out,
+                color 0.3s ease-out,
+                border-color 0.3s ease-out,
+                fill 0.3s ease-out,
+                stroke 0.3s ease-out,
+                opacity 0.3s ease-out !important;
+    will-change: background-color, color, border-color, fill, stroke, opacity;
+  }
+
+  /* Specific animation types with performance optimizations - UNIFIED */
   .animate-colors-fast {
     @apply transition-colors duration-150 ease-out;
+    will-change: color, background-color;
   }
 
   .animate-colors-normal {
-    @apply transition-colors duration-200 ease-out;
+    @apply transition-colors duration-300 ease-out;
+    will-change: color, background-color;
   }
 
   .animate-transform-fast {
     @apply transition-transform duration-150 ease-out;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .animate-transform-normal {
-    @apply transition-transform duration-200 ease-out;
+    @apply transition-transform duration-300 ease-out;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .animate-opacity-fast {
     @apply transition-opacity duration-150 ease-out;
+    will-change: opacity;
   }
 
   .animate-opacity-normal {
-    @apply transition-opacity duration-200 ease-out;
+    @apply transition-opacity duration-300 ease-out;
+    will-change: opacity;
+  }
+
+  /* Performance: Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    .theme-transitioning * {
+      transition: none !important;
+      animation: none !important;
+      will-change: auto !important;
+    }
   }
 }
