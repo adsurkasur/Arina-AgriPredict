@@ -9,13 +9,18 @@ import { cn } from '@/lib/utils';
 
 
 
-interface DataTableViewProps {
-  data: DemandRecord[];
+interface SortConfig {
+  key: string;
+  direction: 'asc' | 'desc';
 }
 
+interface DataTableViewProps {
+  data: DemandRecord[];
+  sortConfig?: SortConfig;
+  onSort?: (key: string) => void;
+}
 
-
-export function DataTableView({ data }: DataTableViewProps) {
+export function DataTableView({ data, sortConfig: _sortConfig, onSort }: DataTableViewProps) {
   const deleteMutation = useDeleteDemand();
 
   // ...existing code...
