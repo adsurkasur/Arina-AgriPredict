@@ -1,16 +1,27 @@
 import js from "@eslint/js";
+import { FlatCompat } from "@eslint/eslintrc";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 
-export default [
+const compat = new FlatCompat({
+  baseDirectory: import.meta.dirname,
+  recommendedConfig: js.configs.recommended,
+});
+
+const eslintConfig = [
   // Global ignore patterns
   { ignores: ["dist", ".next", ".next/types", "node_modules", "tailwind.config.ts"] },
 
   // Base configurations
   js.configs.recommended,
+
+  // Next.js configuration
+  ...compat.config({
+    extends: ['next'],
+  }),
 
   // TypeScript files (project-aware)
   {
@@ -64,3 +75,5 @@ export default [
     rules: {},
   },
 ];
+
+export default eslintConfig;
