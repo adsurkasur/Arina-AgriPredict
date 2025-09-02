@@ -1,18 +1,5 @@
 import "../index.css";
 import { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -30,13 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="twitter:image" content="/public/placeholder.svg" />
       </head>
       <body className="bg-background text-foreground min-h-screen">
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            {children}
-          </TooltipProvider>
-        </QueryClientProvider>
+        {children}
       </body>
     </html>
   );
