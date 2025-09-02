@@ -23,7 +23,7 @@ interface ForecastControlsProps {
 }
 
 export function ForecastControls({ onForecastGenerated }: ForecastControlsProps) {
-  const [selectedProductId, setSelectedProductId] = useLocalStorage<string>('forecast-selected-product', '');
+  const [selectedProductId, setSelectedProductId] = useLocalStorage<string | null>('forecast-selected-product', null);
   const [forecastDays, setForecastDays] = useLocalStorage<number>('forecast-days', 14);
   const { data: products = [] } = useProducts();
   const forecastMutation = useForecast();
@@ -69,7 +69,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
             Select Product
           </Label>
           <Select 
-            value={selectedProductId} 
+            value={selectedProductId ?? undefined} 
             onValueChange={setSelectedProductId}
             disabled={forecastMutation.isPending}
             aria-label="Select product to forecast"
@@ -123,7 +123,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
         <Button
           onClick={handleGenerateForecast}
           disabled={isDisabled}
-          className="w-full animate-fast"
+          className="w-full transition-all duration-200"
           size="lg"
           aria-label="Generate forecast"
         >
