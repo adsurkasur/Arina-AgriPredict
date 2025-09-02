@@ -13,7 +13,7 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export function AgriPredictWorkspace() {
   const [forecastData, setForecastData] = useState<ForecastResponse | null>(null);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [selectedProductId] = useState<string | null>(null);
   
   // Get all demand data for chart display
   const { data: allDemandsData } = useDemands({ limit: 1000 });

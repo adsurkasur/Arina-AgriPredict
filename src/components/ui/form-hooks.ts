@@ -1,8 +1,8 @@
 import { useFormContext } from "react-hook-form";
 import * as React from "react";
 
-type FormFieldContextValue<TFieldValues = unknown, TName = unknown> = {
-  name: TName;
+type FormFieldContextValue = {
+  name: string | number | symbol;
 };
 
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);

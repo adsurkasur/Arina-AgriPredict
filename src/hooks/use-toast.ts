@@ -22,6 +22,9 @@ const actionTypes = {
   REMOVE_TOAST: "REMOVE_TOAST",
 } as const
 
+// reference to avoid being flagged as unused when only used in types
+void actionTypes
+
 let count = 0
 
 function genId() {

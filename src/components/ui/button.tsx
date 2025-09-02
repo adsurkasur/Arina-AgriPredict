@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import type { VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "./button-variants"
@@ -26,4 +26,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button"
 
 export { Button }
-export { buttonVariants } from "./button-variants"
+// `buttonVariants` is exported from `button-variants.ts`. Do not re-export it here to keep this file component-only for fast refresh.

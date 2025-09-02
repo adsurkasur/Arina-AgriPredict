@@ -9,7 +9,6 @@ import {
   ChatRequest,
   ChatResponse,
   Product,
-  ApiResponse,
 } from '@/types/api';
 import { mockApi } from './mock-api';
 

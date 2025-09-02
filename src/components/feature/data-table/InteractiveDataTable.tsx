@@ -68,7 +68,7 @@ export function InteractiveDataTable() {
                   key: queryParams.sortKey || '',
                   direction: queryParams.sortOrder || 'asc'
                 }}
-                onSort={(key) => handleSortChange(key, queryParams.sortOrder)}
+                onSort={(key) => handleSortChange(key, queryParams.sortOrder || 'asc')}
               />
             </div>
 

@@ -20,7 +20,7 @@ interface DataTableViewProps {
   onSort?: (key: string) => void;
 }
 
-export function DataTableView({ data, sortConfig: _sortConfig, onSort }: DataTableViewProps) {
+export function DataTableView({ data }: DataTableViewProps) {
   const deleteMutation = useDeleteDemand();
 
   // ...existing code...
