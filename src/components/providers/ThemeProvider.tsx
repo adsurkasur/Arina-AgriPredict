@@ -1,6 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -24,18 +23,39 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useLocalStorage<Theme>('theme', () => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  });
+  const [theme, setTheme] = useState<Theme>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
+
+    // Get stored theme or system preference
+    const storedTheme = localStorage.getItem('theme') as Theme;
+    let initialTheme: Theme = 'light';
+
+    if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
+      initialTheme = storedTheme;
+    } else {
+      // Check system preference only if no stored preference
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      initialTheme = systemPrefersDark ? 'dark' : 'light';
+    }
+
+    setTheme(initialTheme);
+    setIsInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isInitialized || typeof window === 'undefined') return;
+
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-  }, [theme]);
+
+    // Save to localStorage
+    localStorage.setItem('theme', theme);
+  }, [theme, isInitialized]);
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));

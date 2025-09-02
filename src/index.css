@@ -200,12 +200,45 @@ All colors MUST be HSL for consistency and theming support.
     @apply animate-pulse bg-muted rounded;
   }
 
-  /* Transitions for smooth interactions */
-  .transition-smooth {
-    @apply transition-all duration-200 ease-in-out;
+  /* Unified Animation System */
+  .animate-fast {
+    @apply transition-all duration-150 ease-out;
   }
 
-  .transition-chart {
-    @apply transition-all duration-500 ease-in-out;
+  .animate-normal {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .animate-slow {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .animate-extra-slow {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  /* Specific animation types */
+  .animate-colors-fast {
+    @apply transition-colors duration-150 ease-out;
+  }
+
+  .animate-colors-normal {
+    @apply transition-colors duration-200 ease-out;
+  }
+
+  .animate-transform-fast {
+    @apply transition-transform duration-150 ease-out;
+  }
+
+  .animate-transform-normal {
+    @apply transition-transform duration-200 ease-out;
+  }
+
+  .animate-opacity-fast {
+    @apply transition-opacity duration-150 ease-out;
+  }
+
+  .animate-opacity-normal {
+    @apply transition-opacity duration-200 ease-out;
   }
 }

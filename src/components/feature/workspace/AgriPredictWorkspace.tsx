@@ -55,7 +55,7 @@ export function AgriPredictWorkspace() {
             </Panel>
 
             {/* Resize Handle */}
-            <PanelResizeHandle className="w-2 bg-border hover:bg-primary/20 transition-colors duration-200 rounded-sm flex items-center justify-center">
+            <PanelResizeHandle className="w-2 bg-border hover:bg-primary/20 animate-colors-fast rounded-sm flex items-center justify-center">
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </PanelResizeHandle>
 
