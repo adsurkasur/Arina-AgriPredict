@@ -16,28 +16,9 @@ All colors MUST be HSL for consistency and theming support.
     --card-foreground: 150 8% 15%;
 
     --popover: 0 0% 100%;
-    --po  /* Card and surface optimizations - UNIFIED */
-  .theme-transitioning .card,
-  .theme-transitioning [class*="card"],
-  .theme-transitioning .sidebar,
-  .theme-transitioning .modal,
-  .theme-transitioning .popover {
-    transition: background-color 0.3s ease-out,
-                color 0.3s ease-out,
-                border-color 0.3s ease-out,
-                box-shadow 0.3s ease-out !important;
-    will-change: background-color, color, border-color, box-shadow;
-    contain: layout style paint;
-  }und: 150 8  /* Enhanced icon and SVG optimizations - UNIFIED */
-  .theme-transitioning svg,
-  .theme-transitioning .icon,
-  .theme-transitioning [class*="icon"] {
-    transition: fill 0.3s ease-out,
-                stroke 0.3s ease-out,
-                opacity 0.15s ease-out !important;
-    will-change: fill, stroke, opacity;
-    contain: layout style;
-  }    /* Agricultural Green Primary Palette */
+    --popover-foreground: 150 8% 15%;
+
+    /* Agricultural Green Primary Palette */
     --primary: 142 76% 36%;
     --primary-foreground: 0 0% 98%;
     --primary-hover: 142 76% 30%;
@@ -178,30 +159,87 @@ All colors MUST be HSL for consistency and theming support.
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  /* Unified Animation System - All 300ms */
+  /* Unified Animation System - All 300ms, Non-Stackable */
   .animate-fast,
-  .animate-normal {
-    transition: all 0.3s ease-out;
+  .animate-normal,
+  .animate-colors-fast,
+  .animate-colors-normal,
+  .animate-transform-normal,
+  .animate-transform-fast,
+  .animate-opacity-fast {
+    transition: all 0.3s ease-out !important;
+    transition-behavior: allow-discrete;
   }
 
-  /* Theme transition handling */
-  .theme-transitioning * {
+  /* Comprehensive animation coverage for all interactive elements - Non-Stackable */
+  button, a, input, textarea, select, [role="button"], [tabindex] {
+    transition: all 0.3s ease-out !important;
+    transition-behavior: allow-discrete;
+  }
+
+  /* Ensure all UI components have consistent animations - Non-Stackable */
+  [class*="hover:"], [class*="focus:"], [class*="active:"],
+  [class*="group-hover:"], [class*="group-focus:"], [class*="peer-hover:"],
+  [class*="peer-focus:"], [class*="peer-checked:"], [class*="data-"] {
+    transition: all 0.3s ease-out !important;
+    transition-behavior: allow-discrete;
+  }
+
+  /* Theme transition handling - Optimized for non-stacking */
+  .theme-transitioning .card,
+  .theme-transitioning [class*="card"],
+  .theme-transitioning .sidebar,
+  .theme-transitioning .modal,
+  .theme-transitioning .popover {
     transition: background-color 0.3s ease-out,
                 color 0.3s ease-out,
-                border-color 0.3s ease-out;
+                border-color 0.3s ease-out,
+                box-shadow 0.3s ease-out !important;
+    will-change: background-color, color, border-color, box-shadow;
+    contain: layout style paint;
+    transition-behavior: allow-discrete;
   }
 
-  /* Smooth transition class */
+  /* Enhanced icon and SVG optimizations - Non-Stackable */
+  .theme-transitioning svg,
+  .theme-transitioning .icon,
+  .theme-transitioning [class*="icon"] {
+    transition: fill 0.3s ease-out,
+                stroke 0.3s ease-out,
+                opacity 0.3s ease-out !important;
+    will-change: fill, stroke, opacity;
+    contain: layout style;
+    transition-behavior: allow-discrete;
+  }
+
+  /* Smooth transition class - Non-Stackable */
   .transition-smooth {
-    transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out !important;
+    transition-behavior: allow-discrete;
+  }
+
+  /* Global animation coverage for all elements */
+  * {
+    transition-property: background-color, color, border-color, box-shadow, transform, opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+    transition-behavior: allow-discrete;
+  }
+
+  /* Prevent animation stacking and queuing */
+  *:hover, *:focus, *:active, *:focus-visible {
+    transition: all 0.3s ease-out !important;
+    transition-behavior: allow-discrete;
   }
 
   /* Reduce motion for users who prefer it */
   @media (prefers-reduced-motion: reduce) {
     *,
-    .theme-transitioning * {
+    .theme-transitioning *,
+    button, a, input, textarea, select {
       transition: none !important;
       animation: none !important;
+      transition-behavior: auto;
     }
   }
 }
