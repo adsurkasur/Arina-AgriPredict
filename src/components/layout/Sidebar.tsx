@@ -6,11 +6,15 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import {
   Database,
   TrendingUp,
   MessageSquare,
-  Leaf
+  Leaf,
+  Moon,
+  Sun
 } from "lucide-react";
 
 const navigation = [
@@ -41,6 +45,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div
@@ -103,7 +108,18 @@ export function Sidebar({ className }: SidebarProps) {
       {!isCollapsed && (
         <div className="transition-all duration-300 ease-in-out">
           <Separator className="mb-4 transition-all duration-300" />
-          <div className="p-4">
+          <div className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                <span className="text-sm font-medium">Dark Mode</span>
+              </div>
+              <Switch
+                checked={theme === 'dark'}
+                onCheckedChange={toggleTheme}
+                aria-label="Toggle dark mode"
+              />
+            </div>
             <div className="text-xs text-muted-foreground leading-relaxed">
               Agricultural demand forecasting platform with AI-powered insights
             </div>
