@@ -123,7 +123,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
         <Button
           onClick={handleGenerateForecast}
           disabled={isDisabled}
-          className="w-full transition-all duration-200"
+          className="w-full transition-all duration-300"
           size="lg"
           aria-label="Generate forecast"
         >

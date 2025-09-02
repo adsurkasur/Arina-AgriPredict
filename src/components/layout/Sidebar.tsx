@@ -58,7 +58,7 @@ export function Sidebar({ className }: SidebarProps) {
       <div className={cn("flex items-center border-b transition-all duration-300", isCollapsed ? "justify-center p-3" : "justify-between p-4")}>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-1 hover:bg-green-100/30 transition-all duration-200"
+          className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-1 hover:bg-green-100/30 transition-all duration-300"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
@@ -95,7 +95,7 @@ export function Sidebar({ className }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200",
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300",
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -103,7 +103,7 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <item.icon className="h-5 w-5 shrink-0" />
                 {!isCollapsed && (
-                  <div className="text-left transition-all duration-300">
+                    <div className="text-left transition-all duration-300">
                     <div className="font-medium">{item.name}</div>
                     <div className="text-xs opacity-70">{item.description}</div>
                   </div>
