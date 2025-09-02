@@ -19,7 +19,7 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface ForecastControlsProps {
-  onForecastGenerated: (forecast: ForecastResponse) => void;
+  onForecastGenerated: (_forecast: ForecastResponse) => void;
 }
 
 export function ForecastControls({ onForecastGenerated }: ForecastControlsProps) {

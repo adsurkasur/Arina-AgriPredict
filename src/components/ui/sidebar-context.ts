@@ -1,16 +1,16 @@
 import * as React from "react";
 
-type SidebarContext = {
+type SidebarContextType = {
   state: "expanded" | "collapsed";
   open: boolean;
-  setOpen: (open: boolean) => void;
+  setOpen: (_open: boolean) => void;
   openMobile: boolean;
-  setOpenMobile: (open: boolean) => void;
+  setOpenMobile: (_open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
 };
 
-export const SidebarContext = React.createContext<SidebarContext | null>(null);
+export const SidebarContext = React.createContext<SidebarContextType | null>(null);
 
 export function useSidebar() {
   const context = React.useContext(SidebarContext);

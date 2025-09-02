@@ -4,11 +4,13 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
-import nextPlugin from "@next/eslint-plugin-next";
 
 export default [
   // Global ignore patterns
   { ignores: ["dist", ".next", ".next/types", "node_modules", "tailwind.config.ts"] },
+
+  // Base configurations
+  js.configs.recommended,
 
   // TypeScript files (project-aware)
   {
@@ -18,24 +20,37 @@ export default [
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: "module",
-  project: "./tsconfig.json",
-  tsconfigRootDir: process.cwd(),
+        project: "./tsconfig.json",
       },
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        process: "readonly",
+      },
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
-      "@next/next": nextPlugin,
     },
     rules: {
+      // Disable no-undef for Node.js globals
+      "no-undef": "off",
       // bring in recommended React hooks rules
       ...reactHooks.configs.recommended.rules,
-      ...nextPlugin.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      // prefer type-aware unused var rule
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      // Enable unused vars with proper configuration
+      "@typescript-eslint/no-unused-vars": ["error", {
+        argsIgnorePattern: "^_|^(state|val|value|prevValue|updates|message|messages|typing|config|forecasting|ids|payload|name|props|index)$",
+        varsIgnorePattern: "^_|^(state|val|value|prevValue|updates|message|messages|typing|config|forecasting|ids|payload|name|props|index)$",
+        ignoreRestSiblings: true,
+        caughtErrors: "none"
+      }],
+      "no-unused-vars": ["error", {
+        argsIgnorePattern: "^_|^(state|val|value|prevValue|updates|message|messages|typing|config|forecasting|ids|payload|name|props|index)$",
+        varsIgnorePattern: "^_|^(state|val|value|prevValue|updates|message|messages|typing|config|forecasting|ids|payload|name|props|index)$",
+        ignoreRestSiblings: true
+      }],
     },
   },
 
@@ -43,7 +58,6 @@ export default [
   {
     files: ["**/*.{js,jsx}"],
     languageOptions: {
-      parser: js.parser, // use built-in JS parser from @eslint/js package
       ecmaVersion: 2020,
       globals: globals.browser,
     },

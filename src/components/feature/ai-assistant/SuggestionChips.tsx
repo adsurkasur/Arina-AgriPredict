@@ -3,7 +3,7 @@ import { Lightbulb } from 'lucide-react';
 
 interface SuggestionChipsProps {
   suggestions: string[];
-  onSuggestionClick: (suggestion: string) => void;
+  onSuggestionClick: (_suggestion: string) => void;
 }
 
 export function SuggestionChips({ suggestions, onSuggestionClick }: SuggestionChipsProps) {

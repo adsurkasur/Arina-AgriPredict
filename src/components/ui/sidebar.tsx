@@ -29,7 +29,7 @@ const SidebarProvider = React.forwardRef<
   React.ComponentProps<"div"> & {
     defaultOpen?: boolean
     open?: boolean
-    onOpenChange?: (open: boolean) => void
+    onOpenChange?: (_open: boolean) => void
   }
 >(
   (

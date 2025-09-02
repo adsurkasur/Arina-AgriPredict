@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 interface TableToolbarProps {
   searchValue: string;
-  onSearchChange: (value: string) => void;
+  onSearchChange: (_value: string) => void;
   totalItems: number;
 }
 

@@ -17,7 +17,7 @@ interface SortConfig {
 interface DataTableViewProps {
   data: DemandRecord[];
   sortConfig?: SortConfig;
-  onSort?: (key: string) => void;
+  onSort?: (_key: string) => void;
 }
 
 export function DataTableView({ data }: DataTableViewProps) {

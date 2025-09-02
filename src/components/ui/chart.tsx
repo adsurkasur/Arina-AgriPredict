@@ -18,7 +18,7 @@ function hasNameAndDataKey(obj: unknown): obj is { name: string; dataKey: string
 const THEMES = { light: "", dark: ".dark" } as const
 
 export type ChartConfig = {
-  [k in string]: {
+  [_k in string]: {
     label?: React.ReactNode
     icon?: React.ComponentType
   } & (
@@ -120,8 +120,8 @@ const ChartTooltipContent = React.forwardRef<
     indicator?: "line" | "dot" | "dashed"
     nameKey?: string
     labelKey?: string
-    labelFormatter?: (value: unknown, payload: unknown[]) => React.ReactNode
-    formatter?: (value: unknown, name: unknown, props: unknown, index: number, payload: unknown) => React.ReactNode
+    labelFormatter?: (_value: unknown, _payload: unknown[]) => React.ReactNode
+    formatter?: (_value: unknown, _name: unknown, _props: unknown, _index: number, _payload: unknown) => React.ReactNode
     color?: string
     labelClassName?: string
   }
