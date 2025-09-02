@@ -51,7 +51,7 @@ All colors MUST be HSL for consistency and theming support.
     --warning: 45 93% 47%;
     --warning-foreground: 150 8% 15%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 150 15% 8%;
 
     /* Interface Elements */
     --border: 150 10% 88%;
@@ -126,7 +126,7 @@ All colors MUST be HSL for consistency and theming support.
     --warning: 45 93% 55%;
     --warning-foreground: 150 15% 8%;
     --destructive: 0 84% 65%;
-    --destructive-foreground: 150 15% 8%;
+    --destructive-foreground: 0 0% 98%;
 
     --border: 150 10% 20%;
     --input: 150 10% 20%;
