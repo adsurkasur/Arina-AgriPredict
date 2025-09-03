@@ -69,7 +69,12 @@ export function Sidebar({ className }: SidebarProps) {
               alt="AgriPredict Logo"
               width={20}
               height={20}
-              className="object-contain filter brightness-0"
+              className={cn(
+                "object-contain transition-all duration-300",
+                theme === 'dark' 
+                  ? "filter brightness-0" // White in dark mode
+                  : "filter brightness-0 invert" // Black in light mode
+              )}
             />
           </div>
           {!isCollapsed && (
