@@ -1,20 +1,6 @@
 import { useState } from 'react';
-import { toast } from '@/lib/toast';
 
 export function useLocalStorage<T>(key: string, initialValue: T | (() => T)) {
-  // Show dev mode toast when localStorage is first used
-  const showDevToast = () => {
-    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-      // Use a global flag to prevent multiple toasts
-      if (!(window as any).__localStorageToastShown) {
-        (window as any).__localStorageToastShown = true;
-        toast.info("Development Mode - Using localStorage", {
-          description: "Data is being stored locally. Switch to production for MongoDB.",
-          duration: 8000,
-        });
-      }
-    }
-  };
 
   // Get from local storage then parse stored json or return initialValue
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -23,9 +9,6 @@ export function useLocalStorage<T>(key: string, initialValue: T | (() => T)) {
     }
     try {
       const item = window.localStorage.getItem(key);
-      if (item !== null) {
-        showDevToast(); // Show toast when reading existing data
-      }
       return item ? JSON.parse(item) : (typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue);
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
@@ -43,7 +26,6 @@ export function useLocalStorage<T>(key: string, initialValue: T | (() => T)) {
       // Save to local storage
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        showDevToast(); // Show toast when writing data
       }
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);

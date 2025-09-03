@@ -16,33 +16,12 @@ export function DevModeToast() {
       return;
     }
 
-    // Check if localStorage is available and has been used
-    if (typeof window !== 'undefined' && window.localStorage) {
-      // Check if there are any existing localStorage items (indicating it's being used)
-      const hasLocalStorageData = Object.keys(localStorage).length > 0;
-
-      if (hasLocalStorageData) {
-        hasShownToast.current = true;
-        toast.info("Development Mode - Using localStorage", {
-          description: "Data is being stored locally. Switch to production for MongoDB.",
-          duration: 8000, // Show longer in dev mode
-        });
-      } else {
-        // If no data yet, listen for first localStorage usage
-        const originalSetItem = localStorage.setItem;
-        localStorage.setItem = function(key: string, value: string) {
-          originalSetItem.call(this, key, value);
-
-          if (!hasShownToast.current) {
-            hasShownToast.current = true;
-            toast.info("Development Mode - Using localStorage", {
-              description: "Data is being stored locally. Switch to production for MongoDB.",
-              duration: 8000,
-            });
-          }
-        };
-      }
-    }
+    // Show toast immediately when in development mode
+    hasShownToast.current = true;
+    toast.info("Development Mode", {
+      description: "Running in development environment with localStorage for data persistence.",
+      duration: 8000, // Show longer in dev mode
+    });
   }, []);
 
   return null; // This component doesn't render anything

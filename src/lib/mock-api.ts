@@ -9,28 +9,13 @@ import {
   ChatResponse,
   Product
 } from '@/types/api';
-import { toast } from '@/lib/toast';
 
 // LocalStorage helpers
 const DEMANDS_KEY = 'agriBuddy:demands';
 
-// Show dev mode toast when localStorage is used
-function showDevToast() {
-  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-    if (!(window as any).__localStorageToastShown) {
-      (window as any).__localStorageToastShown = true;
-      toast.info("Development Mode - Using localStorage", {
-        description: "Data is being stored locally. Switch to production for MongoDB.",
-        duration: 8000,
-      });
-    }
-  }
-}
-
 function getLocalDemands(): DemandRecord[] {
   const raw = typeof window !== 'undefined' ? window.localStorage.getItem(DEMANDS_KEY) : null;
   if (raw) {
-    showDevToast(); // Show toast when reading data
     try {
       return JSON.parse(raw);
     } catch {
@@ -81,14 +66,12 @@ function getLocalDemands(): DemandRecord[] {
     },
   ];
   if (typeof window !== 'undefined') {
-    showDevToast(); // Show toast when writing initial data
     window.localStorage.setItem(DEMANDS_KEY, JSON.stringify(initial));
   }
   return initial;
 }
 function setLocalDemands(data: DemandRecord[]) {
   if (typeof window !== 'undefined') {
-    showDevToast(); // Show toast when writing data
     window.localStorage.setItem(DEMANDS_KEY, JSON.stringify(data));
   }
 }
