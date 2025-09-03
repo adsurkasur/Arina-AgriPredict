@@ -1,12 +1,12 @@
 "use client";
 import { createContext, useState, useEffect, ReactNode } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 interface LoadingContextType {
   isLoading: boolean;
   loadingMessage: string;
   setIsLoading: (_loading: boolean) => void;
-  startLoading: () => void;
+  startLoading: (message?: string) => void;
   stopLoading: () => void;
 }
 
@@ -24,8 +24,8 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
   const [loadingMessage, setLoadingMessage] = useState("Loading AgriPredict...");
   const [isNavigating, setIsNavigating] = useState(false);
   const [lastNavigationTime, setLastNavigationTime] = useState<number>(0);
+  const [currentPath, setCurrentPath] = useState<string>('');
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Handle initial page load
   useEffect(() => {
@@ -34,43 +34,35 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       // Simulate initial loading time
       const timer = setTimeout(() => {
         setIsInitialLoad(false);
+        setCurrentPath(pathname);
       }, 1500); // Shorter than homepage loading for better UX
 
       return () => clearTimeout(timer);
     }
-  }, [isInitialLoad]);
+  }, [isInitialLoad, pathname]);
 
-  // Handle route changes - ensure seamless loading transition
+  // Track current path changes to detect when navigation is complete
   useEffect(() => {
-    if (!isInitialLoad && isNavigating) {
-      const currentTime = Date.now();
-      const timeSinceNavigation = currentTime - lastNavigationTime;
+    if (pathname !== currentPath) {
+      setCurrentPath(pathname);
 
-      // If navigation just happened, keep loading for a bit longer to ensure destination loads
-      if (timeSinceNavigation < 1200) { // Within 1.2 seconds of navigation
-        setLoadingMessage("Loading page...");
+      // If we were navigating and the path changed, navigation is complete
+      if (isNavigating && !isInitialLoad) {
+        const navigationDuration = Date.now() - lastNavigationTime;
 
-        // Keep loading active for at least 1.5 seconds after navigation to ensure destination page loads
-        // This prevents flickering if the page loads very quickly
-        const minLoadingTime = Math.max(1500 - timeSinceNavigation, 300); // Minimum 300ms
+        // Ensure minimum loading time to prevent flickering (100-200ms)
+        const minTime = Math.max(150 - navigationDuration, 0);
 
-        const timer = setTimeout(() => {
+        setTimeout(() => {
           setIsLoading(false);
           setIsNavigating(false);
           setLoadingMessage("Loading AgriPredict...");
-        }, minLoadingTime);
-
-        return () => clearTimeout(timer);
-      } else {
-        // If it's been longer, stop loading immediately
-        setIsLoading(false);
-        setIsNavigating(false);
-        setLoadingMessage("Loading AgriPredict...");
+        }, minTime);
       }
     }
-  }, [pathname, searchParams, isInitialLoad, isNavigating, lastNavigationTime]);
+  }, [pathname, currentPath, isNavigating, isInitialLoad, lastNavigationTime]);
 
-  const startLoading = (message = "Loading page...") => {
+  const startLoading = (message = "Loading AgriPredict...") => {
     const navigationTime = Date.now();
     setLastNavigationTime(navigationTime);
     setLoadingMessage(message);

@@ -1,35 +1,37 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
+import { useNavigation } from '@/hooks/useNavigation';
+import { useGlobalLoading } from '@/hooks/useGlobalLoading';
 import { ArrowRight, TrendingUp, Database, MessageSquare } from 'lucide-react';
 
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const { navigateTo } = useNavigation();
+  const { isLoading: isGlobalLoading, loadingMessage } = useGlobalLoading();
 
   useEffect(() => {
     // Simulate loading time
     const timer = setTimeout(() => {
-      setIsLoading(false);
+      setIsInitialLoading(false);
     }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
 
   const handleGetStarted = () => {
-    router.push('/data');
+    navigateTo('/data');
   };
 
   return (
     <>
-      {isLoading && (
+      {(isInitialLoading || isGlobalLoading) && (
         <LoadingScreen
-          isLoading={isLoading}
-          message="Loading AgriPredict"
+          isLoading={isInitialLoading || isGlobalLoading}
+          message={isInitialLoading ? "Loading AgriPredict..." : loadingMessage}
         />
       )}
 
