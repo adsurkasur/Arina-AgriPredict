@@ -23,6 +23,7 @@ function ThemedToastContainer() {
       draggable
       pauseOnHover
       theme={theme === 'dark' ? 'dark' : 'light'}
+      limit={3}
     />
   );
 }
