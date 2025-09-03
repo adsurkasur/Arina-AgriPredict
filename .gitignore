@@ -16,6 +16,9 @@ dist/
 dist-ssr/
 coverage/
 
+# TypeScript build cache
+*.tsbuildinfo
+
 # Environment files
 .env*
 
