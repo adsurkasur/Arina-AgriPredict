@@ -62,8 +62,7 @@ export const demandsApi = {
   // Update existing demand record
   async updateDemand(id: string, data: UpdateDemandRequest) {
     if (isDevelopment) {
-      // Mock implementation
-      throw new Error('Update functionality not implemented in mock API');
+      return mockApi.updateDemand(id, data);
     }
     const response = await apiClient.put(`/demands/${id}`, data);
     return response.data;
@@ -103,21 +102,23 @@ export const chatApi = {
   },
 };
 
-// Products API (mock for now)
+// Products API
 export const productsApi = {
   // Get all available products
   async getProducts(): Promise<Product[]> {
-    // Mock data - in real app this would be an API call
-    return [
-      { id: 'red-chili', name: 'Red Chili', category: 'Spices', unit: 'kg' },
-      { id: 'green-chili', name: 'Green Chili', category: 'Spices', unit: 'kg' },
-      { id: 'onions', name: 'Onions', category: 'Vegetables', unit: 'kg' },
-      { id: 'tomatoes', name: 'Tomatoes', category: 'Vegetables', unit: 'kg' },
-      { id: 'potatoes', name: 'Potatoes', category: 'Vegetables', unit: 'kg' },
-      { id: 'shallots', name: 'Shallots', category: 'Vegetables', unit: 'kg' },
-      { id: 'garlic', name: 'Garlic', category: 'Spices', unit: 'kg' },
-      { id: 'ginger', name: 'Ginger', category: 'Spices', unit: 'kg' },
-    ];
+    if (isDevelopment) {
+      // Mock data
+      return [
+        { id: 'red-chili', name: 'Red Chili', category: 'Spices', unit: 'kg' },
+        { id: 'onions', name: 'Onions', category: 'Vegetables', unit: 'kg' },
+        { id: 'tomatoes', name: 'Tomatoes', category: 'Vegetables', unit: 'kg' },
+        { id: 'potatoes', name: 'Potatoes', category: 'Vegetables', unit: 'kg' },
+        { id: 'rice', name: 'Rice', category: 'Grains', unit: 'kg' },
+        { id: 'wheat', name: 'Wheat', category: 'Grains', unit: 'kg' }
+      ];
+    }
+    const response = await apiClient.get<Product[]>('/products');
+    return response.data;
   },
 };
 

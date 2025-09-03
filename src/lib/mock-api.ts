@@ -4,6 +4,7 @@ import {
   DemandResponse, 
   DemandQueryParams,
   CreateDemandRequest,
+  UpdateDemandRequest,
   ForecastResponse,
   ChatResponse,
   Product
@@ -154,6 +155,27 @@ export const mockApi = {
   demands.unshift(newRecord);
   setLocalDemands(demands);
     return newRecord;
+  },
+
+  async updateDemand(id: string, data: UpdateDemandRequest): Promise<DemandRecord> {
+    await delay(300);
+
+    const demands = getLocalDemands();
+    const index = demands.findIndex(d => d.id === id);
+    if (index === -1) {
+      throw new Error('Record not found');
+    }
+
+    const existing = demands[index];
+    const updated: DemandRecord = {
+      ...existing,
+      ...data,
+      productName: data.productId ? getProductNameFromId(data.productId) : existing.productName
+    };
+
+    demands[index] = updated;
+    setLocalDemands(demands);
+    return updated;
   },
 
   async deleteDemand(id: string): Promise<void> {
@@ -315,6 +337,19 @@ What would you like to do today?`;
     };
   },
 };
+
+// Helper function to map productId to productName
+function getProductNameFromId(productId: string): string {
+  const productMap: Record<string, string> = {
+    'red-chili': 'Red Chili',
+    'onions': 'Onions',
+    'tomatoes': 'Tomatoes',
+    'potatoes': 'Potatoes',
+    'rice': 'Rice',
+    'wheat': 'Wheat'
+  };
+  return productMap[productId] || productId;
+}
 
 // Override API client in development
 if (process.env.NODE_ENV === 'development') {

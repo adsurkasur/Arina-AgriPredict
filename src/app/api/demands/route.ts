@@ -1,0 +1,117 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
+import { DemandRecord, CreateDemandRequest } from '@/types/api';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { db } = await connectToDatabase();
+    const { searchParams } = new URL(request.url);
+
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || '';
+    const sortKey = searchParams.get('sortKey') || 'date';
+    const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+
+    const skip = (page - 1) * limit;
+
+    // Build query
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { productName: { $regex: search, $options: 'i' } },
+        { productId: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Get total count
+    const totalItems = await db.collection('demands').countDocuments(query);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // Get data with sorting and pagination
+    const demands = await db.collection('demands')
+      .find(query)
+      .sort({ [sortKey]: sortOrder })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const response = {
+      data: demands.map(demand => ({
+        ...demand,
+        id: demand._id.toString(),
+        _id: undefined
+      })),
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems
+      }
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Error fetching demands:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch demands' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { db } = await connectToDatabase();
+    const body: CreateDemandRequest = await request.json();
+
+    // Validate required fields
+    const requiredFields = ['date', 'productId', 'quantity', 'price'];
+    const missingFields = requiredFields.filter(field => !body[field as keyof CreateDemandRequest]);
+
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: `Missing required fields: ${missingFields.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Get product name from productId (assuming productId maps to name)
+    const productName = getProductNameFromId(body.productId);
+
+    const newDemand: Omit<DemandRecord, 'id'> = {
+      date: body.date,
+      productName,
+      productId: body.productId,
+      quantity: body.quantity,
+      price: body.price
+    };
+
+    const result = await db.collection('demands').insertOne(newDemand);
+
+    const createdDemand: DemandRecord = {
+      ...newDemand,
+      id: result.insertedId.toString()
+    };
+
+    return NextResponse.json(createdDemand, { status: 201 });
+  } catch (error) {
+    console.error('Error creating demand:', error);
+    return NextResponse.json(
+      { error: 'Failed to create demand' },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to map productId to productName
+function getProductNameFromId(productId: string): string {
+  const productMap: Record<string, string> = {
+    'red-chili': 'Red Chili',
+    'onions': 'Onions',
+    'tomatoes': 'Tomatoes',
+    'potatoes': 'Potatoes',
+    'rice': 'Rice',
+    'wheat': 'Wheat'
+  };
+  return productMap[productId] || productId;
+}
