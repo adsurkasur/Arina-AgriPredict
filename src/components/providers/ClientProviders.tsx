@@ -16,7 +16,7 @@ function ThemedToastContainer() {
       position="bottom-right"
       autoClose={5000}
       hideProgressBar={false}
-      newestOnTop={true}
+      newestOnTop={false}
       closeOnClick
       rtl={false}
       pauseOnFocusLoss
