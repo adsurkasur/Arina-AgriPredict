@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from './MessageBubble';
 import { SuggestionChips } from './SuggestionChips';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Bot, Send } from 'lucide-react';
+import { Bot, Send, Trash2 } from 'lucide-react';
 
 export function AIAssistantPanel() {
   const [inputMessage, setInputMessage] = useLocalStorage('ai-assistant-input', '');
@@ -19,17 +19,20 @@ export function AIAssistantPanel() {
     chatMessages, 
     isAiTyping, 
     addChatMessage, 
-    setAiTyping
+    setAiTyping,
+    clearChat,
+    currentChatId,
+    createNewChat
   } = useAppStore();
   
   const chatMutation = useChat();
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-create chat session if none exists
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (!currentChatId && chatMessages.length === 0) {
+      createNewChat();
     }
-  }, [chatMessages, isAiTyping]);
+  }, [currentChatId, chatMessages.length, createNewChat]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || chatMutation.isPending) return;
@@ -177,21 +180,30 @@ export function AIAssistantPanel() {
                   <p className="text-xs text-muted-foreground">
                     Press Enter to send, Shift+Enter for new line
                   </p>
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() || chatMutation.isPending}
-                    size="sm"
-                    className="transition-smooth"
-                    aria-label="Send message"
-                    style={{
-                      // Performance: Optimize send button
-                      willChange: 'background-color, color, transform',
-                      contain: 'layout style'
-                    }}
-                  >
-                    <Send className="h-4 w-4 mr-2" aria-hidden="true" />
-                    Send
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    {chatMessages.length > 0 && (
+                      <Button
+                        onClick={clearChat}
+                        variant="outline"
+                        size="sm"
+                        className="transition-smooth"
+                        aria-label="Clear chat history"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear
+                      </Button>
+                    )}
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!inputMessage.trim() || chatMutation.isPending}
+                      size="sm"
+                      className="transition-smooth"
+                      aria-label="Send message"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Send
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

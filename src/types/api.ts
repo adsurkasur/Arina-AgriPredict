@@ -40,18 +40,28 @@ export interface UpdateDemandRequest {
   price?: number;
 }
 
-export interface ForecastRequest {
-  productId: string;
-  days: number;
-}
-
 export interface ForecastDataPoint {
   date: string; // ISO string
   predictedValue: number;
 }
 
+export interface ForecastRequest {
+  productId: string;
+  days: number;
+  sellingPrice?: number;
+}
+
+export interface RevenueProjection {
+  date: string;
+  projectedQuantity: number;
+  sellingPrice: number;
+  projectedRevenue: number;
+}
+
 export interface ForecastResponse {
   forecastData: ForecastDataPoint[];
+  revenueProjection?: RevenueProjection[];
+  modelsUsed?: string[];
   summary: string; // AI-generated interpretation in Markdown
 }
 

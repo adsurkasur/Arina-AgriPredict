@@ -14,6 +14,13 @@ import {
   ChatRequest
 } from '@/types/api';
 
+// Helper function to extract error message
+const getErrorMessage = (error: unknown): string => {
+  return typeof error === 'object' && error !== null && 'message' in error
+    ? (error as { message?: string }).message || "An unexpected error occurred"
+    : "An unexpected error occurred";
+};
+
 // Demands hooks
 export function useDemands(params: DemandQueryParams = {}) {
   return useQuery({
@@ -35,9 +42,8 @@ export function useCreateDemand() {
       });
     },
     onError: (error: unknown) => {
-      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast.error("Error adding record", {
-        description: message || "Failed to create demand record."
+        description: getErrorMessage(error)
       });
     },
   });
@@ -56,9 +62,8 @@ export function useUpdateDemand() {
       });
     },
     onError: (error: unknown) => {
-      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast.error("Error updating record", {
-        description: message || "Failed to update demand record."
+        description: getErrorMessage(error)
       });
     },
   });
@@ -76,9 +81,8 @@ export function useDeleteDemand() {
       });
     },
     onError: (error: unknown) => {
-      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast.error("Error deleting record", {
-        description: message || "Failed to delete demand record."
+        description: getErrorMessage(error)
       });
     },
   });
@@ -94,9 +98,8 @@ export function useForecast() {
       });
     },
     onError: (error: unknown) => {
-      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast.error("Error generating forecast", {
-        description: message || "Failed to generate forecast."
+        description: getErrorMessage(error)
       });
     },
   });
@@ -122,9 +125,8 @@ export function useChat() {
       }
     },
     onError: (error: unknown) => {
-      const message = typeof error === 'object' && error !== null && 'message' in error ? (error as { message?: string }).message : undefined;
       toast.error("Error sending message", {
-        description: message || "Failed to communicate with AI assistant."
+        description: getErrorMessage(error)
       });
     },
   });
@@ -136,5 +138,25 @@ export function useProducts() {
     queryKey: ['products'],
     queryFn: () => productsApi.getProducts(),
     staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+}
+
+// Process data hooks
+export function useProcessData() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (text: string) => demandsApi.processData(text),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['demands'] });
+      toast.success("Data processed successfully", {
+        description: `Processed ${data.processed} records from your input.`
+      });
+    },
+    onError: (error: unknown) => {
+      toast.error("Error processing data", {
+        description: getErrorMessage(error)
+      });
+    },
   });
 }

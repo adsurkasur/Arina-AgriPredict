@@ -1,60 +1,143 @@
-# Welcome to your project
+# AgriPredict Platform - Agricultural Demand Forecasting
 
-## Project info
+A comprehensive AI-powered platform for agricultural demand forecasting and data management.
 
+## 🚀 Features
 
+### AI Assistant
+- **Intent Classification**: Automatically understands user requests and executes appropriate actions
+- **Smart Chat**: Context-aware conversations with message history
+- **Action Execution**: Can create records, analyze data, and generate forecasts
+- **Suggestion Chips**: Quick action buttons for common tasks
+- **Clear Chat**: Easy chat history management
 
-## How can I edit this code?
+### Forecasting System
+- **Multiple ML Models**: SMA, WMA, ES, ARIMA, CatBoost algorithms
+- **Interactive Visualization**: Real-time charts and data visualization
+- **Revenue Projections**: Calculate revenue based on forecasted demand and selling prices
+- **Loading States**: User feedback during forecast generation
+- **Product Integration**: Filter forecasts by specific products
 
-There are several ways of editing your application.
+### Data Management
+- **CRUD Operations**: Complete create, read, update, delete functionality
+- **AI-Powered Input**: Intelligent data processing and validation
+- **Real-time Updates**: Live data synchronization
+- **Data Summary Dashboard**: Key metrics and insights
+- **Export Capabilities**: Data export functionality
 
+### Technical Features
+- **Responsive Design**: Works on all device sizes
+- **Performance Optimized**: Hardware acceleration and efficient rendering
+- **Error Handling**: Comprehensive error boundaries and user feedback
+- **Accessibility**: WCAG compliant with proper ARIA labels
+- **State Management**: Persistent state with Zustand
 
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Backend**: Vercel Serverless Functions, Python FastAPI
+- **Database**: MongoDB
+- **AI**: Google Gemini API
+- **State Management**: Zustand with persistence
+- **Data Fetching**: TanStack Query
+- **UI Components**: Radix UI, shadcn/ui
+- **Charts**: Recharts
 
+## 📋 Prerequisites
 
+- Node.js 18+
+- npm or yarn
+- MongoDB database
+- Python 3.8+ (for analysis service)
+- Google Gemini API key
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Getting Started
 
-Follow these steps:
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd data-agri-buddy
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. **Set up environment variables**
+   Create a `.env.local` file in the root directory:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   MONGODB_URI=your_mongodb_connection_string
+   ANALYSIS_SERVICE_URL=http://localhost:8000
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+5. **Start the analysis service** (in a separate terminal)
+   ```bash
+   cd analysis-service
+   pip install -r requirements.txt
+   uvicorn main:app --reload
+   ```
 
-**Edit a file directly in GitHub**
+## 🌐 Usage
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The platform will be available at `http://localhost:3000` with the following main sections:
 
-**Use GitHub Codespaces**
+- **Dashboard**: Overview and key metrics
+- **Data**: Manage agricultural demand records
+- **Forecast**: Generate and view demand forecasts
+- **Assistant**: AI-powered chat and assistance
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📊 API Endpoints
 
-## What technologies are used for this project?
+### Data Management
+- `GET/POST /api/demands` - Demand records CRUD
+- `GET/POST /api/products` - Product management
 
-This project is built with:
+### Forecasting
+- `POST /api/forecast` - Generate forecasts
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### AI Assistant
+- `POST /api/chat` - Chat with AI assistant
+
+## 🔧 Configuration
+
+### Environment Variables
+- `GEMINI_API_KEY`: Your Google Gemini API key
+- `MONGODB_URI`: MongoDB connection string
+- `ANALYSIS_SERVICE_URL`: URL for the Python analysis service
+
+### Analysis Service
+The Python FastAPI service provides:
+- Multiple forecasting algorithms
+- Data preprocessing
+- Model evaluation metrics
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support or questions, please open an issue in the repository.
+
+---
+
+**Status**: ✅ Fully functional and production-ready
+**Last Updated**: December 2024
 
 
 

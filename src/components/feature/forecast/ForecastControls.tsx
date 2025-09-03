@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Calendar, Target } from 'lucide-react';
+import { TrendingUp, Target } from 'lucide-react';
 import { useForecast } from '@/hooks/useApiHooks';
 import { useProducts } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
@@ -20,17 +20,26 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface ForecastControlsProps {
   onForecastGenerated: (_forecast: ForecastResponse) => void;
+  onProductChange?: (_productId: string | null) => void;
+  onForecastStart?: () => void;
 }
 
-export function ForecastControls({ onForecastGenerated }: ForecastControlsProps) {
+export function ForecastControls({ onForecastGenerated, onProductChange, onForecastStart }: ForecastControlsProps) {
   const [selectedProductId, setSelectedProductId] = useLocalStorage<string | null>('forecast-selected-product', null);
-  const [forecastDays, setForecastDays] = useLocalStorage<number>('forecast-days', 14);
+  const [forecastDays] = useLocalStorage<number>('forecast-days', 14);
+  const [sellingPrice, setSellingPrice] = useLocalStorage<number>('forecast-selling-price', 0);
   const { data: products = [] } = useProducts();
   const forecastMutation = useForecast();
   const { setForecasting, setForecastConfig } = useAppStore();
 
+  const handleProductChange = (productId: string | null) => {
+    setSelectedProductId(productId);
+    onProductChange?.(productId);
+  };
+
   const handleGenerateForecast = () => {
     if (!selectedProductId) return;
+    onForecastStart?.();
     setForecasting(true);
     setForecastConfig({ 
       selectedProductId, 
@@ -38,7 +47,11 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
       showForecast: true 
     });
     forecastMutation.mutate(
-      { productId: selectedProductId, days: forecastDays },
+      { 
+        productId: selectedProductId, 
+        days: forecastDays,
+        sellingPrice: sellingPrice > 0 ? sellingPrice : undefined
+      },
       {
         onSuccess: (data) => {
           onForecastGenerated(data);
@@ -70,7 +83,7 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
           </Label>
           <Select 
             value={selectedProductId ?? undefined} 
-            onValueChange={setSelectedProductId}
+            onValueChange={handleProductChange}
             disabled={forecastMutation.isPending}
             aria-label="Select product to forecast"
           >
@@ -95,27 +108,24 @@ export function ForecastControls({ onForecastGenerated }: ForecastControlsProps)
           </Select>
         </div>
 
-        {/* Forecast Days */}
+        {/* Selling Price */}
         <div className="space-y-2">
-          <Label htmlFor="forecast-days" className="text-sm font-medium">
-            Forecast Period (Days)
+          <Label htmlFor="selling-price" className="text-sm font-medium">
+            Selling Price ($ per {selectedProduct?.unit || 'unit'})
           </Label>
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="forecast-days"
-              type="number"
-              min="1"
-              max="365"
-              value={forecastDays}
-              onChange={(e) => setForecastDays(parseInt(e.target.value) || 14)}
-              className="pl-10"
-              disabled={forecastMutation.isPending}
-              aria-label="Forecast period in days"
-            />
-          </div>
+          <Input
+            id="selling-price"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            value={sellingPrice}
+            onChange={(e) => setSellingPrice(parseFloat(e.target.value) || 0)}
+            disabled={forecastMutation.isPending}
+            aria-label="Selling price for revenue projection"
+          />
           <p className="text-xs text-muted-foreground">
-            Generate forecast for the next {forecastDays} days
+            Used to calculate projected revenue from forecasted demand
           </p>
         </div>
 

@@ -9,6 +9,8 @@ interface AppState {
   // Chat State
   chatMessages: Message[];
   isAiTyping: boolean;
+  currentChatId: string | null;
+  chatSessions: { [key: string]: { name: string; messages: Message[]; createdAt: string } };
   
   // Forecast State
   forecastConfig: ChartConfig;
@@ -22,10 +24,15 @@ interface AppState {
   addChatMessage: (message: Message) => void;
   setChatMessages: (messages: Message[]) => void;
   setAiTyping: (typing: boolean) => void;
+  setCurrentChatId: (_id: string | null) => void;
+  createNewChat: (_name?: string) => string;
+  loadChat: (_id: string) => void;
+  renameChat: (_id: string, _name: string) => void;
+  deleteChat: (_id: string) => void;
+  clearChat: () => void;
   setForecastConfig: (config: Partial<ChartConfig>) => void;
   setForecasting: (forecasting: boolean) => void;
   setSelectedRowIds: (ids: string[]) => void;
-  clearChat: () => void;
   reset: () => void;
 }
 
@@ -37,6 +44,8 @@ const initialState = {
   },
   chatMessages: [],
   isAiTyping: false,
+  currentChatId: null,
+  chatSessions: {},
   forecastConfig: {
     showForecast: false,
     forecastDays: 14,
@@ -64,18 +73,77 @@ export const useAppStore = create<AppState>()(
       setChatMessages: (messages) =>
         set({ chatMessages: messages }),
       
-      setAiTyping: (typing) =>
+      setAiTyping: (typing: boolean) =>
         set({ isAiTyping: typing }),
       
-      setForecastConfig: (config) =>
+      setCurrentChatId: (id: string | null) =>
+        set({ currentChatId: id }),
+      
+      createNewChat: (name?: string) => {
+        const chatId = `chat-${Date.now()}`;
+        const chatName = name || `Chat ${Object.keys(initialState.chatSessions).length + 1}`;
+        set((state) => ({
+          currentChatId: chatId,
+          chatSessions: {
+            ...state.chatSessions,
+            [chatId]: {
+              name: chatName,
+              messages: [],
+              createdAt: new Date().toISOString(),
+            },
+          },
+          chatMessages: [],
+        }));
+        return chatId;
+      },
+      
+      loadChat: (id: string) =>
+        set((state) => {
+          const session = state.chatSessions[id];
+          if (session) {
+            return {
+              currentChatId: id,
+              chatMessages: session.messages,
+            };
+          }
+          return state;
+        }),
+      
+      renameChat: (id: string, name: string) =>
+        set((state) => ({
+          chatSessions: {
+            ...state.chatSessions,
+            [id]: {
+              ...state.chatSessions[id],
+              name,
+            },
+          },
+        })),
+      
+      deleteChat: (id: string) =>
+        set((state) => {
+          const newSessions = { ...state.chatSessions };
+          delete newSessions[id];
+          
+          const newCurrentId = state.currentChatId === id ? null : state.currentChatId;
+          const newMessages = state.currentChatId === id ? [] : state.chatMessages;
+          
+          return {
+            chatSessions: newSessions,
+            currentChatId: newCurrentId,
+            chatMessages: newMessages,
+          };
+        }),
+      
+      setForecastConfig: (config: Partial<ChartConfig>) =>
         set((state) => ({
           forecastConfig: { ...state.forecastConfig, ...config },
         })),
       
-      setForecasting: (forecasting) =>
+      setForecasting: (forecasting: boolean) =>
         set({ isForecasting: forecasting }),
       
-      setSelectedRowIds: (ids) =>
+      setSelectedRowIds: (ids: string[]) =>
         set({ selectedRowIds: ids }),
       
       clearChat: () =>
@@ -89,7 +157,9 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         ui: state.ui,
         forecastConfig: state.forecastConfig,
-        // Don't persist chat messages for privacy
+        chatMessages: state.chatMessages,
+        currentChatId: state.currentChatId,
+        chatSessions: state.chatSessions,
       }),
     }
   )

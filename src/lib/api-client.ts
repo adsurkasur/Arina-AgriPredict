@@ -76,6 +76,28 @@ export const demandsApi = {
     const response = await apiClient.delete(`/demands/${id}`);
     return response.data;
   },
+
+  // Process unstructured text data with AI
+  async processData(text: string) {
+    if (isDevelopment) {
+      // In development, simulate processing
+      return {
+        success: true,
+        processed: 1,
+        data: [{
+          id: 'mock-id',
+          date: new Date().toISOString(),
+          productName: 'Mock Product',
+          productId: 'mock-product',
+          quantity: 100,
+          price: 5.0,
+          notes: 'Mock processed data'
+        }]
+      };
+    }
+    const response = await apiClient.post('/demands/process', { text });
+    return response.data;
+  },
 };
 
 // Forecast API
@@ -94,9 +116,7 @@ export const forecastApi = {
 export const chatApi = {
   // Send message to AI assistant
   async sendMessage(data: ChatRequest): Promise<ChatResponse> {
-    if (isDevelopment) {
-      return mockApi.sendChatMessage(data.message);
-    }
+    // Always use real API for chat to enable AI functionality
     const response = await apiClient.post<ChatResponse>('/chat', data);
     return response.data;
   },

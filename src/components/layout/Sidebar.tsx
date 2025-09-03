@@ -9,12 +9,16 @@ import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useNavigation } from "@/hooks/useNavigation";
 import { toast } from "@/lib/toast";
+import { useAppStore } from "@/store/zustand-store";
 import {
   Database,
   TrendingUp,
   MessageSquare,
   Moon,
-  Sun
+  Sun,
+  History,
+  Edit,
+  Trash2
 } from "lucide-react";
 
 const navigation = [
@@ -47,6 +51,12 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { navigateTo } = useNavigation();
+  const { 
+    chatSessions, 
+    currentChatId, 
+    renameChat, 
+    deleteChat
+  } = useAppStore();
 
   return (
     <div
@@ -129,6 +139,77 @@ export function Sidebar({ className }: SidebarProps) {
               </button>
             );
           })}
+
+          {/* Chat Controls - Only show when on assistant page */}
+          {pathname === '/assistant' && !isCollapsed && (
+            <div className="mt-6 space-y-2">
+              <div className="px-3 py-2">
+                <h3 className="text-sm font-medium text-muted-foreground">Chat Controls</h3>
+              </div>
+              <button
+                onClick={() => {
+                  // Chat history functionality - show available chat sessions
+                  const sessionIds = Object.keys(chatSessions);
+                  if (sessionIds.length === 0) {
+                    toast.info("No chat history", {
+                      description: "Start a conversation to create chat history"
+                    });
+                  } else {
+                    toast.info("Chat History", {
+                      description: `${sessionIds.length} conversation${sessionIds.length > 1 ? 's' : ''} available`
+                    });
+                  }
+                }}
+                className="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 w-full text-left hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <History className="h-4 w-4 shrink-0" />
+                <span className="text-sm">Chat History ({Object.keys(chatSessions).length})</span>
+              </button>
+              <button
+                onClick={() => {
+                  // Edit chat name functionality
+                  if (currentChatId) {
+                    const newName = prompt("Enter new chat name:", chatSessions[currentChatId]?.name || "New Chat");
+                    if (newName && newName.trim()) {
+                      renameChat(currentChatId, newName.trim());
+                      toast.success("Chat renamed", {
+                        description: `Chat renamed to "${newName.trim()}"`
+                      });
+                    }
+                  } else {
+                    toast.info("No active chat", {
+                      description: "Start a conversation first"
+                    });
+                  }
+                }}
+                className="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 w-full text-left hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <Edit className="h-4 w-4 shrink-0" />
+                <span className="text-sm">Edit Name</span>
+              </button>
+              <button
+                onClick={() => {
+                  // Delete chat functionality
+                  if (currentChatId) {
+                    if (confirm("Are you sure you want to delete this chat?")) {
+                      deleteChat(currentChatId);
+                      toast.success("Chat deleted", {
+                        description: "Current conversation has been deleted"
+                      });
+                    }
+                  } else {
+                    toast.info("No active chat", {
+                      description: "Start a conversation first"
+                    });
+                  }
+                }}
+                className="flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 w-full text-left hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <Trash2 className="h-4 w-4 shrink-0" />
+                <span className="text-sm">Delete Chat</span>
+              </button>
+            </div>
+          )}
         </nav>
       </ScrollArea>
 

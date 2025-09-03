@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ForecastRequest, ForecastResponse, ForecastDataPoint } from '@/types/api';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:8000';
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +22,7 @@ export async function POST(request: NextRequest) {
     const historicalData = await db.collection('demands')
       .find({ productId: body.productId })
       .sort({ date: -1 })
-      .limit(30) // Last 30 records for forecasting
+      .limit(100) // Get more data for better forecasting
       .toArray();
 
     if (historicalData.length === 0) {
@@ -28,11 +32,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simple forecasting algorithm (moving average)
-    const forecastData = generateForecast(historicalData, body.days);
+    // Try to use the analysis service
+    try {
+      const analysisResponse = await fetch(`${ANALYSIS_SERVICE_URL}/forecast`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_id: body.productId,
+          historical_data: historicalData.map(item => ({
+            date: item.date,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          days: body.days,
+          selling_price: body.sellingPrice
+        }),
+      });
 
-    // Generate AI summary
-    const summary = generateForecastSummary(body.productId, forecastData, historicalData);
+      if (analysisResponse.ok) {
+        const analysisResult = await analysisResponse.json();
+
+        // Transform the response to match our API format
+        const forecastData: ForecastDataPoint[] = analysisResult.forecast_data.map((item: any) => ({
+          date: item.date,
+          predictedValue: item.predicted_price
+        }));
+
+        const response: ForecastResponse = {
+          forecastData,
+          revenueProjection: analysisResult.revenue_projection,
+          modelsUsed: analysisResult.models_used,
+          summary: analysisResult.summary
+        };
+
+        return NextResponse.json(response);
+      }
+    } catch (serviceError) {
+      console.warn('Analysis service unavailable, falling back to simple forecast:', serviceError);
+    }
+
+    // Fallback to simple forecasting if service is unavailable
+    const forecastData = generateSimpleForecast(historicalData, body.days);
+
+    // Generate AI summary using Gemini if available
+    let summary = generateForecastSummary(body.productId, forecastData, historicalData);
+
+    try {
+      const geminiSummary = await generateGeminiSummary(body.productId, forecastData, historicalData);
+      if (geminiSummary) {
+        summary = geminiSummary;
+      }
+    } catch (error) {
+      console.warn('Gemini summary generation failed:', error);
+    }
 
     const response: ForecastResponse = {
       forecastData,
@@ -49,7 +103,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateForecast(historicalData: any[], days: number): ForecastDataPoint[] {
+function generateSimpleForecast(historicalData: any[], days: number): ForecastDataPoint[] {
   const forecast: ForecastDataPoint[] = [];
   const lastDate = new Date(historicalData[0].date);
 
@@ -102,6 +156,46 @@ ${trend === 'increasing' ? '- Consider increasing inventory to meet potential hi
 - Track actual prices against this forecast and adjust strategies accordingly
 
 *This forecast is based on historical patterns and should be used as a guide, not definitive prediction.*`;
+}
+
+async function generateGeminiSummary(productId: string, forecastData: ForecastDataPoint[], historicalData: any[]): Promise<string | null> {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const productName = getProductNameFromId(productId);
+    const avgHistoricalPrice = historicalData.reduce((sum, item) => sum + item.price, 0) / historicalData.length;
+    const avgForecastPrice = forecastData.reduce((sum, item) => sum + item.predictedValue, 0) / forecastData.length;
+
+    const prompt = `
+You are an agricultural market analyst. Based on the following data, generate a comprehensive and insightful summary of the price forecast for ${productName}.
+
+Historical Data Summary:
+- Average historical price: $${avgHistoricalPrice.toFixed(2)}
+- Number of historical records: ${historicalData.length}
+- Date range: ${historicalData[historicalData.length - 1]?.date} to ${historicalData[0]?.date}
+
+Forecast Data Summary:
+- Forecast period: ${forecastData.length} days
+- Average forecasted price: $${avgForecastPrice.toFixed(2)}
+- Forecast dates: ${forecastData[0]?.date} to ${forecastData[forecastData.length - 1]?.date}
+
+Please provide:
+1. An analysis of the current market trend
+2. Key insights about price movements
+3. Practical recommendations for farmers/businesses
+4. Risk factors to consider
+5. Market opportunities or challenges
+
+Format your response in Markdown with clear headings and bullet points. Keep it professional yet accessible for micro and small-scale agricultural businesses.
+`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini summary generation failed:', error);
+    return null;
+  }
 }
 
 function getProductNameFromId(productId: string): string {
