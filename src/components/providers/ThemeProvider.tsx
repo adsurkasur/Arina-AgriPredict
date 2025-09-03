@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { toast } from '@/lib/toast';
 
 type Theme = 'light' | 'dark';
 
@@ -23,6 +24,19 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
+// Show dev mode toast when localStorage is used
+function showDevToast() {
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    if (!(window as any).__localStorageToastShown) {
+      (window as any).__localStorageToastShown = true;
+      toast.info("Development Mode - Using localStorage", {
+        description: "Data is being stored locally. Switch to production for MongoDB.",
+        duration: 8000,
+      });
+    }
+  }
+}
+
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>('light');
 
@@ -36,6 +50,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     // Get stored theme or system preference
     const storedTheme = localStorage.getItem('theme') as Theme;
+    if (storedTheme) {
+      showDevToast(); // Show toast when reading theme data
+    }
     let initialTheme: Theme = 'light';
 
     if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
@@ -58,6 +75,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     if (prefersReducedMotion) {
       root.classList.remove('light', 'dark');
       root.classList.add(newTheme);
+      showDevToast(); // Show toast when writing theme data
       localStorage.setItem('theme', newTheme);
       return;
     }
@@ -65,6 +83,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     // Apply theme change
     root.classList.remove('light', 'dark');
     root.classList.add(newTheme);
+    showDevToast(); // Show toast when writing theme data
     localStorage.setItem('theme', newTheme);
   }, [prefersReducedMotion]);
 

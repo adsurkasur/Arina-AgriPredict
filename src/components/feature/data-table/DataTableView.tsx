@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { toast } from '@/lib/toast';
 
 
 
@@ -27,6 +28,9 @@ export function DataTableView({ data }: DataTableViewProps) {
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
+      toast.info("Deleting record", {
+        description: "Record deletion in progress..."
+      });
       deleteMutation.mutate(id);
     }
   };

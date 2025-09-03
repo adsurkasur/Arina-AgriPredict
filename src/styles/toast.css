@@ -1,0 +1,120 @@
+/* Custom styles for react-toastify to match the project's theme */
+.Toastify__toast-container {
+  font-family: inherit;
+}
+
+.Toastify__toast {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.Toastify__toast--success {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+.Toastify__toast--error {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+.Toastify__toast--warning {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+.Toastify__toast--info {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] .Toastify__toast {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+[data-theme="dark"] .Toastify__toast--success {
+  border-left-color: hsl(142 76% 36%);
+}
+
+[data-theme="dark"] .Toastify__toast--error {
+  border-left-color: hsl(0 84% 60%);
+}
+
+[data-theme="dark"] .Toastify__toast--warning {
+  border-left-color: hsl(38 92% 50%);
+}
+
+[data-theme="dark"] .Toastify__toast--info {
+  border-left-color: hsl(199 89% 48%);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .Toastify__toast--success {
+  border-left-color: hsl(142 76% 36%);
+}
+
+[data-theme="light"] .Toastify__toast--error {
+  border-left-color: hsl(0 84% 60%);
+}
+
+[data-theme="light"] .Toastify__toast--warning {
+  border-left-color: hsl(38 92% 50%);
+}
+
+[data-theme="light"] .Toastify__toast--info {
+  border-left-color: hsl(199 89% 48%);
+}
+
+.Toastify__toast-body {
+  padding: 0;
+  margin: 0;
+}
+
+.Toastify__toast-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.Toastify__close-button {
+  color: hsl(var(--foreground));
+  opacity: 0.7;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+.Toastify__progress-bar {
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground)) 50%, transparent);
+}
+
+.Toastify__progress-bar--success {
+  background: linear-gradient(90deg, transparent, hsl(142 76% 36%) 50%, transparent);
+}
+
+.Toastify__progress-bar--error {
+  background: linear-gradient(90deg, transparent, hsl(0 84% 60%) 50%, transparent);
+}
+
+.Toastify__progress-bar--warning {
+  background: linear-gradient(90deg, transparent, hsl(38 92% 50%) 50%, transparent);
+}
+
+.Toastify__progress-bar--info {
+  background: linear-gradient(90deg, transparent, hsl(199 89% 48%) 50%, transparent);
+}

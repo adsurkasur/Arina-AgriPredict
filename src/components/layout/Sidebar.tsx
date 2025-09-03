@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { toast } from "@/lib/toast";
 import {
   Database,
   TrendingUp,
@@ -73,7 +74,12 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="flex items-center space-x-2">
             <Switch
               checked={theme === 'dark'}
-              onCheckedChange={toggleTheme}
+              onCheckedChange={() => {
+                toggleTheme();
+                toast.info(`Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`, {
+                  description: "Theme preference saved automatically."
+                });
+              }}
               aria-label="Toggle theme"
             />
             {theme === 'dark' ? (

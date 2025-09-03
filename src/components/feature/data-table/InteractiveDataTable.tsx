@@ -51,6 +51,7 @@ export function InteractiveDataTable() {
           searchValue={queryParams.search || ''}
           onSearchChange={(search) => handleParamsChange({ search, page: 1 })}
           totalItems={data?.pagination?.totalItems || 0}
+          data={data?.data || []}
         />
       </CardHeader>
 
