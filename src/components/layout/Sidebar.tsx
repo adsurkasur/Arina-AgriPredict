@@ -1,18 +1,18 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useNavigation } from "@/hooks/useNavigation";
 import { toast } from "@/lib/toast";
 import {
   Database,
   TrendingUp,
   MessageSquare,
-  Leaf,
   Moon,
   Sun
 } from "lucide-react";
@@ -46,6 +46,7 @@ export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { navigateTo } = useNavigation();
 
   return (
     <div
@@ -62,8 +63,14 @@ export function Sidebar({ className }: SidebarProps) {
           className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-1 hover:bg-green-100/30 transition-all duration-300"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-            <Leaf className="h-4 w-4" />
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground overflow-hidden">
+            <Image
+              src="/logo.svg"
+              alt="AgriPredict Logo"
+              width={20}
+              height={20}
+              className="object-contain filter brightness-0"
+            />
           </div>
           {!isCollapsed && (
             <span className="font-semibold text-lg transition-all duration-300">AgriPredict</span>
@@ -97,11 +104,11 @@ export function Sidebar({ className }: SidebarProps) {
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
+              <button
                 key={item.name}
-                href={item.href}
+                onClick={() => navigateTo(item.href)}
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300",
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 w-full text-left",
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -114,7 +121,7 @@ export function Sidebar({ className }: SidebarProps) {
                     <div className="text-xs opacity-70">{item.description}</div>
                   </div>
                 )}
-              </Link>
+              </button>
             );
           })}
         </nav>

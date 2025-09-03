@@ -1,8 +1,9 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider, useTheme } from "./ThemeProvider";
+import { LoadingProvider } from "./LoadingProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "@/styles/toast.css";
@@ -44,11 +45,15 @@ export function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
-          {children}
-          <DevModeToast />
-          <ThemedToastContainer />
-        </TooltipProvider>
+        <Suspense fallback={null}>
+          <LoadingProvider>
+            <TooltipProvider>
+              {children}
+              <DevModeToast />
+              <ThemedToastContainer />
+            </TooltipProvider>
+          </LoadingProvider>
+        </Suspense>
       </ThemeProvider>
     </QueryClientProvider>
   );
