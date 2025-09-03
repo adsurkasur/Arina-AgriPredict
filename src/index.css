@@ -220,10 +220,15 @@ All colors MUST be HSL for consistency and theming support.
 
   /* Global animation coverage for all elements */
   * {
-    transition-property: background-color, color, border-color, box-shadow, transform, opacity;
+    transition-property: background-color, color, border-color, box-shadow, opacity;
     transition-duration: 0.3s;
     transition-timing-function: ease-out;
     transition-behavior: allow-discrete;
+  }
+
+  /* Add transform transitions only for specific interactive elements that need them */
+  button, [role="button"], [tabindex]:not([tabindex="-1"]) {
+    transition-property: background-color, color, border-color, box-shadow, opacity, transform;
   }
 
   /* Prevent animation stacking and queuing */
