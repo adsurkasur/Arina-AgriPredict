@@ -169,8 +169,24 @@ export const useAppStore = create<AppState>()(
           const newSessions = { ...state.chatSessions };
           delete newSessions[id];
           
-          const newCurrentId = state.currentChatId === id ? null : state.currentChatId;
-          const newMessages = state.currentChatId === id ? [] : state.chatMessages;
+          let newCurrentId = state.currentChatId;
+          let newMessages = state.chatMessages;
+          
+          // If we're deleting the current chat
+          if (state.currentChatId === id) {
+            const remainingChatIds = Object.keys(newSessions);
+            
+            if (remainingChatIds.length > 0) {
+              // Switch to the most recent chat (last in the array)
+              const mostRecentChatId = remainingChatIds[remainingChatIds.length - 1];
+              newCurrentId = mostRecentChatId;
+              newMessages = newSessions[mostRecentChatId].messages;
+            } else {
+              // No chats left, go to "no chat" state
+              newCurrentId = null;
+              newMessages = [];
+            }
+          }
           
           return {
             chatSessions: newSessions,

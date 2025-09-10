@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   MessageSquare,
   Plus,
   Trash2,
-  Check,
   ChevronDown,
   ChevronRight,
   Edit
@@ -24,6 +26,9 @@ interface ChatHistorySelectorProps {
 
 export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [renameChatId, setRenameChatId] = useState<string | null>(null);
+  const [renameInput, setRenameInput] = useState('');
   const pathname = usePathname();
   const { navigateTo } = useNavigation();
   const {
@@ -62,23 +67,29 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
   };
 
   const handleDeleteChat = (chatId: string, chatName: string) => {
-    if (confirm(`Are you sure you want to delete "${chatName}"?`)) {
-      deleteChat(chatId);
-      toast.success("Chat deleted", {
-        description: `"${chatName}" has been deleted`
-      });
-    }
+    deleteChat(chatId);
+    toast.success("Chat deleted", {
+      description: `"${chatName}" has been deleted`
+    });
   };
 
   const handleRenameChat = (chatId: string, currentName: string) => {
-    const newName = prompt("Enter new chat name:", currentName);
-    const trimmedName = newName?.trim();
-    if (trimmedName && trimmedName !== currentName) {
-      renameChat(chatId, trimmedName);
+    setRenameChatId(chatId);
+    setRenameInput(currentName);
+    setRenameModalOpen(true);
+  };
+
+  const handleRenameSubmit = () => {
+    const trimmedName = renameInput.trim();
+    if (trimmedName && renameChatId && trimmedName !== chatSessions[renameChatId]?.name) {
+      renameChat(renameChatId, trimmedName);
       toast.success("Chat renamed", {
         description: `Chat renamed to "${trimmedName}"`
       });
     }
+    setRenameModalOpen(false);
+    setRenameChatId(null);
+    setRenameInput('');
   };
 
   const sortedChatSessions = Object.entries(chatSessions)
@@ -156,9 +167,6 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                             <span>{session.messages.length} msg</span>
                           </div>
                         </div>
-                        {currentChatId === chatId && (
-                          <Check className="h-3 w-3 text-primary flex-shrink-0" />
-                        )}
                       </div>
                     </div>
 
@@ -196,6 +204,52 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
           )}
         </div>
       )}
+
+      {/* Rename Chat Modal */}
+      <Dialog open={renameModalOpen} onOpenChange={setRenameModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Rename Chat</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="chat-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="chat-name"
+                value={renameInput}
+                onChange={(e) => setRenameInput(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter chat name"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRenameSubmit();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRenameModalOpen(false);
+                setRenameChatId(null);
+                setRenameInput('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRenameSubmit}
+              disabled={!renameInput.trim()}
+            >
+              Rename
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useChat } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from './MessageBubble';
 import { SuggestionChips } from './SuggestionChips';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Send, Trash2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 import Image from 'next/image';
 
 export function AIAssistantPanel() {
@@ -20,20 +20,10 @@ export function AIAssistantPanel() {
     chatMessages, 
     isAiTyping, 
     addChatMessage, 
-    setAiTyping,
-    clearChat,
-    currentChatId,
-    createNewChat
+    setAiTyping
   } = useAppStore();
   
   const chatMutation = useChat();
-
-  // Auto-create chat session if none exists
-  useEffect(() => {
-    if (!currentChatId && chatMessages.length === 0) {
-      createNewChat();
-    }
-  }, [currentChatId, chatMessages.length, createNewChat]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || chatMutation.isPending) return;
@@ -189,18 +179,6 @@ export function AIAssistantPanel() {
                     Press Enter to send, Shift+Enter for new line
                   </p>
                   <div className="flex items-center space-x-2">
-                    {chatMessages.length > 0 && (
-                      <Button
-                        onClick={clearChat}
-                        variant="outline"
-                        size="sm"
-                        className="transition-smooth"
-                        aria-label="Clear chat history"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Clear
-                      </Button>
-                    )}
                     <Button
                       onClick={handleSendMessage}
                       disabled={!inputMessage.trim() || chatMutation.isPending}
