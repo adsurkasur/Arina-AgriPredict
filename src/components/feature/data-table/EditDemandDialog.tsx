@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { format } from 'date-fns';
 import { Calendar, Edit2 } from 'lucide-react';
 import { DemandRecord, UpdateDemandRequest } from '@/types/api';
@@ -27,21 +25,17 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 
-const formSchema = z.object({
-  date: z.date({
-    message: "Please select a date",
-  }),
-  productName: z.string().min(1, "Please enter a product name"),
-  quantity: z.number().min(0.01, "Quantity must be greater than 0"),
-  price: z.number().min(0.01, "Price must be greater than 0"),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 interface EditDemandDialogProps {
   record: DemandRecord;
   trigger?: React.ReactNode;
 }
+
+type FormData = {
+  date: Date;
+  productName: string;
+  quantity: number;
+  price: number;
+};
 
 export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
   const [open, setOpen] = useState(false);
@@ -54,9 +48,9 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
     setValue,
     watch,
     reset,
+    trigger: formTrigger,
     formState: { errors, isValid, isDirty },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: {
       date: new Date(record.date),
@@ -81,6 +75,10 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
   }, [open, record, reset]);
 
   const onSubmit = (data: FormData) => {
+    if (!data.date) {
+      // This shouldn't happen if validation is working, but as a safeguard
+      return;
+    }
     const updateData: UpdateDemandRequest = {
       date: data.date.toISOString(),
       productName: data.productName,
@@ -138,6 +136,19 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Hidden date input for validation */}
+          <input
+            type="hidden"
+            {...register('date', { 
+              validate: (value) => {
+                if (!value || !(value instanceof Date)) {
+                  return 'Date is required';
+                }
+                return true;
+              }
+            })}
+          />
+
           {/* Date Picker */}
           <div className="space-y-2">
             <Label htmlFor="edit-date" className="text-sm font-medium">
@@ -166,6 +177,7 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
                   onSelect={(date) => {
                     setValue('date', date!, { shouldValidate: true });
                     setDatePickerOpen(false);
+                    formTrigger('date');
                   }}
                   initialFocus
                   className="pointer-events-auto"
@@ -191,7 +203,14 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
                 "transition-smooth",
                 errors.productName && "border-destructive"
               )}
-              {...register('productName')}
+              {...register('productName', { 
+                validate: (value) => {
+                  if (!value || value.trim() === '') {
+                    return 'Product name is required';
+                  }
+                  return true;
+                }
+              })}
               aria-required="true"
               aria-invalid={!!errors.productName}
             />
@@ -208,15 +227,26 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
             <Input
               id="edit-quantity"
               type="number"
-              step="0.01"
+              step="1"
               min="0"
-              placeholder="0.00"
+              placeholder="0"
               disabled={updateMutation.isPending}
               className={cn(
-                "transition-smooth",
+                "transition-smooth [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]",
                 errors.quantity && "border-destructive"
               )}
-              {...register('quantity', { valueAsNumber: true })}
+              {...register('quantity', { 
+                valueAsNumber: true, 
+                validate: (value) => {
+                  if (value === undefined || value === null || isNaN(value)) {
+                    return 'Quantity is required';
+                  }
+                  if (value < 0) {
+                    return 'Quantity must be at least 0';
+                  }
+                  return true;
+                }
+              })}
               aria-required="true"
               aria-invalid={!!errors.quantity}
             />
@@ -238,10 +268,21 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
               placeholder="0.00"
               disabled={updateMutation.isPending}
               className={cn(
-                "transition-smooth",
+                "transition-smooth [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]",
                 errors.price && "border-destructive"
               )}
-              {...register('price', { valueAsNumber: true })}
+              {...register('price', { 
+                valueAsNumber: true, 
+                validate: (value) => {
+                  if (value === undefined || value === null || isNaN(value)) {
+                    return 'Price is required';
+                  }
+                  if (value < 0) {
+                    return 'Price must be at least 0';
+                  }
+                  return true;
+                }
+              })}
               aria-required="true"
               aria-invalid={!!errors.price}
             />

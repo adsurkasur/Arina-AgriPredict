@@ -1,7 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { format } from 'date-fns';
 import { PlusCircle, Calendar } from 'lucide-react';
 import { useCreateDemand } from '@/hooks/useApiHooks';
@@ -18,16 +16,12 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-const formSchema = z.object({
-  date: z.date({
-    message: "Please select a date",
-  }),
-  productName: z.string().min(1, "Please enter a product name"),
-  quantity: z.number().min(0.01, "Quantity must be greater than 0"),
-  price: z.number().min(0.01, "Price must be greater than 0"),
-});
-
-type FormData = z.infer<typeof formSchema>;
+type FormData = {
+  date: Date | undefined;
+  productName: string;
+  quantity: number | undefined;
+  price: number | undefined;
+};
 
 export function InlineAddRow() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -41,22 +35,38 @@ export function InlineAddRow() {
     setValue,
     watch,
     reset,
+    trigger,
     formState: { errors, isValid },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    mode: 'onChange',
+    mode: 'all', // Changed from 'onChange' to 'all' to trigger validation on all events
+    defaultValues: {
+      date: undefined,
+      productName: '',
+      quantity: undefined,
+      price: undefined,
+    },
   });
 
   const selectedDate = watch('date');
 
+  useEffect(() => {
+    if (selectedDate) {
+      setValue('date', selectedDate, { shouldValidate: true });
+    }
+  }, [selectedDate, setValue]);
+
   const onSubmit = (data: FormData) => {
+    if (!data.date) {
+      // This shouldn't happen if validation is working, but as a safeguard
+      return;
+    }
     setPending(true);
   // ...existing code...
     const requestData: CreateDemandRequest = {
-      date: data.date.toISOString(),
+      date: data.date!.toISOString(),
       productName: data.productName,
-      quantity: data.quantity,
-      price: data.price,
+      quantity: data.quantity!,
+      price: data.price!,
     };
     createMutation.mutate(requestData, {
       onSuccess: () => {
@@ -87,7 +97,18 @@ export function InlineAddRow() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {/* Date Picker */}
+            {/* Hidden date input for validation */}
+          <input
+            type="hidden"
+            {...register('date', { 
+              validate: (value) => {
+                if (!value || !(value instanceof Date)) {
+                  return 'Date is required';
+                }
+                return true;
+              }
+            })}
+          />            {/* Date Picker */}
             <div className="space-y-2">
               <Label htmlFor="date" className="text-xs">Date</Label>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
@@ -112,6 +133,7 @@ export function InlineAddRow() {
                     onSelect={(date) => {
                       setValue('date', date!, { shouldValidate: true });
                       setDatePickerOpen(false);
+                      trigger('date');
                     }}
                     initialFocus
                     className="pointer-events-auto"
@@ -135,7 +157,14 @@ export function InlineAddRow() {
                   "transition-smooth",
                   errors.productName && "border-destructive"
                 )}
-                {...register('productName')}
+                {...register('productName', { 
+                  validate: (value) => {
+                    if (!value || value.trim() === '') {
+                      return 'Product name is required';
+                    }
+                    return true;
+                  }
+                })}
                 aria-required="true"
                 aria-invalid={!!errors.productName}
               />
@@ -150,16 +179,26 @@ export function InlineAddRow() {
               <Input
                 id="quantity"
                 type="number"
-                step="0.01"
+                step="1"
                 min="0"
-                placeholder="0.00"
+                placeholder="0"
                 disabled={isPending}
                 className={cn(
-                  "transition-smooth",
+                  "transition-smooth [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]",
                   errors.quantity && "border-destructive"
                 )}
-                {...register('quantity', { valueAsNumber: true })}
-                ref={firstFieldRef}
+                {...register('quantity', { 
+                  valueAsNumber: true, 
+                  validate: (value) => {
+                    if (value === undefined || value === null || (typeof value === 'number' && isNaN(value))) {
+                      return 'Quantity is required';
+                    }
+                    if (value < 0) {
+                      return 'Quantity must be at least 0';
+                    }
+                    return true;
+                  }
+                })}
                 aria-required="true"
                 aria-invalid={!!errors.quantity}
               />
@@ -179,10 +218,21 @@ export function InlineAddRow() {
                 placeholder="0.00"
                 disabled={isPending}
                 className={cn(
-                  "transition-smooth",
+                  "transition-smooth [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]",
                   errors.price && "border-destructive"
                 )}
-                {...register('price', { valueAsNumber: true })}
+                {...register('price', { 
+                  valueAsNumber: true, 
+                  validate: (value) => {
+                    if (value === undefined || value === null || isNaN(value)) {
+                      return 'Price is required';
+                    }
+                    if (value < 0) {
+                      return 'Price must be at least 0';
+                    }
+                    return true;
+                  }
+                })}
               />
               {errors.price && (
                 <p className="text-xs text-destructive">{errors.price.message}</p>
@@ -190,11 +240,11 @@ export function InlineAddRow() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex items-end">
+            <div className="flex items-end justify-start md:col-span-1 col-span-1">
               <Button
                 type="submit"
                 disabled={!isValid || isPending}
-                className="w-full transition-smooth"
+                className="w-full md:w-auto transition-smooth"
                 aria-disabled={!isValid || isPending}
                 aria-label="Add sales record"
               >

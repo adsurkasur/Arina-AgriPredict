@@ -137,10 +137,10 @@ export function TableToolbar({
           
           // Parse and validate data
           const date = new Date(dateStr);
-          const quantity = parseFloat(quantityStr);
+          const quantity = parseInt(quantityStr);
           const price = parseFloat(priceStr);
 
-          if (isNaN(date.getTime()) || isNaN(quantity) || isNaN(price) || quantity <= 0 || price <= 0) {
+          if (isNaN(date.getTime()) || isNaN(quantity) || isNaN(price) || quantity <= 0 || price <= 0 || !Number.isInteger(quantity)) {
             errorCount++;
             continue;
           }
@@ -301,7 +301,7 @@ export function TableToolbar({
                         placeholder="0"
                         value={localFilters.priceMin || ''}
                         onChange={(e) => updateFilter('priceMin', e.target.value ? Number(e.target.value) : undefined)}
-                        className="h-8"
+                        className="h-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                       />
                     </div>
                     <div>
@@ -311,7 +311,7 @@ export function TableToolbar({
                         placeholder="100"
                         value={localFilters.priceMax || ''}
                         onChange={(e) => updateFilter('priceMax', e.target.value ? Number(e.target.value) : undefined)}
-                        className="h-8"
+                        className="h-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                       />
                     </div>
                   </div>
@@ -324,20 +324,24 @@ export function TableToolbar({
                       <Label className="text-xs text-muted-foreground">Min</Label>
                       <Input
                         type="number"
+                        step="1"
+                        min="0"
                         placeholder="0"
                         value={localFilters.quantityMin || ''}
-                        onChange={(e) => updateFilter('quantityMin', e.target.value ? Number(e.target.value) : undefined)}
-                        className="h-8"
+                        onChange={(e) => updateFilter('quantityMin', e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="h-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                       />
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Max</Label>
                       <Input
                         type="number"
+                        step="1"
+                        min="0"
                         placeholder="1000"
                         value={localFilters.quantityMax || ''}
-                        onChange={(e) => updateFilter('quantityMax', e.target.value ? Number(e.target.value) : undefined)}
-                        className="h-8"
+                        onChange={(e) => updateFilter('quantityMax', e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="h-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                       />
                     </div>
                   </div>
