@@ -18,6 +18,13 @@ export function InteractiveDataTable() {
     search: '',
     sortKey: 'date',
     sortOrder: 'asc',
+    dateFrom: undefined,
+    dateTo: undefined,
+    priceMin: undefined,
+    priceMax: undefined,
+    quantityMin: undefined,
+    quantityMax: undefined,
+    productIds: undefined,
   });
   const debouncedParams = useDebounce(queryParams, 300);
   const { data, isLoading, error } = useDemands(debouncedParams);
@@ -48,12 +55,22 @@ export function InteractiveDataTable() {
           <span>Sales Data Management</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0 space-y-3 overflow-auto">
+      <CardContent className="flex-1 flex flex-col min-h-0 space-y-3 overflow-visible">
         <TableToolbar
           searchValue={queryParams.search || ''}
           onSearchChange={(search) => handleParamsChange({ search, page: 1 })}
           totalItems={data?.pagination?.totalItems || 0}
           data={data?.data || []}
+          filters={{
+            dateFrom: queryParams.dateFrom,
+            dateTo: queryParams.dateTo,
+            priceMin: queryParams.priceMin,
+            priceMax: queryParams.priceMax,
+            quantityMin: queryParams.quantityMin,
+            quantityMax: queryParams.quantityMax,
+            productIds: queryParams.productIds,
+          }}
+          onFiltersChange={(filters) => handleParamsChange({ ...filters, page: 1 })}
         />
 
         {isLoading ? (

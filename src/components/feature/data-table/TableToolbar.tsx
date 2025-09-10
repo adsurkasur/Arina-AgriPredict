@@ -1,4 +1,4 @@
-import { Search, Filter, Download, Upload } from 'lucide-react';
+import { Search, Filter, Download, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,21 +7,41 @@ import { toast } from '@/lib/toast';
 import { demandsApi } from '@/lib/api-client';
 import { CreateDemandRequest } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
 
 interface TableToolbarProps {
   searchValue: string;
   onSearchChange: (_value: string) => void;
   totalItems: number;
   data?: any[]; // Add data prop for export
+  filters?: {
+    dateFrom?: string;
+    dateTo?: string;
+    priceMin?: number;
+    priceMax?: number;
+    quantityMin?: number;
+    quantityMax?: number;
+    productIds?: string[];
+  };
+  onFiltersChange?: (_filters: any) => void;
 }
 
 export function TableToolbar({ 
   searchValue, 
   onSearchChange, 
   totalItems,
-  data = []
+  data = [],
+  filters = {},
+  onFiltersChange
 }: TableToolbarProps) {
   const [isImporting, setIsImporting] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [localFilters, setLocalFilters] = useState(filters);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const handleExport = () => {
@@ -163,10 +183,30 @@ export function TableToolbar({
     }
   };
 
+  const handleApplyFilters = () => {
+    if (onFiltersChange) {
+      onFiltersChange(localFilters);
+    }
+    setFilterOpen(false);
+  };
+
+  const handleClearFilters = () => {
+    const clearedFilters = {};
+    setLocalFilters(clearedFilters);
+    if (onFiltersChange) {
+      onFiltersChange(clearedFilters);
+    }
+    setFilterOpen(false);
+  };
+
+  const updateFilter = (key: string, value: any) => {
+    setLocalFilters(prev => ({ ...prev, [key]: value }));
+  };
+
   return (
     <div className="flex items-center justify-between space-x-4" role="toolbar" aria-label="Table controls">
       <div className="flex items-center space-x-4 flex-1">
-        <div className="relative w-64">
+        <div className="relative w-64 mr-2">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             type="text"
@@ -174,11 +214,6 @@ export function TableToolbar({
             value={searchValue}
             onChange={(e) => {
               onSearchChange(e.target.value);
-              if (e.target.value.trim()) {
-                toast.info("Searching records", {
-                  description: `Looking for records containing "${e.target.value}"`
-                });
-              }
             }}
             className="pl-10 transition-smooth"
             aria-label="Search sales records"
@@ -186,10 +221,117 @@ export function TableToolbar({
           />
         </div>
         
-        <Button variant="outline" size="sm" className="transition-smooth" aria-label="Open filters">
-          <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
-          Filters
-        </Button>
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="transition-smooth" aria-label="Open filters">
+              <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
+              Filters
+              {Object.keys(localFilters).length > 0 && (
+                <Badge variant="secondary" className="ml-2 h-4 w-4 p-0 text-xs">
+                  {Object.keys(localFilters).length}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="start">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filters</h4>
+                <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                  <X className="h-4 w-4" />
+                  Clear
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Date Range</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">From</Label>
+                      <Input
+                        type="date"
+                        value={localFilters.dateFrom || ''}
+                        onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">To</Label>
+                      <Input
+                        type="date"
+                        value={localFilters.dateTo || ''}
+                        onChange={(e) => updateFilter('dateTo', e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Price Range ($)</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Min</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={localFilters.priceMin || ''}
+                        onChange={(e) => updateFilter('priceMin', e.target.value ? Number(e.target.value) : undefined)}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Max</Label>
+                      <Input
+                        type="number"
+                        placeholder="100"
+                        value={localFilters.priceMax || ''}
+                        onChange={(e) => updateFilter('priceMax', e.target.value ? Number(e.target.value) : undefined)}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Quantity Range</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Min</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={localFilters.quantityMin || ''}
+                        onChange={(e) => updateFilter('quantityMin', e.target.value ? Number(e.target.value) : undefined)}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Max</Label>
+                      <Input
+                        type="number"
+                        placeholder="1000"
+                        value={localFilters.quantityMax || ''}
+                        onChange={(e) => updateFilter('quantityMax', e.target.value ? Number(e.target.value) : undefined)}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" size="sm" onClick={() => setFilterOpen(false)}>
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleApplyFilters}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="flex items-center space-x-4">

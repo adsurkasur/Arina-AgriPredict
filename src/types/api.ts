@@ -24,6 +24,14 @@ export interface DemandQueryParams {
   search?: string;
   sortKey?: string;
   sortOrder?: 'asc' | 'desc';
+  // Filter parameters
+  dateFrom?: string;
+  dateTo?: string;
+  priceMin?: number;
+  priceMax?: number;
+  quantityMin?: number;
+  quantityMax?: number;
+  productIds?: string[];
 }
 
 export interface CreateDemandRequest {

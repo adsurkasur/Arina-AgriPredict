@@ -94,14 +94,50 @@ export const mockApi = {
   async getDemands(params: DemandQueryParams = {}): Promise<DemandResponse> {
     await delay(500); // Simulate network delay
     
-    const { page = 1, limit = 10, search = '', sortKey = 'date', sortOrder = 'desc' } = params;
+    const { 
+      page = 1, 
+      limit = 10, 
+      search = '', 
+      sortKey = 'date', 
+      sortOrder = 'desc',
+      dateFrom,
+      dateTo,
+      priceMin,
+      priceMax,
+      quantityMin,
+      quantityMax,
+      productIds
+    } = params;
     
     // Filter by search
-  const demands = getLocalDemands();
-  const filtered = demands.filter(demand => 
+    const demands = getLocalDemands();
+    let filtered = demands.filter(demand => 
       demand.productName.toLowerCase().includes(search.toLowerCase()) ||
       demand.productId.toLowerCase().includes(search.toLowerCase())
     );
+    
+    // Apply additional filters
+    if (dateFrom) {
+      filtered = filtered.filter(demand => new Date(demand.date) >= new Date(dateFrom));
+    }
+    if (dateTo) {
+      filtered = filtered.filter(demand => new Date(demand.date) <= new Date(dateTo));
+    }
+    if (priceMin !== undefined) {
+      filtered = filtered.filter(demand => demand.price >= priceMin);
+    }
+    if (priceMax !== undefined) {
+      filtered = filtered.filter(demand => demand.price <= priceMax);
+    }
+    if (quantityMin !== undefined) {
+      filtered = filtered.filter(demand => demand.quantity >= quantityMin);
+    }
+    if (quantityMax !== undefined) {
+      filtered = filtered.filter(demand => demand.quantity <= quantityMax);
+    }
+    if (productIds && productIds.length > 0) {
+      filtered = filtered.filter(demand => productIds.includes(demand.productId));
+    }
     
     // Sort
     filtered.sort((a, b) => {
