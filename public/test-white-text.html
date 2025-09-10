@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Text Delete Buttons Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        .destructive { background: #dc3545; color: white; }
+        .destructive:hover { background: #c82333; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .white-text { color: white !important; }
+    </style>
+</head>
+<body>
+    <h1>🗑️ White Text Delete Buttons Test</h1>
+
+    <div class="test-section">
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li>Open the <a href="/data" target="_blank">Data Table</a> in a new tab</li>
+            <li>Look for the red "Clear Data" button - text should be white</li>
+            <li>Find individual record delete buttons (trash icons) in each row</li>
+            <li>Hover over delete buttons - text should turn white</li>
+            <li>Click delete buttons to see confirmation dialogs</li>
+            <li>Check dialog confirm buttons - should have white text</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected White Text Elements:</h2>
+        <ul>
+            <li class="success">✅ Clear Data button text: Always white</li>
+            <li class="success">✅ Individual record delete buttons: White on hover</li>
+            <li class="success">✅ Dialog confirm buttons: White text on red background</li>
+            <li class="success">✅ Chat delete buttons: White on hover</li>
+            <li class="success">✅ All destructive button variants: White text</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Button Types Updated:</h2>
+        <ul>
+            <li><strong>Clear Data Button:</strong> <code>text-white</code> class added</li>
+            <li><strong>Record Delete Buttons:</strong> <code>hover:text-white</code> on hover</li>
+            <li><strong>Dialog Confirm Buttons:</strong> <code>text-white</code> in destructive state</li>
+            <li><strong>Chat Delete Buttons:</strong> <code>hover:text-white</code> on hover</li>
+            <li><strong>Generic Delete Dialog:</strong> <code>text-white</code> for all variants</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Quick Test Buttons:</h2>
+        <button onclick="openDataPage()">Open Data Table</button>
+        <button onclick="testButtonStyling()">Test Button Styling</button>
+        <button class="destructive white-text" onclick="simulateDelete()">⚠️ Simulate Delete Action</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results:</h2>
+        <div id="results">Click buttons above to test functionality</div>
+    </div>
+
+    <div class="test-section">
+        <h2>CSS Classes Applied:</h2>
+        <pre><code>/* Clear Data Button */
+text-white
+
+/* Hover States */
+hover:text-white
+
+/* Dialog Confirm Buttons */
+bg-destructive text-white hover:bg-destructive/90
+
+/* All Delete Buttons */
+hover:bg-destructive/20 hover:text-white hover:scale-110</code></pre>
+    </div>
+
+    <script>
+        function openDataPage() {
+            window.open('/data', '_blank');
+            document.getElementById('results').innerHTML = '<span class="info">Data table opened. Check all delete buttons for white text!</span>';
+        }
+
+        function testButtonStyling() {
+            document.getElementById('results').innerHTML = '<span class="info">Look for white text on all red/destructive buttons and hover states.</span>';
+        }
+
+        function simulateDelete() {
+            const confirmed = confirm('⚠️ SIMULATION: This represents a delete confirmation dialog!\n\nFeatures to expect:\n• White text on confirm button\n• Red destructive background\n• Clear warning message\n\nClick OK to see confirmation.');
+            if (confirmed) {
+                document.getElementById('results').innerHTML = '<span class="success">✅ Dialog should have white text on destructive buttons!</span>';
+            } else {
+                document.getElementById('results').innerHTML = '<span class="info">Test cancelled - check the real dialogs in the app.</span>';
+            }
+        }
+
+        // Auto-check if we're on the data page
+        if (window.location.pathname === '/data') {
+            document.getElementById('results').innerHTML = '<span class="success">✅ You are on the data page! Test all delete buttons for white text.</span>';
+        }
+    </script>
+</body>
+</html>

@@ -20,7 +20,7 @@ export function ErrorDisplay({
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle className="font-semibold">{title}</AlertTitle>
       <AlertDescription className="mt-2">
-        <p className="text-sm text-destructive-foreground/90">{message}</p>
+        <p className="text-sm text-white/90">{message}</p>
         {onRetry && (
           <Button
             variant="outline"

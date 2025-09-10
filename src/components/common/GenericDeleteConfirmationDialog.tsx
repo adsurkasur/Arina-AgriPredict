@@ -77,7 +77,7 @@ export function GenericDeleteConfirmationDialog({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive hover:scale-110 transition-all duration-200 hover:shadow-sm"
+            className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-sm"
             disabled={loadingState}
           >
             <Trash2 className="h-3 w-3" />
@@ -109,7 +109,7 @@ export function GenericDeleteConfirmationDialog({
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loadingState}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {loadingState ? 'Deleting...' : confirmText}
           </AlertDialogAction>

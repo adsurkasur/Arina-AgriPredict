@@ -147,22 +147,6 @@ export function InlineAddRow() {
               <PlusCircle className="h-4 w-4 text-primary" />
               <Label className="text-sm font-semibold">Add New Sales Record</Label>
             </div>
-            
-            {/* AI Assistant Button */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-xs text-primary hover:bg-primary/10"
-              onClick={() => {
-                // This would open the AI assistant or provide help
-                console.log('AI Assistant: Need help filling out the form?');
-              }}
-              disabled={isPending}
-            >
-              <Bot className="h-3 w-3 mr-1" />
-              AI Help
-            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">

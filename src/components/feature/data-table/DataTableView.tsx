@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { EditDemandDialog } from './EditDemandDialog';
 import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDeleteConfirmationDialog';
 import { useDeleteDemand } from '@/hooks/useApiHooks';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 
@@ -149,6 +149,16 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
                         confirmText="Delete Record"
                         mutation={deleteMutation}
                         itemId={record.id}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-sm"
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        }
                       />
                     </div>
                   </TableCell>

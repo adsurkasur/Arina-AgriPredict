@@ -6,17 +6,21 @@ interface TablePaginationProps {
   currentPage: number;
   totalPages: number;
   totalItems: number;
+  pageSize: number;
   onPageChange: (_page: number) => void;
+  onPageSizeChange: (_pageSize: number) => void;
 }
 
 export function TablePagination({
   currentPage,
   totalPages,
   totalItems,
+  pageSize,
   onPageChange,
+  onPageSizeChange,
 }: TablePaginationProps) {
-  const startItem = (currentPage - 1) * 10 + 1;
-  const endItem = Math.min(currentPage * 10, totalItems);
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const goToFirstPage = () => onPageChange(1);
   const goToPreviousPage = () => onPageChange(Math.max(1, currentPage - 1));
@@ -69,7 +73,7 @@ export function TablePagination({
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2">
           <span className="text-sm text-muted-foreground">Rows per page</span>
-          <Select defaultValue="10" aria-label="Rows per page">
+          <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))} aria-label="Rows per page">
             <SelectTrigger className="h-8 w-16">
               <SelectValue />
             </SelectTrigger>

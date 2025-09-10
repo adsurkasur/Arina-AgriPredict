@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Data Dialog Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .destructive { background: #dc3545; }
+        .destructive:hover { background: #c82333; }
+        .white-text { color: white !important; }
+    </style>
+</head>
+<body>
+    <h1>🗑️ Clear Data Dialog & White Text Test</h1>
+
+    <div class="test-section">
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li>Open the <a href="/data" target="_blank">Data Table</a> in a new tab</li>
+            <li>Look for the red "Clear Data" button beside Import/Export</li>
+            <li>Check that the button text is white (not affected by theme)</li>
+            <li>Click the Clear Data button to test the new confirmation dialog</li>
+            <li>Verify the dialog shows proper details and styling</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected Changes:</h2>
+        <ul>
+            <li class="success">✅ Clear Data button text is white regardless of theme</li>
+            <li class="success">✅ Clicking Clear Data opens a styled confirmation dialog</li>
+            <li class="success">✅ Dialog shows detailed information about what will be deleted</li>
+            <li class="success">✅ Dialog has proper "Delete All Data" and "Cancel" buttons</li>
+            <li class="success">✅ No more browser alert() - uses proper UI component</li>
+            <li class="warning">⚠️ Dialog should show record count and warning message</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Dialog Features to Test:</h2>
+        <ul>
+            <li>✅ **Title**: "Clear All Data"</li>
+            <li>✅ **Description**: Clear warning about permanent deletion</li>
+            <li>✅ **Item Details**: Shows record count and additional info</li>
+            <li>✅ **Buttons**: "Delete All Data" (destructive) and "Cancel"</li>
+            <li>✅ **Styling**: Proper destructive theme colors</li>
+            <li>✅ **Accessibility**: Proper ARIA labels and keyboard navigation</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Quick Test Buttons:</h2>
+        <button onclick="openDataPage()">Open Data Table</button>
+        <button onclick="testButtonStyling()">Test Button Styling</button>
+        <button class="destructive white-text" onclick="simulateDialog()">⚠️ Simulate Dialog</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results:</h2>
+        <div id="results">Click buttons above to test functionality</div>
+    </div>
+
+    <script>
+        function openDataPage() {
+            window.open('/data', '_blank');
+            document.getElementById('results').innerHTML = '<span class="info">Data table opened. Look for the white text on the Clear Data button!</span>';
+        }
+
+        function testButtonStyling() {
+            document.getElementById('results').innerHTML = '<span class="info">Check the Clear Data button - text should be white even in different themes.</span>';
+        }
+
+        function simulateDialog() {
+            const confirmed = confirm('⚠️ SIMULATION: This would open the new confirmation dialog!\n\nFeatures to expect:\n• Proper dialog styling\n• Record count display\n• Destructive button colors\n• No browser alert()\n\nClick OK to see what the real dialog looks like.');
+            if (confirmed) {
+                document.getElementById('results').innerHTML = '<span class="success">✅ Great! Now test the real dialog in the data table.</span>';
+            } else {
+                document.getElementById('results').innerHTML = '<span class="info">Test cancelled - try the real button in the data table.</span>';
+            }
+        }
+
+        // Auto-check if we're on the data page
+        if (window.location.pathname === '/data') {
+            document.getElementById('results').innerHTML = '<span class="success">✅ You are on the data page! Test the Clear Data button now.</span>';
+        }
+    </script>
+</body>
+</html>

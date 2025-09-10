@@ -1,4 +1,4 @@
-import { Search, Filter, Download, Upload, X } from 'lucide-react';
+import { Search, Filter, Download, Upload, X, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { toast } from '@/lib/toast';
 import { demandsApi } from '@/lib/api-client';
 import { CreateDemandRequest } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
+import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDeleteConfirmationDialog';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import {
   Popover,
@@ -89,6 +90,36 @@ export function TableToolbar({
 
   const handleImport = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleClearData = async () => {
+    if (data.length === 0) {
+      toast.warning("No data to clear", {
+        description: "There are no records to delete."
+      });
+      return;
+    }
+
+    try {
+      // Delete all records
+      const deletePromises = data.map(record =>
+        demandsApi.deleteDemand(record.id)
+      );
+
+      await Promise.all(deletePromises);
+
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ['demands'] });
+
+      toast.success("Data cleared successfully", {
+        description: `Deleted ${data.length} records.`
+      });
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      toast.error("Failed to clear data", {
+        description: "Some records may not have been deleted. Please try again."
+      });
+    }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -308,7 +339,7 @@ export function TableToolbar({
                       <Label className="text-xs text-muted-foreground">Max</Label>
                       <Input
                         type="number"
-                        placeholder="100"
+                        placeholder=""
                         value={localFilters.priceMax || ''}
                         onChange={(e) => updateFilter('priceMax', e.target.value ? Number(e.target.value) : undefined)}
                         className="h-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
@@ -338,7 +369,7 @@ export function TableToolbar({
                         type="number"
                         step="1"
                         min="0"
-                        placeholder="1000"
+                        placeholder=""
                         value={localFilters.quantityMax || ''}
                         onChange={(e) => updateFilter('quantityMax', e.target.value ? parseInt(e.target.value) : undefined)}
                         className="h-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
@@ -375,6 +406,32 @@ export function TableToolbar({
           <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
           Export
         </Button>
+
+        <GenericDeleteConfirmationDialog
+          title="Clear All Data"
+          description="This will permanently delete all sales records from the database. This action cannot be undone."
+          itemName="All Sales Data"
+          itemDetails={[
+            `Total Records: ${data.length}`,
+            "This includes all historical sales data",
+            "Action cannot be reversed"
+          ]}
+          confirmText="Delete All Data"
+          cancelText="Cancel"
+          onConfirm={handleClearData}
+          trigger={
+            <Button
+              variant="destructive"
+              size="sm"
+              className="transition-smooth text-white"
+              aria-label="Clear all data"
+              disabled={data.length === 0}
+            >
+              <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+              Clear Data
+            </Button>
+          }
+        />
       </div>
 
       {/* Hidden file input for import */}

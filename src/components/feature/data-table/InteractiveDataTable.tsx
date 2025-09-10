@@ -114,6 +114,10 @@ export function InteractiveDataTable() {
     setQueryParams((prev) => ({ ...prev, page }));
   }
 
+  function handlePageSizeChange(pageSize: number) {
+    setQueryParams((prev) => ({ ...prev, limit: pageSize, page: 1 }));
+  }
+
   if (error) {
     return (
       <ErrorDisplay message={error.message || 'Unknown error'} />
@@ -170,7 +174,9 @@ export function InteractiveDataTable() {
                 currentPage={filteredData.pagination.currentPage}
                 totalPages={filteredData.pagination.totalPages}
                 totalItems={filteredData.pagination.totalItems}
+                pageSize={queryParams.limit || 10}
                 onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
               />
             )}
           </>
