@@ -250,7 +250,7 @@ export function TableToolbar({
               <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
               Filters
               {getActiveFilterCount() > 0 && (
-                <Badge variant="secondary" className="ml-2 h-4 w-4 p-0 text-xs">
+                <Badge variant="secondary" className="ml-2 px-1.5 py-0.5 text-xs font-medium min-w-[18px] h-5 flex items-center justify-center">
                   {getActiveFilterCount()}
                 </Badge>
               )}
