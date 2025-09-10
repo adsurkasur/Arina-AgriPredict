@@ -203,6 +203,28 @@ export function TableToolbar({
     setLocalFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  // Helper function to count only active filters
+  const getActiveFilterCount = () => {
+    let count = 0;
+    
+    // Date filters
+    if (localFilters.dateFrom && localFilters.dateFrom.trim() !== '') count++;
+    if (localFilters.dateTo && localFilters.dateTo.trim() !== '') count++;
+    
+    // Price filters
+    if (localFilters.priceMin !== undefined && localFilters.priceMin !== null) count++;
+    if (localFilters.priceMax !== undefined && localFilters.priceMax !== null) count++;
+    
+    // Quantity filters
+    if (localFilters.quantityMin !== undefined && localFilters.quantityMin !== null) count++;
+    if (localFilters.quantityMax !== undefined && localFilters.quantityMax !== null) count++;
+    
+    // Product IDs filter
+    if (localFilters.productIds && Array.isArray(localFilters.productIds) && localFilters.productIds.length > 0) count++;
+    
+    return count;
+  };
+
   return (
     <div className="flex items-center justify-between space-x-4" role="toolbar" aria-label="Table controls">
       <div className="flex items-center space-x-4 flex-1">
@@ -226,9 +248,9 @@ export function TableToolbar({
             <Button variant="outline" size="sm" className="transition-smooth" aria-label="Open filters">
               <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
               Filters
-              {Object.keys(localFilters).length > 0 && (
+              {getActiveFilterCount() > 0 && (
                 <Badge variant="secondary" className="ml-2 h-4 w-4 p-0 text-xs">
-                  {Object.keys(localFilters).length}
+                  {getActiveFilterCount()}
                 </Badge>
               )}
             </Button>
