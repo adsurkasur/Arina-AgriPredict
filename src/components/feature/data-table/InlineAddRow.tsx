@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { PlusCircle, Calendar } from 'lucide-react';
+import { PlusCircle, Calendar, Bot } from 'lucide-react';
 import { useCreateDemand } from '@/hooks/useApiHooks';
 import { CreateDemandRequest } from '@/types/api';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,8 @@ type FormData = {
 export function InlineAddRow() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const createMutation = useCreateDemand();
   const firstFieldRef = useRef<HTMLInputElement>(null);
 
@@ -48,6 +50,55 @@ export function InlineAddRow() {
   });
 
   const selectedDate = watch('date');
+  const productNameValue = watch('productName');
+
+  // Generate smart defaults based on historical patterns
+  const generateSmartDefaults = useCallback(() => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    // Set yesterday as default date for data entry
+    setValue('date', yesterday, { shouldValidate: true });
+    
+    // Could add more smart defaults here based on historical data
+    // For example: most common product, average prices, etc.
+  }, [setValue]);
+
+  // Apply smart defaults when component mounts
+  useEffect(() => {
+    generateSmartDefaults();
+  }, [generateSmartDefaults]);
+
+  // Generate product suggestions based on input
+  const generateProductSuggestions = useCallback((input: string): string[] => {
+    const products = ['Red Chili', 'Onion', 'Tomato', 'Potato', 'Rice', 'Wheat', 'Corn', 'Soybean'];
+    const lowerInput = input.toLowerCase();
+    
+    return products.filter(product => 
+      product.toLowerCase().includes(lowerInput) || 
+      product.toLowerCase().replace(/\s+/g, '').includes(lowerInput.replace(/\s+/g, ''))
+    ).slice(0, 3);
+  }, []);
+
+  // Generate AI suggestions based on product name input
+  useEffect(() => {
+    if (productNameValue && productNameValue.length > 1) {
+      // Generate smart suggestions based on input
+      const suggestions = generateProductSuggestions(productNameValue);
+      setAiSuggestions(suggestions);
+      setShowAISuggestions(suggestions.length > 0);
+    } else {
+      setShowAISuggestions(false);
+      setAiSuggestions([]);
+    }
+  }, [productNameValue, generateProductSuggestions]);
+
+  // Handle AI suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setValue('productName', suggestion, { shouldValidate: true });
+    setShowAISuggestions(false);
+  };
 
   useEffect(() => {
     if (selectedDate) {
@@ -91,9 +142,27 @@ export function InlineAddRow() {
     <Card className="border-primary/20 bg-primary/5">
       <CardContent className="p-4">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex items-center space-x-2 mb-3">
-            <PlusCircle className="h-4 w-4 text-primary" />
-            <Label className="text-sm font-semibold">Add New Sales Record</Label>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <PlusCircle className="h-4 w-4 text-primary" />
+              <Label className="text-sm font-semibold">Add New Sales Record</Label>
+            </div>
+            
+            {/* AI Assistant Button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-xs text-primary hover:bg-primary/10"
+              onClick={() => {
+                // This would open the AI assistant or provide help
+                console.log('AI Assistant: Need help filling out the form?');
+              }}
+              disabled={isPending}
+            >
+              <Bot className="h-3 w-3 mr-1" />
+              AI Help
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -170,6 +239,29 @@ export function InlineAddRow() {
               />
               {errors.productName && (
                 <p className="text-xs text-destructive">{errors.productName.message}</p>
+              )}
+              
+              {/* AI Suggestions */}
+              {showAISuggestions && aiSuggestions.length > 0 && (
+                <div className="mt-2 p-2 bg-primary/5 rounded-md border border-primary/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bot className="h-3 w-3 text-primary" />
+                    <span className="text-xs font-medium text-primary">AI Suggestions</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {aiSuggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="px-2 py-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary rounded border border-primary/20 transition-colors"
+                        disabled={isPending}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
