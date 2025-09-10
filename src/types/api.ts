@@ -28,7 +28,7 @@ export interface DemandQueryParams {
 
 export interface CreateDemandRequest {
   date: string; // ISO string
-  productId: string;
+  productName: string;
   quantity: number;
   price: number;
 }

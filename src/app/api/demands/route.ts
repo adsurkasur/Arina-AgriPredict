@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const body: CreateDemandRequest = await request.json();
 
     // Validate required fields
-    const requiredFields = ['date', 'productId', 'quantity', 'price'];
+    const requiredFields = ['date', 'productName', 'quantity', 'price'];
     const missingFields = requiredFields.filter(field => !body[field as keyof CreateDemandRequest]);
 
     if (missingFields.length > 0) {
@@ -75,13 +75,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get product name from productId (assuming productId maps to name)
-    const productName = getProductNameFromId(body.productId);
+    // Generate productId from productName
+    const productId = generateProductId(body.productName);
 
     const newDemand: Omit<DemandRecord, 'id'> = {
       date: body.date,
-      productName,
-      productId: body.productId,
+      productName: body.productName,
+      productId,
       quantity: body.quantity,
       price: body.price
     };
@@ -103,15 +103,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to map productId to productName
-function getProductNameFromId(productId: string): string {
-  const productMap: Record<string, string> = {
-    'red-chili': 'Red Chili',
-    'onions': 'Onions',
-    'tomatoes': 'Tomatoes',
-    'potatoes': 'Potatoes',
-    'rice': 'Rice',
-    'wheat': 'Wheat'
-  };
-  return productMap[productId] || productId;
+// Helper function to generate productId from productName
+function generateProductId(productName: string): string {
+  return productName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .trim();
 }

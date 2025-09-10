@@ -43,58 +43,31 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 export const demandsApi = {
   // Get paginated demands with filtering and sorting
   async getDemands(params: DemandQueryParams = {}): Promise<DemandResponse> {
-    if (isDevelopment) {
-      return mockApi.getDemands(params);
-    }
+    // Always use real API - remove mock data dependency
     const response = await apiClient.get<DemandResponse>('/demands', { params });
     return response.data;
   },
 
   // Create new demand record
   async createDemand(data: CreateDemandRequest) {
-    if (isDevelopment) {
-      return mockApi.createDemand(data);
-    }
     const response = await apiClient.post('/demands', data);
     return response.data;
   },
 
   // Update existing demand record
   async updateDemand(id: string, data: UpdateDemandRequest) {
-    if (isDevelopment) {
-      return mockApi.updateDemand(id, data);
-    }
     const response = await apiClient.put(`/demands/${id}`, data);
     return response.data;
   },
 
   // Delete demand record
   async deleteDemand(id: string) {
-    if (isDevelopment) {
-      return mockApi.deleteDemand(id);
-    }
     const response = await apiClient.delete(`/demands/${id}`);
     return response.data;
   },
 
   // Process unstructured text data with AI
   async processData(text: string) {
-    if (isDevelopment) {
-      // In development, simulate processing
-      return {
-        success: true,
-        processed: 1,
-        data: [{
-          id: 'mock-id',
-          date: new Date().toISOString(),
-          productName: 'Mock Product',
-          productId: 'mock-product',
-          quantity: 100,
-          price: 5.0,
-          notes: 'Mock processed data'
-        }]
-      };
-    }
     const response = await apiClient.post('/demands/process', { text });
     return response.data;
   },
@@ -126,17 +99,6 @@ export const chatApi = {
 export const productsApi = {
   // Get all available products
   async getProducts(): Promise<Product[]> {
-    if (isDevelopment) {
-      // Mock data
-      return [
-        { id: 'red-chili', name: 'Red Chili', category: 'Spices', unit: 'kg' },
-        { id: 'onions', name: 'Onions', category: 'Vegetables', unit: 'kg' },
-        { id: 'tomatoes', name: 'Tomatoes', category: 'Vegetables', unit: 'kg' },
-        { id: 'potatoes', name: 'Potatoes', category: 'Vegetables', unit: 'kg' },
-        { id: 'rice', name: 'Rice', category: 'Grains', unit: 'kg' },
-        { id: 'wheat', name: 'Wheat', category: 'Grains', unit: 'kg' }
-      ];
-    }
     const response = await apiClient.get<Product[]>('/products');
     return response.data;
   },

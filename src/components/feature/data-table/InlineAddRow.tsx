@@ -3,20 +3,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { PlusCircle, Calendar, Package } from 'lucide-react';
+import { PlusCircle, Calendar } from 'lucide-react';
 import { useCreateDemand } from '@/hooks/useApiHooks';
-import { useProducts } from '@/hooks/useApiHooks';
 import { CreateDemandRequest } from '@/types/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Popover,
   PopoverContent,
@@ -30,7 +22,7 @@ const formSchema = z.object({
   date: z.date({
     message: "Please select a date",
   }),
-  productId: z.string().min(1, "Please select a product"),
+  productName: z.string().min(1, "Please enter a product name"),
   quantity: z.number().min(0.01, "Quantity must be greater than 0"),
   price: z.number().min(0.01, "Price must be greater than 0"),
 });
@@ -41,7 +33,6 @@ export function InlineAddRow() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const createMutation = useCreateDemand();
-  const { data: products = [] } = useProducts();
   const firstFieldRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -57,14 +48,13 @@ export function InlineAddRow() {
   });
 
   const selectedDate = watch('date');
-  const selectedProductId = watch('productId');
 
   const onSubmit = (data: FormData) => {
     setPending(true);
   // ...existing code...
     const requestData: CreateDemandRequest = {
       date: data.date.toISOString(),
-      productId: data.productId,
+      productName: data.productName,
       quantity: data.quantity,
       price: data.price,
     };
@@ -133,38 +123,24 @@ export function InlineAddRow() {
               )}
             </div>
 
-            {/* Product Selector */}
+            {/* Product Input */}
             <div className="space-y-2">
-              <Label htmlFor="productId" className="text-xs">Product</Label>
-              <Select
-                value={selectedProductId}
-                onValueChange={(value) => setValue('productId', value, { shouldValidate: true })}
+              <Label htmlFor="productName" className="text-xs">Product Name</Label>
+              <Input
+                id="productName"
+                type="text"
+                placeholder="Enter product name"
                 disabled={isPending}
-              >
-                <SelectTrigger 
-                  className={cn(
-                    "w-full",
-                    errors.productId && "border-destructive"
-                  )}
-                >
-                  <div className="flex items-center">
-                    <Package className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Select product" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">{product.name}</span>
-                        <span className="text-xs text-muted-foreground">({product.unit})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.productId && (
-                <p className="text-xs text-destructive">{errors.productId.message}</p>
+                className={cn(
+                  "transition-smooth",
+                  errors.productName && "border-destructive"
+                )}
+                {...register('productName')}
+                aria-required="true"
+                aria-invalid={!!errors.productName}
+              />
+              {errors.productName && (
+                <p className="text-xs text-destructive">{errors.productName.message}</p>
               )}
             </div>
 

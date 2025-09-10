@@ -137,27 +137,27 @@ export const mockApi = {
   async createDemand(data: CreateDemandRequest): Promise<DemandRecord> {
     await delay(300);
     
-    const product = mockProducts.find(p => p.id === data.productId);
-    if (!product) {
-      throw new Error('Product not found');
-    }
+    // Generate productId from productName
+    const productId = data.productName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .trim();
     
     const newRecord: DemandRecord = {
       id: `${Date.now()}`,
       date: data.date,
-      productName: product.name,
-      productId: data.productId,
+      productName: data.productName,
+      productId,
       quantity: data.quantity,
       price: data.price,
     };
     
-  const demands = getLocalDemands();
-  demands.unshift(newRecord);
-  setLocalDemands(demands);
+    const demands = getLocalDemands();
+    demands.unshift(newRecord);
+    setLocalDemands(demands);
     return newRecord;
-  },
-
-  async updateDemand(id: string, data: UpdateDemandRequest): Promise<DemandRecord> {
+  },  async updateDemand(id: string, data: UpdateDemandRequest): Promise<DemandRecord> {
     await delay(300);
 
     const demands = getLocalDemands();
