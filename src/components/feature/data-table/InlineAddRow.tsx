@@ -240,11 +240,11 @@ export function InlineAddRow() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex items-end justify-start md:col-span-1 col-span-1">
+            <div className="flex justify-start md:col-span-1 col-span-1 pt-8">
               <Button
                 type="submit"
                 disabled={!isValid || isPending}
-                className="w-full md:w-auto transition-smooth"
+                className="w-full h-10 px-3 py-2 text-base md:text-sm transition-smooth"
                 aria-disabled={!isValid || isPending}
                 aria-label="Add sales record"
               >
