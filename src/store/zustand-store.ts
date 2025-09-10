@@ -70,9 +70,17 @@ export const useAppStore = create<AppState>()(
           const newMessages = [...state.chatMessages, message];
           let updatedSessions = { ...state.chatSessions };
           
+          // Update the current chat session with the new messages
+          if (state.currentChatId && state.chatSessions[state.currentChatId]) {
+            updatedSessions[state.currentChatId] = {
+              ...state.chatSessions[state.currentChatId],
+              messages: newMessages
+            };
+          }
+          
           // If this is the first user message and the chat name is still generic, update it
           if (message.role === 'user' && state.currentChatId && state.chatMessages.length === 0) {
-            const currentSession = state.chatSessions[state.currentChatId];
+            const currentSession = updatedSessions[state.currentChatId];
             if (currentSession && currentSession.name.startsWith('Chat ')) {
               // Generate a title from the first message (truncate to 50 chars)
               const titleFromMessage = message.content.length > 50 
