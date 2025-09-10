@@ -7,6 +7,7 @@ import { toast } from '@/lib/toast';
 import { demandsApi } from '@/lib/api-client';
 import { CreateDemandRequest } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
 import {
   Popover,
   PopoverContent,
@@ -187,7 +188,7 @@ export function TableToolbar({
     if (onFiltersChange) {
       onFiltersChange(localFilters);
     }
-    setFilterOpen(false);
+    // Keep popup open after applying filters
   };
 
   const handleClearFilters = () => {
@@ -196,7 +197,7 @@ export function TableToolbar({
     if (onFiltersChange) {
       onFiltersChange(clearedFilters);
     }
-    setFilterOpen(false);
+    // Keep popup open after clearing filters
   };
 
   const updateFilter = (key: string, value: any) => {
@@ -259,10 +260,10 @@ export function TableToolbar({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">Filters</h4>
-                <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                <PopoverPrimitive.Close className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
                   <X className="h-4 w-4" />
-                  Clear
-                </Button>
+                  <span className="sr-only">Close</span>
+                </PopoverPrimitive.Close>
               </div>
 
               <div className="space-y-3">
@@ -344,8 +345,8 @@ export function TableToolbar({
               </div>
 
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" size="sm" onClick={() => setFilterOpen(false)}>
-                  Cancel
+                <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                  Clear
                 </Button>
                 <Button size="sm" onClick={handleApplyFilters}>
                   Apply Filters
