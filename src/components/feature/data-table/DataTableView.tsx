@@ -3,7 +3,8 @@ import { DemandRecord } from '@/types/api';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { EditDemandDialog } from './EditDemandDialog';
-import { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
+import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDeleteConfirmationDialog';
+import { useDeleteDemand } from '@/hooks/useApiHooks';
 
 
 
@@ -19,6 +20,7 @@ interface DataTableViewProps {
 }
 
 export function DataTableView({ data }: DataTableViewProps) {
+  const deleteMutation = useDeleteDemand();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -68,7 +70,19 @@ export function DataTableView({ data }: DataTableViewProps) {
                 <TableCell>
                   <div className="flex items-center space-x-1">
                     <EditDemandDialog record={record} />
-                    <DeleteConfirmationDialog record={record} />
+                    <GenericDeleteConfirmationDialog
+                      title="Delete Sales Record"
+                      description="Are you sure you want to delete this sales record? This action cannot be undone."
+                      itemName={record.productName}
+                      itemDetails={[
+                        `Quantity: ${record.quantity}`,
+                        `Price: $${record.price}`,
+                        `Date: ${format(new Date(record.date), 'MMM dd, yyyy')}`
+                      ]}
+                      confirmText="Delete Record"
+                      mutation={deleteMutation}
+                      itemId={record.id}
+                    />
                   </div>
                 </TableCell>
               </TableRow>

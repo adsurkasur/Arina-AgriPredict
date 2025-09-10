@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDeleteConfirmationDialog';
 import {
   MessageSquare,
   Plus,
@@ -66,7 +67,7 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
     }
   };
 
-  const handleDeleteChat = (chatId: string, chatName: string) => {
+  const handleDeleteChat = async (chatId: string, chatName: string) => {
     deleteChat(chatId);
     toast.success("Chat deleted", {
       description: `"${chatName}" has been deleted`
@@ -184,18 +185,26 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive transition-all duration-200 hover:shadow-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteChat(chatId, session.name);
-                        }}
-                        title="Delete chat"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      <GenericDeleteConfirmationDialog
+                        title="Delete Chat Session"
+                        description="Are you sure you want to delete this chat session? This action cannot be undone and all messages in this conversation will be permanently removed."
+                        itemName={session.name}
+                        itemDetails={[
+                          `Created: ${format(new Date(session.createdAt), 'MMM d, yyyy')}`,
+                          `Messages: ${session.messages.length}`
+                        ]}
+                        onConfirm={() => handleDeleteChat(chatId, session.name)}
+                        trigger={
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive hover:scale-110 transition-all duration-200 hover:shadow-sm"
+                            title="Delete chat"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        }
+                      />
                     </div>
                   </div>
                 ))}
