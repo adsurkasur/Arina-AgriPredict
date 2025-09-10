@@ -55,7 +55,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-0 font-medium hover:bg-transparent"
+                className="h-auto p-0 font-medium hover:bg-transparent hover:text-primary"
                 onClick={() => handleSort('date')}
               >
                 Date
@@ -66,7 +66,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-0 font-medium hover:bg-transparent"
+                className="h-auto p-0 font-medium hover:bg-transparent hover:text-primary"
                 onClick={() => handleSort('productName')}
               >
                 Product
@@ -77,7 +77,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-0 font-medium hover:bg-transparent"
+                className="h-auto p-0 font-medium hover:bg-transparent hover:text-primary"
                 onClick={() => handleSort('quantity')}
               >
                 Quantity
@@ -88,7 +88,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-0 font-medium hover:bg-transparent"
+                className="h-auto p-0 font-medium hover:bg-transparent hover:text-primary"
                 onClick={() => handleSort('price')}
               >
                 Price

@@ -1,7 +1,7 @@
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useDemands } from '@/hooks/useApiHooks';
 import { useDebounce } from '@/hooks/useDebounce';
-import { DemandQueryParams } from '@/types/api';
+import { DemandQueryParams, DemandRecord } from '@/types/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TableToolbar } from './TableToolbar';
 import { DataTableView } from './DataTableView';
@@ -10,6 +10,7 @@ import { InlineAddRow } from './InlineAddRow';
 import { ErrorDisplay } from '@/components/common/ErrorDisplay';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Database } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 export function InteractiveDataTable() {
   const [queryParams, setQueryParams] = useLocalStorage<DemandQueryParams>('data-table-params', {
@@ -26,11 +27,83 @@ export function InteractiveDataTable() {
     quantityMax: undefined,
     productIds: undefined,
   });
-  const debouncedParams = useDebounce(queryParams, 300);
-  const { data, isLoading, error } = useDemands(debouncedParams);
+
+  // Separate search from other filters for client-side filtering
+  const [localSearch, setLocalSearch] = useState(queryParams.search || '');
+
+  // Debounce only non-search parameters for API calls
+  const filterParams = useMemo(() => ({
+    page: queryParams.page,
+    limit: queryParams.limit,
+    sortKey: queryParams.sortKey,
+    sortOrder: queryParams.sortOrder,
+    dateFrom: queryParams.dateFrom,
+    dateTo: queryParams.dateTo,
+    priceMin: queryParams.priceMin,
+    priceMax: queryParams.priceMax,
+    quantityMin: queryParams.quantityMin,
+    quantityMax: queryParams.quantityMax,
+    productIds: queryParams.productIds,
+    // Remove search from API call - handled client-side
+  }), [
+    queryParams.page,
+    queryParams.limit,
+    queryParams.sortKey,
+    queryParams.sortOrder,
+    queryParams.dateFrom,
+    queryParams.dateTo,
+    queryParams.priceMin,
+    queryParams.priceMax,
+    queryParams.quantityMin,
+    queryParams.quantityMax,
+    queryParams.productIds,
+  ]);
+
+  const debouncedFilterParams = useDebounce(filterParams, 300);
+  const { data: apiData, isLoading, error } = useDemands(debouncedFilterParams);
+
+  // Client-side search filtering
+  const filteredData = useMemo(() => {
+    if (!apiData?.data) return apiData;
+
+    if (!localSearch.trim()) {
+      return apiData;
+    }
+
+    const searchTerm = localSearch.toLowerCase();
+    const filtered = apiData.data.filter((record: DemandRecord) => {
+      // Search in multiple fields
+      const searchableText = [
+        record.productName,
+        record.productId,
+        record.date,
+        record.quantity.toString(),
+        record.price.toString(),
+        `$${record.price.toFixed(2)}`, // formatted price
+        new Date(record.date).toLocaleDateString(), // formatted date
+      ].join(' ').toLowerCase();
+
+      return searchableText.includes(searchTerm);
+    });
+
+    return {
+      data: filtered,
+      pagination: {
+        ...apiData.pagination,
+        totalItems: filtered.length,
+        totalPages: Math.ceil(filtered.length / (filterParams.limit || 10)),
+      },
+    };
+  }, [apiData, localSearch, filterParams.limit]);
 
   function handleParamsChange(params: Partial<DemandQueryParams>) {
     setQueryParams((prev) => ({ ...prev, ...params }));
+  }
+
+  function handleSearchChange(search: string) {
+    setLocalSearch(search);
+    // Update persisted params for search
+    setQueryParams((prev) => ({ ...prev, search }));
   }
 
   function handleSortChange(key: string, direction: 'asc' | 'desc') {
@@ -57,10 +130,10 @@ export function InteractiveDataTable() {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col min-h-0 space-y-3 overflow-visible">
         <TableToolbar
-          searchValue={queryParams.search || ''}
-          onSearchChange={(search) => handleParamsChange({ search, page: 1 })}
-          totalItems={data?.pagination?.totalItems || 0}
-          data={data?.data || []}
+          searchValue={localSearch}
+          onSearchChange={handleSearchChange}
+          totalItems={filteredData?.pagination?.totalItems || 0}
+          data={filteredData?.data || []}
           filters={{
             dateFrom: queryParams.dateFrom,
             dateTo: queryParams.dateTo,
@@ -81,7 +154,7 @@ export function InteractiveDataTable() {
           <>
             <div className="flex-1 min-h-0 overflow-auto max-h-[40vh]">
               <DataTableView
-                data={data?.data || []}
+                data={filteredData?.data || []}
                 sortConfig={{
                   key: queryParams.sortKey || '',
                   direction: queryParams.sortOrder || 'asc'
@@ -92,11 +165,11 @@ export function InteractiveDataTable() {
 
             <InlineAddRow />
 
-            {data?.pagination && (
+            {filteredData?.pagination && (
               <TablePagination
-                currentPage={data.pagination.currentPage}
-                totalPages={data.pagination.totalPages}
-                totalItems={data.pagination.totalItems}
+                currentPage={filteredData.pagination.currentPage}
+                totalPages={filteredData.pagination.totalPages}
+                totalItems={filteredData.pagination.totalItems}
                 onPageChange={handlePageChange}
               />
             )}

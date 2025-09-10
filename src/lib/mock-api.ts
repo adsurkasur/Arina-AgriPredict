@@ -109,12 +109,16 @@ export const mockApi = {
       productIds
     } = params;
     
-    // Filter by search
+    // Filter by search (only if search is provided)
     const demands = getLocalDemands();
-    let filtered = demands.filter(demand => 
-      demand.productName.toLowerCase().includes(search.toLowerCase()) ||
-      demand.productId.toLowerCase().includes(search.toLowerCase())
-    );
+    let filtered = demands;
+    
+    if (search && search.trim()) {
+      filtered = demands.filter(demand => 
+        demand.productName.toLowerCase().includes(search.toLowerCase()) ||
+        demand.productId.toLowerCase().includes(search.toLowerCase())
+      );
+    }
     
     // Apply additional filters
     if (dateFrom) {
