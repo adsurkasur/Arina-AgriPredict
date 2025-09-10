@@ -9,7 +9,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from './MessageBubble';
 import { SuggestionChips } from './SuggestionChips';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Bot, Send, Trash2 } from 'lucide-react';
+import { Send, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 
 export function AIAssistantPanel() {
   const [inputMessage, setInputMessage] = useLocalStorage('ai-assistant-input', '');
@@ -109,7 +110,14 @@ export function AIAssistantPanel() {
                   willChange: 'color',
                   contain: 'layout style'
                 }}>
-                  <Bot className="h-16 w-16 mx-auto mb-6 opacity-50" aria-hidden="true" />
+                  <Image
+                    src="/logo.svg"
+                    alt="Arina AgriPredict AI Assistant"
+                    width={64}
+                    height={64}
+                    className="mx-auto mb-6 opacity-50"
+                    aria-hidden="true"
+                  />
                   <h2 className="text-2xl font-semibold mb-2">AI Assistant Ready</h2>
                   <p className="text-base max-w-md">
                     Ask me to analyze data, create records, or generate forecasts

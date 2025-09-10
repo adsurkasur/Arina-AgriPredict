@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
+import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/store/zustand-store';
+import { useNavigation } from '@/hooks/useNavigation';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +24,8 @@ interface ChatHistorySelectorProps {
 
 export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const pathname = usePathname();
+  const { navigateTo } = useNavigation();
   const {
     chatSessions,
     currentChatId,
@@ -33,16 +37,28 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
 
   const handleSelectChat = (chatId: string) => {
     loadChat(chatId);
-    toast.success("Chat loaded", {
-      description: `Switched to "${chatSessions[chatId].name}"`
-    });
+    
+    // Redirect to /assistant if not already there
+    if (pathname !== '/assistant') {
+      navigateTo('/assistant');
+    } else {
+      toast.success("Chat loaded", {
+        description: `Switched to "${chatSessions[chatId].name}"`
+      });
+    }
   };
 
   const handleCreateNewChat = () => {
     createNewChat();
-    toast.success("New chat created", {
-      description: "Started a new conversation"
-    });
+    
+    // Redirect to /assistant if not already there
+    if (pathname !== '/assistant') {
+      navigateTo('/assistant');
+    } else {
+      toast.success("New chat created", {
+        description: "Started a new conversation"
+      });
+    }
   };
 
   const handleDeleteChat = (chatId: string, chatName: string) => {
@@ -115,8 +131,8 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
               <p className="text-xs">No chats yet</p>
             </div>
           ) : (
-            <ScrollArea className="max-h-64">
-              <div className="space-y-1">
+            <ScrollArea className="h-80 w-full rounded-md border-0">
+              <div className="space-y-1 p-1">
                 {sortedChatSessions.map(([chatId, session]) => (
                   <div
                     key={chatId}

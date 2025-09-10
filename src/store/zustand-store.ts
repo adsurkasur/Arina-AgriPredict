@@ -66,9 +66,31 @@ export const useAppStore = create<AppState>()(
         })),
       
       addChatMessage: (message) =>
-        set((state) => ({
-          chatMessages: [...state.chatMessages, message],
-        })),
+        set((state) => {
+          const newMessages = [...state.chatMessages, message];
+          let updatedSessions = { ...state.chatSessions };
+          
+          // If this is the first user message and the chat name is still generic, update it
+          if (message.role === 'user' && state.currentChatId && state.chatMessages.length === 0) {
+            const currentSession = state.chatSessions[state.currentChatId];
+            if (currentSession && currentSession.name.startsWith('Chat ')) {
+              // Generate a title from the first message (truncate to 50 chars)
+              const titleFromMessage = message.content.length > 50 
+                ? message.content.substring(0, 50) + '...'
+                : message.content;
+              
+              updatedSessions[state.currentChatId] = {
+                ...currentSession,
+                name: titleFromMessage
+              };
+            }
+          }
+          
+          return {
+            chatMessages: newMessages,
+            chatSessions: updatedSessions
+          };
+        }),
       
       setChatMessages: (messages) =>
         set({ chatMessages: messages }),
@@ -81,19 +103,33 @@ export const useAppStore = create<AppState>()(
       
       createNewChat: (name?: string) => {
         const chatId = `chat-${Date.now()}`;
-        const chatName = name || `Chat ${Object.keys(initialState.chatSessions).length + 1}`;
-        set((state) => ({
-          currentChatId: chatId,
-          chatSessions: {
-            ...state.chatSessions,
-            [chatId]: {
-              name: chatName,
-              messages: [],
-              createdAt: new Date().toISOString(),
+        
+        set((state) => {
+          let chatName = name;
+          
+          if (!chatName) {
+            // Generate unique name by checking existing names
+            const existingNames = Object.values(state.chatSessions).map((session: any) => session.name);
+            let counter = 1;
+            do {
+              chatName = `Chat ${counter}`;
+              counter++;
+            } while (existingNames.includes(chatName));
+          }
+          
+          return {
+            currentChatId: chatId,
+            chatSessions: {
+              ...state.chatSessions,
+              [chatId]: {
+                name: chatName,
+                messages: [],
+                createdAt: new Date().toISOString(),
+              },
             },
-          },
-          chatMessages: [],
-        }));
+            chatMessages: [],
+          };
+        });
         return chatId;
       },
       
