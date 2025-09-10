@@ -47,15 +47,15 @@ export function InteractiveDataTable() {
           <Database className="h-5 w-5 text-primary" />
           <span>Sales Data Management</span>
         </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col min-h-0 space-y-3 overflow-auto">
         <TableToolbar
           searchValue={queryParams.search || ''}
           onSearchChange={(search) => handleParamsChange({ search, page: 1 })}
           totalItems={data?.pagination?.totalItems || 0}
           data={data?.data || []}
         />
-      </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col min-h-0 space-y-4 overflow-auto">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center min-h-0">
             <LoadingSpinner size="lg" text="Loading sales data..." />

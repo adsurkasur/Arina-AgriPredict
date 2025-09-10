@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { DemandRecord } from '@/types/api';
-import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { EditDemandDialog } from './EditDemandDialog';
 import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDeleteConfirmationDialog';
@@ -36,7 +36,12 @@ export function DataTableView({ data }: DataTableViewProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            {/* ...existing code... */}
+            <TableHead className="w-[120px]">Date</TableHead>
+            <TableHead>Product</TableHead>
+            <TableHead className="text-right w-[100px]">Quantity</TableHead>
+            <TableHead className="text-right w-[100px]">Price</TableHead>
+            <TableHead className="text-right w-[120px]">Total</TableHead>
+            <TableHead className="text-right w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
