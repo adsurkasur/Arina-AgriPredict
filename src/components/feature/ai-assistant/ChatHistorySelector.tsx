@@ -175,7 +175,7 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-6 w-6 p-0 hover:bg-muted"
+                        className="h-6 w-6 p-0 hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:shadow-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRenameChat(chatId, session.name);
@@ -187,7 +187,7 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                        className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive transition-all duration-200 hover:shadow-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteChat(chatId, session.name);

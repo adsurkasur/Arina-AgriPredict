@@ -36,6 +36,7 @@ export interface CreateDemandRequest {
 export interface UpdateDemandRequest {
   date?: string;
   productId?: string;
+  productName?: string;
   quantity?: number;
   price?: number;
 }

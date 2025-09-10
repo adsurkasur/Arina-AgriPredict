@@ -1,12 +1,9 @@
 import { format } from 'date-fns';
-import { Edit2, Trash2 } from 'lucide-react';
 import { DemandRecord } from '@/types/api';
-import { useDeleteDemand } from '@/hooks/useApiHooks';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { toast } from '@/lib/toast';
+import { EditDemandDialog } from './EditDemandDialog';
+import { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
 
 
 
@@ -22,18 +19,6 @@ interface DataTableViewProps {
 }
 
 export function DataTableView({ data }: DataTableViewProps) {
-  const deleteMutation = useDeleteDemand();
-
-  // ...existing code...
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this record?')) {
-      toast.info("Deleting record", {
-        description: "Record deletion in progress..."
-      });
-      deleteMutation.mutate(id);
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -58,10 +43,7 @@ export function DataTableView({ data }: DataTableViewProps) {
             return (
               <TableRow
                 key={record.id}
-                className={cn(
-                  "transition-smooth hover:bg-muted/50",
-                  deleteMutation.isPending && "opacity-50"
-                )}
+                className="transition-smooth hover:bg-muted/50"
               >
                 <TableCell className="font-medium">
                   {format(new Date(record.date), 'MMM dd, yyyy')}
@@ -85,23 +67,8 @@ export function DataTableView({ data }: DataTableViewProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(record.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <EditDemandDialog record={record} />
+                    <DeleteConfirmationDialog record={record} />
                   </div>
                 </TableCell>
               </TableRow>

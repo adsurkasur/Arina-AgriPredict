@@ -69,6 +69,10 @@ export async function PUT(
       updateData.productId = body.productId;
       updateData.productName = getProductNameFromId(body.productId);
     }
+    if (body.productName) {
+      updateData.productName = body.productName;
+      updateData.productId = generateProductId(body.productName);
+    }
     if (body.quantity !== undefined) updateData.quantity = body.quantity;
     if (body.price !== undefined) updateData.price = body.price;
 
@@ -158,4 +162,13 @@ function getProductNameFromId(productId: string): string {
     'wheat': 'Wheat'
   };
   return productMap[productId] || productId;
+}
+
+// Helper function to generate productId from productName
+function generateProductId(productName: string): string {
+  return productName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .trim();
 }
