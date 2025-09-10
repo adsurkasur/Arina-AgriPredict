@@ -9,16 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useNavigation } from "@/hooks/useNavigation";
 import { toast } from "@/lib/toast";
-import { useAppStore } from "@/store/zustand-store";
 import { ChatHistorySelector } from "@/components/feature/ai-assistant";
 import {
   Database,
   TrendingUp,
   MessageSquare,
   Moon,
-  Sun,
-  Edit,
-  Trash2
+  Sun
 } from "lucide-react";
 
 const navigation = [
@@ -51,12 +48,6 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { navigateTo } = useNavigation();
-  const { 
-    chatSessions, 
-    currentChatId, 
-    renameChat, 
-    deleteChat
-  } = useAppStore();
 
   return (
     <div
