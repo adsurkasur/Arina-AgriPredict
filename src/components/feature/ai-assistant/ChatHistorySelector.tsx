@@ -11,7 +11,8 @@ import {
   Trash2,
   Check,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Edit
 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 
@@ -157,7 +158,7 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                         }}
                         title="Rename chat"
                       >
-                        ✏️
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
