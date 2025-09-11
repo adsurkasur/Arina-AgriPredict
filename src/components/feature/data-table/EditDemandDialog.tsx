@@ -35,6 +35,7 @@ type FormData = {
   productName: string;
   quantity: number;
   price: number;
+  unit: string;
 };
 
 export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
@@ -57,6 +58,7 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
       productName: record.productName,
       quantity: record.quantity,
       price: record.price,
+      unit: record.unit || 'pcs',
     },
   });
 
@@ -70,6 +72,7 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
         productName: record.productName,
         quantity: record.quantity,
         price: record.price,
+        unit: record.unit || 'pcs',
       });
     }
   }, [open, record, reset]);
@@ -84,6 +87,7 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
       productName: data.productName,
       quantity: data.quantity,
       price: data.price,
+      unit: data.unit,
     };
 
     updateMutation.mutate(
@@ -252,6 +256,36 @@ export function EditDemandDialog({ record, trigger }: EditDemandDialogProps) {
             />
             {errors.quantity && (
               <p className="text-xs text-destructive">{errors.quantity.message}</p>
+            )}
+          </div>
+
+          {/* Unit */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-unit" className="text-sm font-medium">
+              Unit
+            </Label>
+            <Input
+              id="edit-unit"
+              type="text"
+              placeholder="pcs"
+              disabled={updateMutation.isPending}
+              className={cn(
+                "transition-smooth",
+                errors.unit && "border-destructive"
+              )}
+              {...register('unit', { 
+                validate: (value) => {
+                  if (!value || value.trim() === '') {
+                    return 'Unit is required';
+                  }
+                  return true;
+                }
+              })}
+              aria-required="true"
+              aria-invalid={!!errors.unit}
+            />
+            {errors.unit && (
+              <p className="text-xs text-destructive">{errors.unit.message}</p>
             )}
           </div>
 

@@ -22,6 +22,7 @@ type FormData = {
   productName: string;
   quantity: number | undefined;
   price: number | undefined;
+  unit: string;
 };
 
 export function InlineAddRow() {
@@ -48,6 +49,7 @@ export function InlineAddRow() {
       productName: '',
       quantity: undefined,
       price: undefined,
+      unit: '',
     },
   });
 
@@ -118,6 +120,7 @@ export function InlineAddRow() {
       productName: data.productName,
       quantity: data.quantity!,
       price: data.price!,
+      unit: data.unit || 'pcs', // Default to 'pcs' if not specified
     };
     createMutation.mutate(requestData, {
       onSuccess: () => {
@@ -149,7 +152,7 @@ export function InlineAddRow() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             {/* Hidden date input for validation */}
           <input
             type="hidden"
@@ -280,6 +283,34 @@ export function InlineAddRow() {
               />
               {errors.quantity && (
                 <p className="text-xs text-destructive">{errors.quantity.message}</p>
+              )}
+            </div>
+
+            {/* Unit */}
+            <div className="space-y-2">
+              <Label htmlFor="unit" className="text-xs">Unit</Label>
+              <Input
+                id="unit"
+                type="text"
+                placeholder="pcs"
+                disabled={isPending}
+                className={cn(
+                  "transition-smooth",
+                  errors.unit && "border-destructive"
+                )}
+                {...register('unit', { 
+                  validate: (value) => {
+                    if (!value || value.trim() === '') {
+                      return 'Unit is required';
+                    }
+                    return true;
+                  }
+                })}
+                aria-required="true"
+                aria-invalid={!!errors.unit}
+              />
+              {errors.unit && (
+                <p className="text-xs text-destructive">{errors.unit.message}</p>
               )}
             </div>
 

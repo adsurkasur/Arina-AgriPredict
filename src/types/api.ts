@@ -7,6 +7,7 @@ export interface DemandRecord {
   productId: string;
   quantity: number;
   price: number;
+  unit: string;
 }
 
 export interface DemandResponse {
@@ -39,6 +40,7 @@ export interface CreateDemandRequest {
   productName: string;
   quantity: number;
   price: number;
+  unit: string;
 }
 
 export interface UpdateDemandRequest {
@@ -47,6 +49,7 @@ export interface UpdateDemandRequest {
   productName?: string;
   quantity?: number;
   price?: number;
+  unit?: string;
 }
 
 export interface ForecastDataPoint {

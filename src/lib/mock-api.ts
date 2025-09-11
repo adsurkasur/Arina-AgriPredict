@@ -136,6 +136,7 @@ export const mockApi = {
       productId,
       quantity: data.quantity,
       price: data.price,
+      unit: data.unit || 'pcs',
     };
     
     const demands = getLocalDemands();
