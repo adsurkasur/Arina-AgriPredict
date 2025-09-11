@@ -1,0 +1,31 @@
+id,product_name,category,region,date,quantity_sold,unit_price,total_revenue,supplier,customer_type,season,weather_condition,demand_score
+1,Rice Premium,Grains,North Delhi,2023-01-01,1250.5,45.50,56862.75,AgriCorp Ltd,Retail,Summer,Sunny,8.5
+2,Wheat Organic,Grains,South Delhi,2023-01-01,980.2,38.75,37977.25,GreenFields,Wholesale,Winter,Cloudy,7.2
+3,Corn Yellow,Grains,East Delhi,2023-01-01,1450.8,32.90,47721.32,FarmFresh,Retail,Summer,Sunny,9.1
+4,Soybeans,Grains,West Delhi,2023-01-01,750.3,55.20,41416.56,NatureHarvest,Wholesale,Winter,Rainy,6.8
+5,Tomatoes Fresh,Vegetables,North Delhi,2023-01-01,320.7,28.50,9140.45,UrbanFarms,Retail,Summer,Sunny,8.9
+6,Potatoes,Vegetables,South Delhi,2023-01-01,450.2,22.80,10264.56,AgriCorp Ltd,Wholesale,Winter,Cloudy,7.5
+7,Onions Red,Vegetables,East Delhi,2023-01-01,380.9,18.90,7204.01,FarmFresh,Retail,Summer,Sunny,8.2
+8,Carrots,Vegetables,West Delhi,2023-01-01,290.4,25.60,7434.24,GreenFields,Wholesale,Winter,Rainy,7.8
+9,Apples Red,Fruits,North Delhi,2023-01-01,180.6,65.40,11809.24,FreshFruits,Retail,Winter,Cloudy,9.3
+10,Oranges,Fruits,South Delhi,2023-01-01,220.8,45.20,9976.16,NatureHarvest,Wholesale,Summer,Sunny,8.7
+11,Bananas,Fruits,East Delhi,2023-01-01,350.3,32.80,11489.84,UrbanFarms,Retail,Winter,Rainy,8.4
+12,Milk Fresh,Dairy,North Delhi,2023-01-01,420.5,48.90,20564.45,DairyBest,Retail,Summer,Sunny,9.0
+13,Cheese Cheddar,Dairy,South Delhi,2023-01-01,85.2,125.60,10700.12,FarmFresh,Wholesale,Winter,Cloudy,7.9
+14,Yogurt Plain,Dairy,East Delhi,2023-01-01,195.8,35.40,6930.12,GreenFields,Retail,Summer,Sunny,8.6
+15,Eggs,Dairy,West Delhi,2023-01-01,280.4,6.80,1906.72,NatureHarvest,Wholesale,Winter,Rainy,8.1
+16,Rice Premium,Grains,North Delhi,2023-01-02,1180.3,45.60,53805.68,AgriCorp Ltd,Retail,Summer,Sunny,8.4
+17,Wheat Organic,Grains,South Delhi,2023-01-02,1020.7,38.80,39587.16,GreenFields,Wholesale,Winter,Cloudy,7.3
+18,Corn Yellow,Grains,East Delhi,2023-01-02,1380.2,33.10,45670.62,FarmFresh,Retail,Summer,Sunny,9.0
+19,Soybeans,Grains,West Delhi,2023-01-02,820.8,55.40,45464.32,NatureHarvest,Wholesale,Winter,Rainy,6.9
+20,Tomatoes Fresh,Vegetables,North Delhi,2023-01-02,295.6,28.70,8482.32,UrbanFarms,Retail,Summer,Sunny,8.8
+21,Potatoes,Vegetables,South Delhi,2023-01-02,480.9,22.90,11020.61,AgriCorp Ltd,Wholesale,Winter,Cloudy,7.6
+22,Onions Red,Vegetables,East Delhi,2023-01-02,410.2,19.00,7793.80,FarmFresh,Retail,Summer,Sunny,8.3
+23,Carrots,Vegetables,West Delhi,2023-01-02,315.7,25.80,8146.26,GreenFields,Wholesale,Winter,Rainy,7.9
+24,Apples Red,Fruits,North Delhi,2023-01-02,195.3,65.60,12811.68,FreshFruits,Retail,Winter,Cloudy,9.2
+25,Oranges,Fruits,South Delhi,2023-01-02,235.4,45.40,10688.36,NatureHarvest,Wholesale,Summer,Sunny,8.8
+26,Bananas,Fruits,East Delhi,2023-01-02,375.8,32.90,12366.22,UrbanFarms,Retail,Winter,Rainy,8.5
+27,Milk Fresh,Dairy,North Delhi,2023-01-02,445.2,49.00,21808.80,DairyBest,Retail,Summer,Sunny,9.1
+28,Cheese Cheddar,Dairy,South Delhi,2023-01-02,92.8,125.80,11670.24,FarmFresh,Wholesale,Winter,Cloudy,8.0
+29,Yogurt Plain,Dairy,East Delhi,2023-01-02,210.5,35.60,7495.80,GreenFields,Retail,Summer,Sunny,8.7
+30,Eggs,Dairy,West Delhi,2023-01-02,305.6,6.90,2108.64,NatureHarvest,Wholesale,Winter,Rainy,8.2
