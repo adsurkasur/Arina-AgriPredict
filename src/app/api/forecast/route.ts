@@ -3,7 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { ForecastRequest, ForecastResponse, ForecastDataPoint } from '@/types/api';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:8000';
+const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:7860';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(request: NextRequest) {
@@ -57,14 +57,19 @@ export async function POST(request: NextRequest) {
         // Transform the response to match our API format
         const forecastData: ForecastDataPoint[] = analysisResult.forecast_data.map((item: any) => ({
           date: item.date,
-          predictedValue: item.predicted_price
+          predictedValue: item.predicted_value, // Updated to match our API
+          confidenceLower: item.confidence_lower,
+          confidenceUpper: item.confidence_upper,
+          modelUsed: item.model_used
         }));
 
         const response: ForecastResponse = {
           forecastData,
           revenueProjection: analysisResult.revenue_projection,
           modelsUsed: analysisResult.models_used,
-          summary: analysisResult.summary
+          summary: analysisResult.summary,
+          confidence: analysisResult.confidence,
+          scenario: analysisResult.scenario
         };
 
         return NextResponse.json(response);
