@@ -215,7 +215,7 @@ export function AdvancedForecastControls({
                   {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Pick start date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={dateFrom}
@@ -242,7 +242,7 @@ export function AdvancedForecastControls({
                   {dateTo ? format(dateTo, "dd/MM/yyyy") : "Pick end date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={dateTo}
