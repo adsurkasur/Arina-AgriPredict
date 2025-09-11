@@ -11,19 +11,35 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import traceback
 
-# Import ML libraries (will be available when deployed)
-try:
-    from statsmodels.tsa.holtwinters import ExponentialSmoothing
-    from statsmodels.tsa.arima.model import ARIMA
-    from catboost import CatBoostRegressor
-    STATS_MODELS_AVAILABLE = True
-    CATBOOST_AVAILABLE = True
-except ImportError:
-    STATS_MODELS_AVAILABLE = False
-    CATBOOST_AVAILABLE = False
+# Import ML libraries (lazy loading to avoid startup issues)
+STATS_MODELS_AVAILABLE = True
+CATBOOST_AVAILABLE = True
+
+def _import_statsmodels():
+    """Lazy import of statsmodels"""
+    global ExponentialSmoothing, ARIMA, STATS_MODELS_AVAILABLE
+    try:
+        if 'ExponentialSmoothing' not in globals():
+            from statsmodels.tsa.holtwinters import ExponentialSmoothing
+            from statsmodels.tsa.arima.model import ARIMA
+    except ImportError:
+        STATS_MODELS_AVAILABLE = False
+        logger.warning("Statsmodels not available")
+
+def _import_catboost():
+    """Lazy import of CatBoost"""
+    global CatBoostRegressor, CATBOOST_AVAILABLE
+    try:
+        if 'CatBoostRegressor' not in globals():
+            from catboost import CatBoostRegressor
+    except ImportError:
+        CATBOOST_AVAILABLE = False
+        logger.warning("CatBoost not available")
 
 from utils.logger import setup_logger
 from utils.config import settings
+
+logger = setup_logger(__name__)
 
 logger = setup_logger(__name__)
 
@@ -215,6 +231,9 @@ class ForecastEngine:
     ) -> ForecastResult:
         """Exponential Smoothing forecast"""
         try:
+            # Lazy import statsmodels
+            _import_statsmodels()
+
             if not STATS_MODELS_AVAILABLE:
                 raise ImportError("statsmodels not available")
 
@@ -265,6 +284,9 @@ class ForecastEngine:
     ) -> ForecastResult:
         """ARIMA forecast"""
         try:
+            # Lazy import statsmodels
+            _import_statsmodels()
+
             if not STATS_MODELS_AVAILABLE:
                 raise ImportError("statsmodels not available")
 
@@ -315,6 +337,9 @@ class ForecastEngine:
     ) -> ForecastResult:
         """CatBoost forecast (placeholder for future training)"""
         try:
+            # Lazy import CatBoost
+            _import_catboost()
+
             if not CATBOOST_AVAILABLE:
                 raise ImportError("CatBoost not available")
 
