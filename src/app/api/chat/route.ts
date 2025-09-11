@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Analyze the message to determine intent and generate response
-    const analysis = analyzeMessage(body.message, body.history);
+    const analysis = await analyzeMessage(body.message, db, body.history);
 
     // Generate response based on analysis
     const response = await generateAIResponse(analysis, db, body.message, body.history);
@@ -56,12 +56,12 @@ interface MessageAnalysis {
   requiresRefetch: boolean;
 }
 
-function analyzeMessage(message: string, _history: any[] = []): MessageAnalysis {
+async function analyzeMessage(message: string, db: any, _history: any[] = []): Promise<MessageAnalysis> {
   const lowerMessage = message.toLowerCase();
 
   // Check for forecast requests
   if (lowerMessage.includes('forecast') || lowerMessage.includes('predict') || lowerMessage.includes('future')) {
-    const productId = extractProductId(lowerMessage);
+    const productId = await extractProductId(lowerMessage, db);
     return {
       intent: 'FORECAST',
       productId,
@@ -114,8 +114,9 @@ function analyzeMessage(message: string, _history: any[] = []): MessageAnalysis 
   };
 }
 
-function extractProductId(message: string): string | undefined {
-  const products = ['red-chili', 'onions', 'tomatoes', 'potatoes', 'rice', 'wheat'];
+async function extractProductId(message: string, db: any): Promise<string | undefined> {
+  // Get all unique product IDs from the demands collection
+  const products = await db.collection('demands').distinct('productId');
   const lowerMessage = message.toLowerCase();
 
   for (const product of products) {
@@ -129,6 +130,10 @@ function extractProductId(message: string): string | undefined {
 async function generateAIResponse(analysis: MessageAnalysis, db: any, message: string, _history: any[] = []): Promise<ChatResponse> {
   const maxRetries = 3;
   let lastError: any;
+
+  // Get available products for dynamic suggestions
+  const availableProducts = await db.collection('demands').distinct('productName');
+  const topProducts = availableProducts.slice(0, 3); // Use top 3 products for suggestions
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -175,15 +180,15 @@ Response format: Provide a natural, conversational response with any relevant su
       switch (analysis.intent) {
         case 'FORECAST':
           if (analysis.productId) {
+            const productName = await getProductNameFromId(analysis.productId, db);
             suggestions = [
-              `Forecast ${getProductNameFromId(analysis.productId)} for 7 days`,
-              `Show historical data for ${getProductNameFromId(analysis.productId)}`,
+              `Forecast ${productName} for 7 days`,
+              `Show historical data for ${productName}`,
               'View all products'
             ];
           } else {
             suggestions = [
-              'Forecast Red Chili prices',
-              'Forecast Onion prices',
+              ...topProducts.map((product: string) => `Forecast ${product} prices`),
               'View all available products'
             ];
           }
@@ -191,8 +196,7 @@ Response format: Provide a natural, conversational response with any relevant su
 
         case 'CREATE':
           suggestions = [
-            'Add new Red Chili demand',
-            'Add new Onion demand',
+            ...topProducts.map((product: string) => `Add new ${product} demand`),
             'View current data'
           ];
           break;
@@ -200,7 +204,7 @@ Response format: Provide a natural, conversational response with any relevant su
         case 'READ':
           suggestions = [
             'Show all demand data',
-            'Show Red Chili data',
+            ...topProducts.map((product: string) => `Show ${product} data`),
             'Show recent entries'
           ];
           break;
@@ -283,17 +287,18 @@ function generateFallbackResponse(analysis: MessageAnalysis, error?: any): ChatR
   switch (analysis.intent) {
     case 'FORECAST':
       if (analysis.productId) {
-        content += `I'll help you forecast prices for ${getProductNameFromId(analysis.productId)}. Please specify the number of days you'd like to forecast (e.g., "forecast for 7 days").`;
+        // In error case, use productId as fallback since we can't query DB
+        const productName = analysis.productId;
+        content += `I'll help you forecast prices for ${productName}. Please specify the number of days you'd like to forecast (e.g., "forecast for 7 days").`;
         suggestions = [
-          `Forecast ${getProductNameFromId(analysis.productId)} for 7 days`,
-          `Show historical data for ${getProductNameFromId(analysis.productId)}`,
+          `Forecast ${productName} for 7 days`,
+          `Show historical data for ${productName}`,
           'View all products'
         ];
       } else {
         content += 'I can help you forecast prices for agricultural products. Which product would you like to forecast?';
         suggestions = [
-          'Forecast Red Chili prices',
-          'Forecast Onion prices',
+          'Forecast prices for available products',
           'View all available products'
         ];
       }
@@ -302,8 +307,7 @@ function generateFallbackResponse(analysis: MessageAnalysis, error?: any): ChatR
     case 'CREATE':
       content += 'I can help you add new demand data. What product and details would you like to add?';
       suggestions = [
-        'Add new Red Chili demand',
-        'Add new Onion demand',
+        'Add new demand data',
         'View current data'
       ];
       break;
@@ -312,7 +316,6 @@ function generateFallbackResponse(analysis: MessageAnalysis, error?: any): ChatR
       content += 'I can show you the current demand data. Would you like to see all records or filter by product?';
       suggestions = [
         'Show all demand data',
-        'Show Red Chili data',
         'Show recent entries'
       ];
       break;
@@ -360,14 +363,14 @@ function generateFallbackResponse(analysis: MessageAnalysis, error?: any): ChatR
   };
 }
 
-function getProductNameFromId(productId: string): string {
-  const productMap: Record<string, string> = {
-    'red-chili': 'Red Chili',
-    'onions': 'Onions',
-    'tomatoes': 'Tomatoes',
-    'potatoes': 'Potatoes',
-    'rice': 'Rice',
-    'wheat': 'Wheat'
-  };
-  return productMap[productId] || productId;
+async function getProductNameFromId(productId: string, db: any): Promise<string> {
+  try {
+    const product = await db.collection('demands').findOne(
+      { productId },
+      { projection: { productName: 1 } }
+    );
+    return product?.productName || productId;
+  } catch {
+    return productId;
+  }
 }

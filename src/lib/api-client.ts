@@ -10,7 +10,6 @@ import {
   ChatResponse,
   Product,
 } from '@/types/api';
-import { mockApi } from './mock-api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
 
@@ -35,9 +34,6 @@ apiClient.interceptors.response.use(
     return Promise.reject(apiError);
   }
 );
-
-// Use mock API in development, real API in production
-const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Demands API
 export const demandsApi = {
@@ -77,9 +73,6 @@ export const demandsApi = {
 export const forecastApi = {
   // Generate forecast for product
   async generateForecast(data: ForecastRequest): Promise<ForecastResponse> {
-    if (isDevelopment) {
-      return mockApi.generateForecast(data.productId, data.days, data);
-    }
     const response = await apiClient.post<ForecastResponse>('/forecast', data);
     return response.data;
   },

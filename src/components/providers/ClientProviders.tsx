@@ -7,7 +7,6 @@ import { LoadingProvider } from "./LoadingProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "@/styles/toast.css";
-import { DevModeToast } from "@/components/common/DevModeToast";
 
 // Themed ToastContainer component
 function ThemedToastContainer() {
@@ -49,7 +48,6 @@ export function ClientProviders({ children }: ClientProvidersProps) {
           <LoadingProvider>
             <TooltipProvider>
               {children}
-              <DevModeToast />
               <ThemedToastContainer />
             </TooltipProvider>
           </LoadingProvider>

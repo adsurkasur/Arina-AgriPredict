@@ -1,18 +1,62 @@
 import { NextResponse } from 'next/server';
-import { Product } from '@/types/api';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export async function GET() {
   try {
-    const products: Product[] = [
-      { id: 'red-chili', name: 'Red Chili', category: 'Spices', unit: 'kg' },
-      { id: 'onions', name: 'Onions', category: 'Vegetables', unit: 'kg' },
-      { id: 'tomatoes', name: 'Tomatoes', category: 'Vegetables', unit: 'kg' },
-      { id: 'potatoes', name: 'Potatoes', category: 'Vegetables', unit: 'kg' },
-      { id: 'rice', name: 'Rice', category: 'Grains', unit: 'kg' },
-      { id: 'wheat', name: 'Wheat', category: 'Grains', unit: 'kg' }
-    ];
+    const { db } = await connectToDatabase();
 
-    return NextResponse.json(products);
+    // Get all unique products from the demands collection
+    const uniqueProducts = await db.collection('demands').aggregate([
+      {
+        $group: {
+          _id: '$productId',
+          name: { $first: '$productName' },
+          count: { $sum: 1 },
+          lastUpdated: { $max: '$date' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          name: 1,
+          category: {
+            $cond: {
+              if: {
+                $or: [
+                  { $regexMatch: { input: '$name', regex: /chili|spice|garlic|ginger/i } },
+                  { $in: ['$name', ['Garlic', 'Ginger']] }
+                ]
+              },
+              then: 'Spices',
+              else: {
+                $cond: {
+                  if: {
+                    $or: [
+                      { $regexMatch: { input: '$name', regex: /rice|wheat|grain/i } },
+                      { $in: ['$name', ['Rice', 'Wheat']] }
+                    ]
+                  },
+                  then: 'Grains',
+                  else: 'Vegetables'
+                }
+              }
+            }
+          },
+          unit: 'kg'
+        }
+      },
+      {
+        $sort: { name: 1 }
+      }
+    ]).toArray();
+
+    // If no products in database, return empty array
+    if (uniqueProducts.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    return NextResponse.json(uniqueProducts);
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(

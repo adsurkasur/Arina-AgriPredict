@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { PlusCircle, Calendar, Bot } from 'lucide-react';
 import { useCreateDemand } from '@/hooks/useApiHooks';
+import { useProducts } from '@/hooks/useApiHooks';
 import { CreateDemandRequest } from '@/types/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ export function InlineAddRow() {
   const [showAISuggestions, setShowAISuggestions] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const createMutation = useCreateDemand();
+  const { data: availableProducts = [] } = useProducts();
   const firstFieldRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -72,14 +74,13 @@ export function InlineAddRow() {
 
   // Generate product suggestions based on input
   const generateProductSuggestions = useCallback((input: string): string[] => {
-    const products = ['Red Chili', 'Onion', 'Tomato', 'Potato', 'Rice', 'Wheat', 'Corn', 'Soybean'];
     const lowerInput = input.toLowerCase();
     
-    return products.filter(product => 
-      product.toLowerCase().includes(lowerInput) || 
-      product.toLowerCase().replace(/\s+/g, '').includes(lowerInput.replace(/\s+/g, ''))
-    ).slice(0, 3);
-  }, []);
+    return availableProducts.filter(product => 
+      product.name.toLowerCase().includes(lowerInput) || 
+      product.name.toLowerCase().replace(/\s+/g, '').includes(lowerInput.replace(/\s+/g, ''))
+    ).map(product => product.name).slice(0, 3);
+  }, [availableProducts]);
 
   // Generate AI suggestions based on product name input
   useEffect(() => {

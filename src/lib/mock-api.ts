@@ -23,70 +23,14 @@ function getLocalDemands(): DemandRecord[] {
       return [];
     }
   }
-  // If not present, seed with initial data
-  const initial = [
-    {
-      id: '1',
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      productName: 'Red Chili',
-      productId: 'red-chili',
-      quantity: 150,
-      price: 8.50,
-    },
-    {
-      id: '2',
-      date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-      productName: 'Onions',
-      productId: 'onions',
-      quantity: 200,
-      price: 3.20,
-    },
-    {
-      id: '3',
-      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      productName: 'Tomatoes',
-      productId: 'tomatoes',
-      quantity: 180,
-      price: 4.75,
-    },
-    {
-      id: '4',
-      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-      productName: 'Red Chili',
-      productId: 'red-chili',
-      quantity: 120,
-      price: 8.75,
-    },
-    {
-      id: '5',
-      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      productName: 'Potatoes',
-      productId: 'potatoes',
-      quantity: 300,
-      price: 2.80,
-    },
-  ];
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(DEMANDS_KEY, JSON.stringify(initial));
-  }
-  return initial;
+  // Start with empty array - no hardcoded initial data
+  return [];
 }
 function setLocalDemands(data: DemandRecord[]) {
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(DEMANDS_KEY, JSON.stringify(data));
   }
 }
-
-const mockProducts: Product[] = [
-  { id: 'red-chili', name: 'Red Chili', category: 'Spices', unit: 'kg' },
-  { id: 'green-chili', name: 'Green Chili', category: 'Spices', unit: 'kg' },
-  { id: 'onions', name: 'Onions', category: 'Vegetables', unit: 'kg' },
-  { id: 'tomatoes', name: 'Tomatoes', category: 'Vegetables', unit: 'kg' },
-  { id: 'potatoes', name: 'Potatoes', category: 'Vegetables', unit: 'kg' },
-  { id: 'shallots', name: 'Shallots', category: 'Vegetables', unit: 'kg' },
-  { id: 'garlic', name: 'Garlic', category: 'Spices', unit: 'kg' },
-  { id: 'ginger', name: 'Ginger', category: 'Spices', unit: 'kg' },
-];
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -211,7 +155,7 @@ export const mockApi = {
     const updated: DemandRecord = {
       ...existing,
       ...data,
-      productName: data.productId ? getProductNameFromId(data.productId) : existing.productName
+      productName: data.productName || existing.productName
     };
 
     demands[index] = updated;
@@ -232,13 +176,57 @@ export const mockApi = {
   setLocalDemands(demands);
   },
 
+  async getProducts(): Promise<Product[]> {
+    await delay(300); // Simulate network delay
+
+    // Get unique products from the actual demand data
+    const demands = getLocalDemands();
+    const uniqueProducts = new Map<string, Product>();
+
+    demands.forEach(demand => {
+      if (!uniqueProducts.has(demand.productId)) {
+        // Determine category based on common product patterns
+        let category = 'Vegetables';
+        const productName = demand.productName.toLowerCase();
+
+        if (productName.includes('chili') || productName.includes('spice') ||
+            productName.includes('garlic') || productName.includes('ginger')) {
+          category = 'Spices';
+        } else if (productName.includes('rice') || productName.includes('wheat') ||
+                   productName.includes('grain')) {
+          category = 'Grains';
+        }
+
+        uniqueProducts.set(demand.productId, {
+          id: demand.productId,
+          name: demand.productName,
+          category,
+          unit: 'kg'
+        });
+      }
+    });
+
+    // Return products sorted by name
+    return Array.from(uniqueProducts.values()).sort((a, b) => a.name.localeCompare(b.name));
+  },
+
   async generateForecast(_productId: string, days: number, _options?: Partial<ForecastRequest>): Promise<ForecastResponse> {
     await delay(2000); // Longer delay to simulate ML processing
-    
-    const product = mockProducts.find(p => p.id === _productId);
-    if (!product) {
+
+    // Get product info from demand data
+    const demands = getLocalDemands();
+    const productDemand = demands.find(d => d.productId === _productId);
+
+    if (!productDemand) {
       throw new Error('Product not found');
     }
+
+    const product = {
+      id: productDemand.productId,
+      name: productDemand.productName,
+      category: 'Unknown', // Could be determined from product name patterns
+      unit: 'kg'
+    };
     
     // Generate mock forecast data with enhanced features
     const forecastData = Array.from({ length: days }, (_, i) => {
@@ -332,6 +320,10 @@ ${_options?.includeConfidence ? 'Confidence intervals included for risk assessme
   async sendChatMessage(message: string): Promise<ChatResponse> {
     await delay(1500); // Simulate AI processing time
     
+    // Get available products for dynamic suggestions
+    const products = await this.getProducts();
+    const productNames = products.map(p => p.name);
+    
     // Simple mock AI responses
     const lowerMessage = message.toLowerCase();
     
@@ -344,7 +336,7 @@ ${_options?.includeConfidence ? 'Confidence intervals included for risk assessme
       response = "I understand you want to delete a record. To help you with this, I would need to identify the specific record. Could you provide more details like the product name and date?";
       actionTaken = 'READ';
       suggestions = [
-        "Show me all records for tomatoes",
+        "Show me all records",
         "Delete the latest record",
         "Remove all records from yesterday"
       ];
@@ -352,46 +344,53 @@ ${_options?.includeConfidence ? 'Confidence intervals included for risk assessme
       response = "I can help you add a new sales record! Please provide the product, quantity, price, and date for the new record.";
       actionTaken = 'CREATE';
       suggestions = [
-        "Add 100kg tomatoes at $4.50 for today",
-        "Create record for red chili",
+        "Add a new sales record",
+        "Create record for a product",
         "Add multiple records"
       ];
     } else if (lowerMessage.includes('forecast') || lowerMessage.includes('predict')) {
       response = "I can generate a demand forecast for any product in your inventory. Which product would you like me to forecast, and for how many days?";
       actionTaken = 'FORECAST';
-      suggestions = [
-        "Forecast red chili for 14 days",
-        "Predict tomato demand for next month",
-        "Generate forecast for all products"
-      ];
+      if (productNames.length > 0) {
+        suggestions = [
+          `Forecast ${productNames[0]} for 14 days`,
+          `Predict ${productNames[0]} demand for next month`,
+          "Generate forecast for all products"
+        ];
+      } else {
+        suggestions = [
+          "Add some products first to generate forecasts",
+          "Create sales records to enable forecasting"
+        ];
+      }
     } else if (lowerMessage.includes('analyze') || lowerMessage.includes('insight')) {
-      response = `
+      if (productNames.length > 0) {
+        response = `
 # Data Analysis Summary
 
 Based on your current sales data, here are some key insights:
 
-## Top Performing Products
-1. **Red Chili** - Highest price per kg ($8.50-8.75)
-2. **Tomatoes** - Consistent demand with good volume
-3. **Potatoes** - High volume, lower margin product
+## Available Products
+${productNames.map(name => `- ${name}`).join('\n')}
 
 ## Recent Trends
-- Red chili shows price volatility, indicating strong market dynamics
-- Vegetable categories show steady demand patterns
-- Average daily sales value: $1,200-1,500
+- Your data shows ${productNames.length} different products
+- Analysis available once you have more sales records
 
 ## Recommendations
-- Focus on red chili for higher margins
-- Maintain consistent tomato inventory
-- Consider bulk pricing for potatoes
+- Add more sales records to get detailed insights
+- Track different products to see market patterns
 
 Would you like me to dive deeper into any specific product or time period?
-      `;
+        `;
+      } else {
+        response = "I need some sales data to provide analysis. Please add some sales records first!";
+      }
       actionTaken = 'READ';
       suggestions = [
-        "Analyze red chili trends",
-        "Compare this month vs last month",
-        "Show profit margins by product"
+        "Analyze sales trends",
+        "Compare products",
+        "Show profit margins"
       ];
     } else {
       response = `Hello! I'm your AgriPredict AI assistant. I can help you with:
@@ -422,19 +421,6 @@ What would you like to do today?`;
     };
   },
 };
-
-// Helper function to map productId to productName
-function getProductNameFromId(productId: string): string {
-  const productMap: Record<string, string> = {
-    'red-chili': 'Red Chili',
-    'onions': 'Onions',
-    'tomatoes': 'Tomatoes',
-    'potatoes': 'Potatoes',
-    'rice': 'Rice',
-    'wheat': 'Wheat'
-  };
-  return productMap[productId] || productId;
-}
 
 // Override API client in development
 if (process.env.NODE_ENV === 'development') {

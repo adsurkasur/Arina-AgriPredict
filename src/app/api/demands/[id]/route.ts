@@ -67,7 +67,8 @@ export async function PUT(
     if (body.date) updateData.date = body.date;
     if (body.productId) {
       updateData.productId = body.productId;
-      updateData.productName = getProductNameFromId(body.productId);
+      // Use provided productName or fallback to productId
+      updateData.productName = body.productName || body.productId;
     }
     if (body.productName) {
       updateData.productName = body.productName;
@@ -149,19 +150,6 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
-
-// Helper function to map productId to productName
-function getProductNameFromId(productId: string): string {
-  const productMap: Record<string, string> = {
-    'red-chili': 'Red Chili',
-    'onions': 'Onions',
-    'tomatoes': 'Tomatoes',
-    'potatoes': 'Potatoes',
-    'rice': 'Rice',
-    'wheat': 'Wheat'
-  };
-  return productMap[productId] || productId;
 }
 
 // Helper function to generate productId from productName

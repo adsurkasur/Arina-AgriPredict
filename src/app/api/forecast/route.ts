@@ -73,14 +73,17 @@ export async function POST(request: NextRequest) {
       console.warn('Analysis service unavailable, falling back to simple forecast:', serviceError);
     }
 
+    // Get product name from historical data
+    const productName = historicalData[0]?.productName || body.productId;
+
     // Fallback to simple forecasting if service is unavailable
     const forecastData = generateSimpleForecast(historicalData, body.days);
 
     // Generate AI summary using Gemini if available
-    let summary = generateForecastSummary(body.productId, forecastData, historicalData);
+    let summary = generateForecastSummary(productName, forecastData, historicalData);
 
     try {
-      const geminiSummary = await generateGeminiSummary(body.productId, forecastData, historicalData);
+      const geminiSummary = await generateGeminiSummary(productName, forecastData, historicalData);
       if (geminiSummary) {
         summary = geminiSummary;
       }
@@ -133,8 +136,7 @@ function generateSimpleForecast(historicalData: any[], days: number): ForecastDa
   return forecast;
 }
 
-function generateForecastSummary(productId: string, forecastData: ForecastDataPoint[], historicalData: any[]): string {
-  const productName = getProductNameFromId(productId);
+function generateForecastSummary(productName: string, forecastData: ForecastDataPoint[], historicalData: any[]): string {
   const avgHistoricalPrice = historicalData.reduce((sum, item) => sum + item.price, 0) / historicalData.length;
   const avgForecastPrice = forecastData.reduce((sum, item) => sum + item.predictedValue, 0) / forecastData.length;
 
@@ -158,11 +160,10 @@ ${trend === 'increasing' ? '- Consider increasing inventory to meet potential hi
 *This forecast is based on historical patterns and should be used as a guide, not definitive prediction.*`;
 }
 
-async function generateGeminiSummary(productId: string, forecastData: ForecastDataPoint[], historicalData: any[]): Promise<string | null> {
+async function generateGeminiSummary(productName: string, forecastData: ForecastDataPoint[], historicalData: any[]): Promise<string | null> {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const productName = getProductNameFromId(productId);
     const avgHistoricalPrice = historicalData.reduce((sum, item) => sum + item.price, 0) / historicalData.length;
     const avgForecastPrice = forecastData.reduce((sum, item) => sum + item.predictedValue, 0) / forecastData.length;
 
@@ -198,14 +199,4 @@ Format your response in Markdown with clear headings and bullet points. Keep it 
   }
 }
 
-function getProductNameFromId(productId: string): string {
-  const productMap: Record<string, string> = {
-    'red-chili': 'Red Chili',
-    'onions': 'Onions',
-    'tomatoes': 'Tomatoes',
-    'potatoes': 'Potatoes',
-    'rice': 'Rice',
-    'wheat': 'Wheat'
-  };
-  return productMap[productId] || productId;
-}
+

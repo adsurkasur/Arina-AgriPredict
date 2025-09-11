@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -39,6 +40,7 @@ export function AdvancedForecastControls({
   const [selectedModels, setSelectedModels] = useLocalStorage<string[]>('forecast-models', ['ensemble']);
   const [includeConfidence, setIncludeConfidence] = useLocalStorage<boolean>('forecast-confidence', true);
   const [scenario, setScenario] = useLocalStorage<'optimistic' | 'pessimistic' | 'realistic'>('forecast-scenario', 'realistic');
+  const [productSelectOpen, setProductSelectOpen] = React.useState(false);
 
   const { data: products = [] } = useProducts();
   const forecastMutation = useForecast();
@@ -134,24 +136,51 @@ export function AdvancedForecastControls({
         {/* Product Selection */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Select Products</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {products.map((product) => (
-              <div key={product.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`product-${product.id}`}
-                  checked={selectedProductIds.includes(product.id)}
-                  onCheckedChange={() => handleProductToggle(product.id)}
-                  disabled={forecastMutation.isPending}
-                />
-                <Label
-                  htmlFor={`product-${product.id}`}
-                  className="text-sm cursor-pointer"
-                >
-                  {product.name}
-                </Label>
-              </div>
-            ))}
-          </div>
+          <Popover open={productSelectOpen} onOpenChange={setProductSelectOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={productSelectOpen}
+                className="w-full justify-between"
+                disabled={forecastMutation.isPending}
+              >
+                {selectedProductIds.length === 0
+                  ? "Select products..."
+                  : `${selectedProductIds.length} product${selectedProductIds.length === 1 ? '' : 's'} selected`
+                }
+                <Settings className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search products..." />
+                <CommandEmpty>No products found.</CommandEmpty>
+                <CommandGroup className="max-h-64 overflow-auto">
+                  {products.map((product) => (
+                    <CommandItem
+                      key={product.id}
+                      onSelect={() => {
+                        handleProductToggle(product.id);
+                        setProductSelectOpen(false);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={selectedProductIds.includes(product.id)}
+                        className="mr-2"
+                        onChange={() => {}} // Handled by onSelect
+                      />
+                      <span className="flex-1">{product.name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {product.category}
+                      </Badge>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
           {selectedProductIds.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {selectedProductIds.map(id => {
