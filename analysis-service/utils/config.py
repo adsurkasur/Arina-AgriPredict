@@ -10,7 +10,7 @@ class Settings:
 
     # API Settings
     API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
-    API_PORT: int = int(os.getenv("PORT", 8000))
+    API_PORT: int = int(os.getenv("PORT", 7860))  # Default to 7860 for Hugging Face Spaces
     API_WORKERS: int = int(os.getenv("API_WORKERS", 1))
 
     # CORS Settings

@@ -1,3 +1,14 @@
+---
+title: AgriPredict Analysis Service
+emoji: 🌾
+colorFrom: green
+colorTo: blue
+sdk: docker
+sdk_version: null
+app_file: main.py
+pinned: false
+---
+
 # AgriPredict Analysis Service
 
 A FastAPI-based service for advanced agricultural demand forecasting using multiple ML models including ensemble methods, statistical models, and machine learning algorithms.
