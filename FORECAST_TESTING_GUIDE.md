@@ -5,11 +5,13 @@ This guide explains how to test the forecasting feature of AgriPredict using the
 ## 📋 Prerequisites
 
 1. **Generated Datasets**: Ensure you have run the dataset generation script:
+
    ```bash
    python generate_datasets.py
    ```
 
 2. **Running Services**: Start both frontend and backend services:
+
    ```bash
    python start_services.py
    ```
@@ -147,101 +149,6 @@ This guide explains how to test the forecasting feature of AgriPredict using the
    - Test network connectivity issues
    - Test malformed CSV files
 
-## 🔧 API Testing (Updated Endpoints)
-
-If you want to test the APIs directly:
-
-### Enhanced Import APIs
-```bash
-# Bulk import (for large files)
-curl -X POST http://localhost:3000/api/bulk-import \
-  -F "file=@large_dataset.csv"
-
-# Regular import (for small files)
-curl -X POST http://localhost:3000/api/demands \
-  -F "file=@small_dataset.csv"
-
-# Clear all data
-curl -X DELETE http://localhost:3000/api/demands/clear-all
-```
-
-### Forecast API
-```bash
-curl -X POST http://localhost:3000/api/forecast \
-  -H "Content-Type: application/json" \
-  -d '{
-    "productId": "rice_premium",
-    "days": 30,
-    "sellingPrice": 45.50,
-    "models": ["ensemble"],
-    "scenario": "realistic"
-  }'
-```
-
-### Demands API
-```bash
-# Get paginated data
-curl "http://localhost:3000/api/demands?page=1&limit=20&sortKey=date&sortOrder=desc"
-
-# Search data
-curl "http://localhost:3000/api/demands?search=rice"
-
-# Get products list
-curl "http://localhost:3000/api/products"
-```
-
-## 📊 Expected Results
-
-### Enhanced Import System
-- ✅ **Unified Import Button**: Single button handles all import types automatically
-- ✅ **Smart Method Selection**: Large files use bulk import, small files use regular import
-- ✅ **Progress Tracking**: Real-time progress indicators during import
-- ✅ **Performance**: 10-50x faster imports for large datasets
-- ✅ **Complete Data Clearing**: Clear-all functionality removes ALL database records
-
-### Data Management Page
-- ✅ Records loaded successfully with enhanced import system
-- ✅ Data table displays with pagination
-- ✅ Search and filtering work correctly
-- ✅ Summary statistics show correct counts
-- ✅ Products immediately available for forecasting
-
-### Forecasting Feature
-- ✅ Historical data fetched from imported data
-- ✅ Forecast generated with confidence intervals
-- ✅ Multiple models work (SMA, WMA, ARIMA, etc.)
-- ✅ AI summary provides insights
-- ✅ Revenue projections calculated when price provided
-- ✅ **Real-time Integration**: Products appear immediately after import
-
-### Performance
-- ✅ **Bulk Import**: Large datasets load in seconds instead of minutes
-- ✅ **Forecast Generation**: Completes within 10 seconds
-- ✅ **Page Loads**: Responsive interactions
-- ✅ **Memory Efficient**: Handles large files without memory issues
-
-## 🆕 New Features to Test
-
-### 1. Unified Import Experience
-- Test the single "Import Data" button with different file sizes
-- Verify automatic method selection works correctly
-- Test progress tracking and error handling
-
-### 2. Complete Data Management
-- Test "Clear All Data" functionality
-- Verify complete database cleanup
-- Test re-importing after clearing
-
-### 3. Enhanced Forecast Integration
-- Import data and immediately see products in forecast dropdown
-- Test forecast generation without page refresh
-- Verify cache invalidation works properly
-
-### 4. Performance Improvements
-- Compare import times for large datasets
-- Test system responsiveness with 10,000+ records
-- Monitor memory usage during bulk operations
-
 ## 🐛 Troubleshooting (Updated)
 
 ### Common Issues
@@ -288,6 +195,7 @@ curl "http://localhost:3000/api/products"
 ### Debug Steps
 
 1. **Check Service Status**:
+
    ```bash
    # Check if services are running
    python start_services.py --help
@@ -300,6 +208,7 @@ curl "http://localhost:3000/api/products"
    - Import: Monitor progress indicators and error messages
 
 3. **API Testing**:
+
    ```bash
    # Test individual APIs
    curl http://localhost:3000/api/demands
@@ -308,6 +217,7 @@ curl "http://localhost:3000/api/products"
    ```
 
 4. **Performance Monitoring**:
+
    ```bash
    # Check system resources during import
    # Monitor browser network tab for API calls
@@ -329,6 +239,7 @@ curl "http://localhost:3000/api/products"
 ## 📞 Support
 
 If you encounter issues:
+
 1. Check the troubleshooting section above
 2. Review service logs for error messages
 3. Verify all prerequisites are met
@@ -339,6 +250,7 @@ If you encounter issues:
 ## 🚀 Recent Enhancements
 
 The forecasting feature now includes:
+
 - **Unified Import Experience**: Single button handles all import scenarios
 - **Bulk Import Performance**: 10-50x faster for large datasets
 - **Complete Data Management**: Clear all data functionality
@@ -347,8 +259,6 @@ The forecasting feature now includes:
 - **Performance Monitoring**: Progress tracking and system health indicators
 
 The enhanced system is now ready for comprehensive testing with improved performance and user experience! 🚀
-   - Test "Realistic", "Optimistic", and "Pessimistic" scenarios
-   - Compare how different assumptions affect forecasts
 
 ### Step 5: Advanced Testing
 
@@ -370,6 +280,7 @@ The enhanced system is now ready for comprehensive testing with improved perform
 If you want to test the APIs directly:
 
 ### Load CSV Data API
+
 ```bash
 # Check data status
 curl http://localhost:3000/api/load-csv
@@ -379,6 +290,7 @@ curl -X POST http://localhost:3000/api/load-csv
 ```
 
 ### Forecast API
+
 ```bash
 curl -X POST http://localhost:3000/api/forecast \
   -H "Content-Type: application/json" \
@@ -392,6 +304,7 @@ curl -X POST http://localhost:3000/api/forecast \
 ```
 
 ### Demands API
+
 ```bash
 # Get paginated data
 curl "http://localhost:3000/api/demands?page=1&limit=20&sortKey=date&sortOrder=desc"
@@ -403,12 +316,14 @@ curl "http://localhost:3000/api/demands?search=rice"
 ## 📊 Expected Results
 
 ### Data Management Page
+
 - ✅ 10,000 records loaded successfully
 - ✅ Data table displays with pagination
 - ✅ Search and filtering work correctly
 - ✅ Summary statistics show correct counts
 
 ### Forecasting Feature
+
 - ✅ Historical data fetched from CSV/database
 - ✅ Forecast generated with confidence intervals
 - ✅ Multiple models work (SMA, WMA, ARIMA, etc.)

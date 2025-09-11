@@ -20,6 +20,318 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useForecast, useProducts } from '@/hooks/useApiHooks';
 
+// Extracted Product Selector Component
+interface ProductSelectorProps {
+  selectedProductIds: string[];
+  onProductChange: (_productIds: string[]) => void;
+  products: any[];
+  disabled?: boolean;
+}
+
+function ProductSelector({ selectedProductIds, onProductChange, products, disabled }: ProductSelectorProps) {
+  const [productSelectOpen, setProductSelectOpen] = React.useState(false);
+
+  const handleProductToggle = (productId: string) => {
+    const newSelection = selectedProductIds.includes(productId)
+      ? selectedProductIds.filter(id => id !== productId)
+      : [...selectedProductIds, productId];
+
+    onProductChange(newSelection);
+  };
+
+  return (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium">Select Products</Label>
+      <Popover open={productSelectOpen} onOpenChange={setProductSelectOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={productSelectOpen}
+            className="w-full justify-between"
+            disabled={disabled}
+          >
+            {selectedProductIds.length === 0
+              ? "Select products..."
+              : `${selectedProductIds.length} product${selectedProductIds.length === 1 ? '' : 's'} selected`
+            }
+            <Settings className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput placeholder="Search products..." />
+            <CommandEmpty>No products found.</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto">
+              {products.map((product) => (
+                <CommandItem
+                  key={product.id}
+                  onSelect={() => {
+                    handleProductToggle(product.id);
+                    setProductSelectOpen(false);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Checkbox
+                    checked={selectedProductIds.includes(product.id)}
+                    className="mr-2"
+                    onChange={() => {}} // Handled by onSelect
+                  />
+                  <span className="flex-1">{product.name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {product.category}
+                  </Badge>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {selectedProductIds.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {selectedProductIds.map(id => {
+            const product = products.find(p => p.id === id);
+            return product ? (
+              <Badge key={id} variant="secondary" className="text-xs">
+                {product.name}
+              </Badge>
+            ) : null;
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Extracted Date Range Selector Component
+interface DateRangeSelectorProps {
+  dateFrom: Date | undefined;
+  dateTo: Date | undefined;
+  onDateFromChange: (_date: Date | undefined) => void;
+  onDateToChange: (_date: Date | undefined) => void;
+  disabled?: boolean;
+}
+
+function DateRangeSelector({ dateFrom, dateTo, onDateFromChange, onDateToChange, disabled }: DateRangeSelectorProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">From Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !dateFrom && "text-muted-foreground"
+              )}
+              disabled={disabled}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Pick start date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFrom}
+              onSelect={onDateFromChange}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">To Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !dateTo && "text-muted-foreground"
+              )}
+              disabled={disabled}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateTo ? format(dateTo, "dd/MM/yyyy") : "Pick end date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateTo}
+              onSelect={onDateToChange}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
+  );
+}
+
+// Extracted Model Selector Component
+interface ModelSelectorProps {
+  selectedModels: string[];
+  onModelChange: (_models: string[]) => void;
+  disabled?: boolean;
+}
+
+function ModelSelector({ selectedModels, onModelChange, disabled }: ModelSelectorProps) {
+  const availableModels = [
+    { id: 'ensemble', name: 'Ensemble (Recommended)', description: 'Combines multiple models' },
+    { id: 'sma', name: 'Simple Moving Average', description: 'Basic trend analysis' },
+    { id: 'wma', name: 'Weighted Moving Average', description: 'Recent data weighted more' },
+    { id: 'es', name: 'Exponential Smoothing', description: 'Seasonal trend analysis' },
+    { id: 'arima', name: 'ARIMA', description: 'Statistical time series' },
+    { id: 'catboost', name: 'CatBoost', description: 'Machine learning model' }
+  ];
+
+  const handleModelToggle = (modelId: string) => {
+    if (modelId === 'ensemble') {
+      onModelChange(['ensemble']);
+    } else {
+      const newModels = selectedModels.includes(modelId)
+        ? selectedModels.filter(id => id !== modelId)
+        : [...selectedModels.filter(m => m !== 'ensemble'), modelId];
+
+      if (newModels.length === 0) {
+        onModelChange(['ensemble']);
+      } else {
+        onModelChange(newModels);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium">Forecast Models</Label>
+      <div className="grid grid-cols-2 gap-2">
+        {availableModels.map((model) => (
+          <div key={model.id} className="flex items-center space-x-2">
+            <Checkbox
+              id={model.id}
+              checked={selectedModels.includes(model.id)}
+              onCheckedChange={() => handleModelToggle(model.id)}
+              disabled={disabled}
+            />
+            <div className="grid gap-1.5 leading-none">
+              <Label
+                htmlFor={model.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {model.name}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {model.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Extracted Forecast Parameters Component
+interface ForecastParametersProps {
+  forecastDays: number;
+  sellingPrice: number;
+  scenario: 'optimistic' | 'pessimistic' | 'realistic';
+  includeConfidence: boolean;
+  onDaysChange: (_days: number) => void;
+  onPriceChange: (_price: number) => void;
+  onScenarioChange: (_scenario: 'optimistic' | 'pessimistic' | 'realistic') => void;
+  onConfidenceChange: (_include: boolean) => void;
+  disabled?: boolean;
+}
+
+function ForecastParameters({
+  forecastDays,
+  sellingPrice,
+  scenario,
+  includeConfidence,
+  onDaysChange,
+  onPriceChange,
+  onScenarioChange,
+  onConfidenceChange,
+  disabled
+}: ForecastParametersProps) {
+  const scenarios = [
+    { id: 'optimistic', name: 'Optimistic', description: 'Best case scenario' },
+    { id: 'realistic', name: 'Realistic', description: 'Balanced scenario' },
+    { id: 'pessimistic', name: 'Pessimistic', description: 'Worst case scenario' }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Forecast Days</Label>
+          <Input
+            type="number"
+            min="1"
+            max="365"
+            value={forecastDays}
+            onChange={(e) => onDaysChange(parseInt(e.target.value) || 14)}
+            disabled={disabled}
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Selling Price ($)</Label>
+          <Input
+            type="number"
+            min="0"
+            step="0.01"
+            value={sellingPrice}
+            onChange={(e) => onPriceChange(parseFloat(e.target.value) || 0)}
+            disabled={disabled}
+            placeholder="Optional"
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Scenario</Label>
+          <Select value={scenario} onValueChange={onScenarioChange} disabled={disabled}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {scenarios.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  <div>
+                    <div className="font-medium">{s.name}</div>
+                    <div className="text-xs text-muted-foreground">{s.description}</div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="confidence"
+            checked={includeConfidence}
+            onCheckedChange={onConfidenceChange}
+            disabled={disabled}
+          />
+          <Label htmlFor="confidence" className="text-sm font-medium">
+            Include Confidence Intervals
+          </Label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface AdvancedForecastControlsProps {
   onForecastGenerated: (_forecast: ForecastResponse) => void;
   onProductChange?: (_productIds: string[]) => void;
@@ -40,50 +352,14 @@ export function AdvancedForecastControls({
   const [selectedModels, setSelectedModels] = useLocalStorage<string[]>('forecast-models', ['ensemble']);
   const [includeConfidence, setIncludeConfidence] = useLocalStorage<boolean>('forecast-confidence', true);
   const [scenario, setScenario] = useLocalStorage<'optimistic' | 'pessimistic' | 'realistic'>('forecast-scenario', 'realistic');
-  const [productSelectOpen, setProductSelectOpen] = React.useState(false);
 
   const { data: products = [] } = useProducts();
   const forecastMutation = useForecast();
   const { setForecasting } = useAppStore();
 
-  const availableModels = [
-    { id: 'ensemble', name: 'Ensemble (Recommended)', description: 'Combines multiple models' },
-    { id: 'sma', name: 'Simple Moving Average', description: 'Basic trend analysis' },
-    { id: 'wma', name: 'Weighted Moving Average', description: 'Recent data weighted more' },
-    { id: 'es', name: 'Exponential Smoothing', description: 'Seasonal trend analysis' },
-    { id: 'arima', name: 'ARIMA', description: 'Statistical time series' },
-    { id: 'catboost', name: 'CatBoost', description: 'Machine learning model' }
-  ];
-
-  const scenarios = [
-    { id: 'optimistic', name: 'Optimistic', description: 'Best case scenario' },
-    { id: 'realistic', name: 'Realistic', description: 'Balanced scenario' },
-    { id: 'pessimistic', name: 'Pessimistic', description: 'Worst case scenario' }
-  ];
-
-  const handleProductToggle = (productId: string) => {
-    const newSelection = selectedProductIds.includes(productId)
-      ? selectedProductIds.filter(id => id !== productId)
-      : [...selectedProductIds, productId];
-
-    setSelectedProductIds(newSelection);
-    onProductChange?.(newSelection);
-  };
-
-  const handleModelToggle = (modelId: string) => {
-    if (modelId === 'ensemble') {
-      setSelectedModels(['ensemble']);
-    } else {
-      const newModels = selectedModels.includes(modelId)
-        ? selectedModels.filter(id => id !== modelId)
-        : [...selectedModels.filter(m => m !== 'ensemble'), modelId];
-
-      if (newModels.length === 0) {
-        setSelectedModels(['ensemble']);
-      } else {
-        setSelectedModels(newModels);
-      }
-    }
+  const handleProductChange = (productIds: string[]) => {
+    setSelectedProductIds(productIds);
+    onProductChange?.(productIds);
   };
 
   const handleGenerateForecast = () => {
@@ -134,264 +410,70 @@ export function AdvancedForecastControls({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Product Selection */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Select Products</Label>
-          <Popover open={productSelectOpen} onOpenChange={setProductSelectOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={productSelectOpen}
-                className="w-full justify-between"
-                disabled={forecastMutation.isPending}
-              >
-                {selectedProductIds.length === 0
-                  ? "Select products..."
-                  : `${selectedProductIds.length} product${selectedProductIds.length === 1 ? '' : 's'} selected`
-                }
-                <Settings className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search products..." />
-                <CommandEmpty>No products found.</CommandEmpty>
-                <CommandGroup className="max-h-64 overflow-auto">
-                  {products.map((product) => (
-                    <CommandItem
-                      key={product.id}
-                      onSelect={() => {
-                        handleProductToggle(product.id);
-                        setProductSelectOpen(false);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={selectedProductIds.includes(product.id)}
-                        className="mr-2"
-                        onChange={() => {}} // Handled by onSelect
-                      />
-                      <span className="flex-1">{product.name}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {selectedProductIds.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {selectedProductIds.map(id => {
-                const product = products.find(p => p.id === id);
-                return product ? (
-                  <Badge key={id} variant="secondary" className="text-xs">
-                    {product.name}
-                  </Badge>
-                ) : null;
-              })}
-            </div>
-          )}
-        </div>
+        <ProductSelector
+          selectedProductIds={selectedProductIds}
+          onProductChange={handleProductChange}
+          products={products}
+          disabled={isDisabled}
+        />
 
         <Separator />
 
         {/* Date Range */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">From Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !dateFrom && "text-muted-foreground"
-                  )}
-                  disabled={forecastMutation.isPending}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Pick start date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateFrom}
-                  onSelect={setDateFrom}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+        <DateRangeSelector
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          onDateFromChange={setDateFrom}
+          onDateToChange={setDateTo}
+          disabled={isDisabled}
+        />
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">To Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !dateTo && "text-muted-foreground"
-                  )}
-                  disabled={forecastMutation.isPending}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateTo ? format(dateTo, "dd/MM/yyyy") : "Pick end date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateTo}
-                  onSelect={setDateTo}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+        <Separator />
 
-        {/* Forecast Horizon */}
-        <div className="space-y-2">
-          <Label htmlFor="forecast-days" className="text-sm font-medium">
-            Forecast Horizon (Days)
-          </Label>
-          <Select
-            value={forecastDays.toString()}
-            onValueChange={(value) => setForecastDays(parseInt(value))}
-            disabled={forecastMutation.isPending}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 days</SelectItem>
-              <SelectItem value="14">14 days</SelectItem>
-              <SelectItem value="30">30 days</SelectItem>
-              <SelectItem value="60">60 days</SelectItem>
-              <SelectItem value="90">90 days</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Selling Price */}
-        <div className="space-y-2">
-          <Label htmlFor="selling-price" className="text-sm font-medium">
-            Selling Price ($ per unit)
-          </Label>
-          <Input
-            id="selling-price"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0.00"
-            value={sellingPrice}
-            onChange={(e) => setSellingPrice(parseFloat(e.target.value) || 0)}
-            disabled={forecastMutation.isPending}
-          />
-        </div>
+        {/* Forecast Parameters */}
+        <ForecastParameters
+          forecastDays={forecastDays}
+          sellingPrice={sellingPrice}
+          scenario={scenario}
+          includeConfidence={includeConfidence}
+          onDaysChange={setForecastDays}
+          onPriceChange={setSellingPrice}
+          onScenarioChange={setScenario}
+          onConfidenceChange={setIncludeConfidence}
+          disabled={isDisabled}
+        />
 
         <Separator />
 
         {/* Model Selection */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Forecasting Models</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {availableModels.map((model) => (
-              <div key={model.id} className="flex items-start space-x-2">
-                <Checkbox
-                  id={`model-${model.id}`}
-                  checked={selectedModels.includes(model.id)}
-                  onCheckedChange={() => handleModelToggle(model.id)}
-                  disabled={forecastMutation.isPending}
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <Label
-                    htmlFor={`model-${model.id}`}
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    {model.name}
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {model.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Scenario Selection */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Scenario</Label>
-          <Select
-            value={scenario}
-            onValueChange={(value: 'optimistic' | 'pessimistic' | 'realistic') => setScenario(value)}
-            disabled={forecastMutation.isPending}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {scenarios.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  <div>
-                    <div className="font-medium">{s.name}</div>
-                    <div className="text-xs text-muted-foreground">{s.description}</div>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Confidence Intervals */}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="confidence"
-            checked={includeConfidence}
-            onCheckedChange={(checked) => setIncludeConfidence(checked === true)}
-            disabled={forecastMutation.isPending}
-          />
-          <Label htmlFor="confidence" className="text-sm cursor-pointer">
-            Include confidence intervals
-          </Label>
-        </div>
+        <ModelSelector
+          selectedModels={selectedModels}
+          onModelChange={setSelectedModels}
+          disabled={isDisabled}
+        />
 
         <Separator />
 
         {/* Generate Button */}
-        <Button
-          onClick={handleGenerateForecast}
-          disabled={isDisabled}
-          className="w-full transition-all duration-300"
-          size="lg"
-        >
-          {forecastMutation.isPending ? (
-            <LoadingSpinner size="sm" text="Generating..." />
-          ) : (
-            <>
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Generate Advanced Forecast
-            </>
-          )}
-        </Button>
-
-        {/* Selected Configuration Summary */}
-        {(selectedProductIds.length > 0 || selectedModels.length > 0) && (
-          <div className="p-3 bg-muted rounded-lg">
-            <h4 className="text-sm font-medium mb-2">Configuration Summary</h4>
-            <div className="text-xs text-muted-foreground space-y-1">
-              <div>Products: {selectedProductIds.length}</div>
-              <div>Models: {selectedModels.join(', ')}</div>
-              <div>Scenario: {scenario}</div>
-              <div>Confidence: {includeConfidence ? 'Enabled' : 'Disabled'}</div>
-            </div>
-          </div>
-        )}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleGenerateForecast}
+            disabled={isDisabled}
+            className="min-w-[140px]"
+          >
+            {forecastMutation.isPending ? (
+              <>
+                <LoadingSpinner className="mr-2 h-4 w-4" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Generate Forecast
+              </>
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

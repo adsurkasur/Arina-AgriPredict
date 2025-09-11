@@ -117,6 +117,51 @@ async def health_check():
         "version": "1.0.0"
     }
 
+# API Endpoints
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "service": "analysis-service",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "1.0.0"
+    }
+
+# Helper functions for forecast generation
+def validate_historical_data(df: pd.DataFrame) -> None:
+    """Validate that historical data meets minimum requirements"""
+    if len(df) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Insufficient historical data. Need at least 3 data points."
+        )
+
+def prepare_forecast_metadata(request: ForecastRequest, df: pd.DataFrame) -> Dict[str, Any]:
+    """Prepare metadata for forecast response"""
+    return {
+        "data_points": len(df),
+        "forecast_horizon": request.days,
+        "product_id": request.product_id,
+        "generated_at": datetime.utcnow().isoformat(),
+        "scenario": request.scenario
+    }
+
+def calculate_revenue_if_needed(
+    forecast_engine: ForecastEngine,
+    request: ForecastRequest,
+    forecast_result: Dict[str, Any],
+    df: pd.DataFrame
+) -> Optional[List[RevenueProjection]]:
+    """Calculate revenue projection if selling price is provided"""
+    if request.selling_price and request.selling_price > 0:
+        return forecast_engine.calculate_revenue_projection(
+            forecast_data=forecast_result["forecast_data"],
+            selling_price=request.selling_price,
+            historical_data=df
+        )
+    return None
+
 @app.post("/forecast", response_model=ForecastResponse)
 async def generate_forecast(
     request: ForecastRequest,
@@ -131,12 +176,7 @@ async def generate_forecast(
 
         # Process and validate data
         df = data_processor.process_historical_data(request.historical_data)
-
-        if len(df) < 3:
-            raise HTTPException(
-                status_code=400,
-                detail="Insufficient historical data. Need at least 3 data points."
-            )
+        validate_historical_data(df)
 
         # Generate forecast
         forecast_result = await forecast_engine.generate_forecast(
@@ -147,16 +187,10 @@ async def generate_forecast(
             scenario=request.scenario
         )
 
-        # Calculate revenue projection if selling price provided
-        revenue_projection = None
-        if request.selling_price and request.selling_price > 0:
-            revenue_projection = forecast_engine.calculate_revenue_projection(
-                forecast_data=forecast_result["forecast_data"],
-                selling_price=request.selling_price,
-                historical_data=df
-            )
+        # Calculate revenue projection if needed
+        revenue_projection = calculate_revenue_if_needed(forecast_engine, request, forecast_result, df)
 
-        # Generate AI summary
+        # Generate AI summary and confidence
         summary = forecast_engine.generate_summary(
             forecast_data=forecast_result["forecast_data"],
             historical_data=df,
@@ -164,20 +198,12 @@ async def generate_forecast(
             scenario=request.scenario
         )
 
-        # Calculate overall confidence
         confidence = forecast_engine.calculate_overall_confidence(
             forecast_data=forecast_result["forecast_data"]
         )
 
-        # Prepare metadata
-        metadata = {
-            "data_points": len(df),
-            "forecast_horizon": request.days,
-            "product_id": request.product_id,
-            "generated_at": datetime.utcnow().isoformat(),
-            "scenario": request.scenario
-        }
-
+        # Prepare response
+        metadata = prepare_forecast_metadata(request, df)
         response = ForecastResponse(
             forecast_data=forecast_result["forecast_data"],
             revenue_projection=revenue_projection,

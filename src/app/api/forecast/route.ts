@@ -6,25 +6,100 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:7860';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+async function validateForecastRequest(body: ForecastRequest): Promise<{ isValid: boolean; error?: string }> {
+  if (!body.productId || !body.days) {
+    return { isValid: false, error: 'Missing required fields: productId and days' };
+  }
+  if (body.days < 1 || body.days > 365) {
+    return { isValid: false, error: 'Days must be between 1 and 365' };
+  }
+  return { isValid: true };
+}
+
+async function fetchHistoricalData(db: any, productId: string): Promise<any[]> {
+  return await db.collection('demands')
+    .find({ productId })
+    .sort({ date: -1 })
+    .limit(100)
+    .toArray();
+}
+
+async function callAnalysisService(productId: string, historicalData: any[], days: number, sellingPrice?: number): Promise<any | null> {
+  try {
+    const analysisResponse = await fetch(`${ANALYSIS_SERVICE_URL}/forecast`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: productId,
+        historical_data: historicalData.map(item => ({
+          date: item.date,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        days,
+        selling_price: sellingPrice
+      }),
+    });
+
+    if (analysisResponse.ok) {
+      return await analysisResponse.json();
+    }
+  } catch (error) {
+    console.warn('Analysis service call failed:', error);
+  }
+  return null;
+}
+
+function transformAnalysisResult(analysisResult: any): ForecastResponse {
+  const forecastData: ForecastDataPoint[] = analysisResult.forecast_data.map((item: any) => ({
+    date: item.date,
+    predictedValue: item.predicted_value,
+    confidenceLower: item.confidence_lower,
+    confidenceUpper: item.confidence_upper,
+    modelUsed: item.model_used
+  }));
+
+  return {
+    forecastData,
+    revenueProjection: analysisResult.revenue_projection,
+    modelsUsed: analysisResult.models_used,
+    summary: analysisResult.summary,
+    confidence: analysisResult.confidence,
+    scenario: analysisResult.scenario
+  };
+}
+
+async function generateFallbackForecast(historicalData: any[], productId: string, days: number): Promise<ForecastResponse> {
+  const productName = historicalData[0]?.productName || productId;
+  const forecastData = generateSimpleForecast(historicalData, days);
+
+  let summary = generateForecastSummary(productName, forecastData, historicalData);
+
+  try {
+    const geminiSummary = await generateGeminiSummary(productName, forecastData, historicalData);
+    if (geminiSummary) {
+      summary = geminiSummary;
+    }
+  } catch (error) {
+    console.warn('Gemini summary generation failed:', error);
+  }
+
+  return { forecastData, summary };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { db } = await connectToDatabase();
     const body: ForecastRequest = await request.json();
 
-    if (!body.productId || !body.days) {
-      return NextResponse.json(
-        { error: 'Missing required fields: productId and days' },
-        { status: 400 }
-      );
+    // Validate request
+    const validation = await validateForecastRequest(body);
+    if (!validation.isValid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    // Get historical data for the product
-    const historicalData = await db.collection('demands')
-      .find({ productId: body.productId })
-      .sort({ date: -1 })
-      .limit(100) // Get more data for better forecasting
-      .toArray();
-
+    // Fetch historical data
+    const historicalData = await fetchHistoricalData(db, body.productId);
     if (historicalData.length === 0) {
       return NextResponse.json(
         { error: 'No historical data found for this product' },
@@ -32,76 +107,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try to use the analysis service
-    try {
-      const analysisResponse = await fetch(`${ANALYSIS_SERVICE_URL}/forecast`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          product_id: body.productId,
-          historical_data: historicalData.map(item => ({
-            date: item.date,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          days: body.days,
-          selling_price: body.sellingPrice
-        }),
-      });
-
-      if (analysisResponse.ok) {
-        const analysisResult = await analysisResponse.json();
-
-        // Transform the response to match our API format
-        const forecastData: ForecastDataPoint[] = analysisResult.forecast_data.map((item: any) => ({
-          date: item.date,
-          predictedValue: item.predicted_value, // Updated to match our API
-          confidenceLower: item.confidence_lower,
-          confidenceUpper: item.confidence_upper,
-          modelUsed: item.model_used
-        }));
-
-        const response: ForecastResponse = {
-          forecastData,
-          revenueProjection: analysisResult.revenue_projection,
-          modelsUsed: analysisResult.models_used,
-          summary: analysisResult.summary,
-          confidence: analysisResult.confidence,
-          scenario: analysisResult.scenario
-        };
-
-        return NextResponse.json(response);
-      }
-    } catch (serviceError) {
-      console.warn('Analysis service unavailable, falling back to simple forecast:', serviceError);
+    // Try analysis service first
+    const analysisResult = await callAnalysisService(body.productId, historicalData, body.days, body.sellingPrice);
+    if (analysisResult) {
+      const response = transformAnalysisResult(analysisResult);
+      return NextResponse.json(response);
     }
 
-    // Get product name from historical data
-    const productName = historicalData[0]?.productName || body.productId;
+    // Fallback to simple forecast
+    console.warn('Analysis service unavailable, using fallback forecast');
+    const fallbackResponse = await generateFallbackForecast(historicalData, body.productId, body.days);
+    return NextResponse.json(fallbackResponse);
 
-    // Fallback to simple forecasting if service is unavailable
-    const forecastData = generateSimpleForecast(historicalData, body.days);
-
-    // Generate AI summary using Gemini if available
-    let summary = generateForecastSummary(productName, forecastData, historicalData);
-
-    try {
-      const geminiSummary = await generateGeminiSummary(productName, forecastData, historicalData);
-      if (geminiSummary) {
-        summary = geminiSummary;
-      }
-    } catch (error) {
-      console.warn('Gemini summary generation failed:', error);
-    }
-
-    const response: ForecastResponse = {
-      forecastData,
-      summary
-    };
-
-    return NextResponse.json(response);
   } catch (error) {
     console.error('Error generating forecast:', error);
     return NextResponse.json(

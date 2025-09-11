@@ -92,44 +92,122 @@ export function TableToolbar({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  // Helper function to validate CSV file type
+  const validateCsvFile = (file: File): boolean => {
     if (!file.name.toLowerCase().endsWith('.csv')) {
       toast.error("Invalid file type", {
         description: "Please select a CSV file."
       });
-      return;
+      return false;
     }
+    return true;
+  };
 
-    // Quick file size check to determine import method
-    const fileSizeMB = file.size / (1024 * 1024);
+  // Helper function to determine import strategy based on file size
+  const determineImportStrategy = (fileSizeMB: number): 'bulk' | 'regular' => {
+    return fileSizeMB > 1 ? 'bulk' : 'regular';
+  };
 
-    // If file is larger than 1MB or we can't read it quickly, use bulk import
-    if (fileSizeMB > 1) {
-      await handleBulkImportProcess(file);
-      return;
-    }
-
-    // For smaller files, try to read and determine row count
+  // Helper function to check if file should use bulk import based on row count
+  const shouldUseBulkImport = async (file: File): Promise<boolean> => {
     try {
       const text = await file.text();
       const lines = text.split('\n').filter(line => line.trim());
-
-      // If more than 100 rows, use bulk import for better performance
-      if (lines.length > 101) { // 100 data rows + 1 header
-        await handleBulkImportProcess(file);
-        return;
-      }
-
-      // For small files, use regular import
-      await handleRegularImportProcess(text);
+      return lines.length > 101; // 100 data rows + 1 header
     } catch (error) {
-      // If reading fails, fall back to bulk import
       console.warn('Failed to read file for size check, using bulk import:', error);
-      await handleBulkImportProcess(file);
+      return true; // Fall back to bulk import if reading fails
     }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!validateCsvFile(file)) return;
+
+    const fileSizeMB = file.size / (1024 * 1024);
+    const strategy = determineImportStrategy(fileSizeMB);
+
+    if (strategy === 'bulk') {
+      await handleBulkImportProcess(file);
+      return;
+    }
+
+    // For smaller files, check row count to determine strategy
+    const useBulk = await shouldUseBulkImport(file);
+    if (useBulk) {
+      await handleBulkImportProcess(file);
+    } else {
+      try {
+        const text = await file.text();
+        await handleRegularImportProcess(text);
+      } catch (error) {
+        console.warn('Failed to read file, falling back to bulk import:', error);
+        await handleBulkImportProcess(file);
+      }
+    }
+  };
+
+  // Helper function to validate CSV headers
+  const validateCsvHeaders = (headers: string[]): boolean => {
+    const expectedHeaders = ['Date', 'Product', 'Quantity', 'Price'];
+    if (!expectedHeaders.every(header => headers.includes(header))) {
+      toast.error("Invalid CSV format", {
+        description: "CSV must have columns: Date, Product, Quantity, Price"
+      });
+      return false;
+    }
+    return true;
+  };
+
+  // Helper function to validate and parse CSV row data
+  const validateAndParseRow = (values: string[]): CreateDemandRequest | null => {
+    if (values.length !== 4) return null;
+
+    const [dateStr, productName, quantityStr, priceStr] = values;
+
+    const date = new Date(dateStr);
+    const quantity = parseInt(quantityStr);
+    const price = parseFloat(priceStr);
+
+    if (isNaN(date.getTime()) || isNaN(quantity) || isNaN(price) ||
+        quantity <= 0 || price <= 0 || !Number.isInteger(quantity)) {
+      return null;
+    }
+
+    return {
+      date: date.toISOString(),
+      productName,
+      quantity,
+      price,
+      unit: 'kg'
+    };
+  };
+
+  // Helper function to process individual CSV rows
+  const processCsvRows = async (dataRows: string[]): Promise<{ successCount: number; errorCount: number }> => {
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const row of dataRows) {
+      try {
+        const values = row.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+        const importData = validateAndParseRow(values);
+
+        if (!importData) {
+          errorCount++;
+          continue;
+        }
+
+        await demandsApi.createDemand(importData);
+        successCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+
+    return { successCount, errorCount };
   };
 
   const handleRegularImportProcess = async (csvText: string) => {
@@ -145,53 +223,12 @@ export function TableToolbar({
       }
 
       const headers = lines[0].split(',').map(h => h.trim());
-      const expectedHeaders = ['Date', 'Product', 'Quantity', 'Price'];
-
-      if (!expectedHeaders.every(header => headers.includes(header))) {
-        toast.error("Invalid CSV format", {
-          description: "CSV must have columns: Date, Product, Quantity, Price"
-        });
-        return;
-      }
+      if (!validateCsvHeaders(headers)) return;
 
       const dataRows = lines.slice(1);
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (const row of dataRows) {
-        try {
-          const values = row.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-          if (values.length !== 4) continue;
-
-          const [dateStr, productName, quantityStr, priceStr] = values;
-
-          // Parse and validate data
-          const date = new Date(dateStr);
-          const quantity = parseInt(quantityStr);
-          const price = parseFloat(priceStr);
-
-          if (isNaN(date.getTime()) || isNaN(quantity) || isNaN(price) || quantity <= 0 || price <= 0 || !Number.isInteger(quantity)) {
-            errorCount++;
-            continue;
-          }
-
-          const importData: CreateDemandRequest = {
-            date: date.toISOString(),
-            productName,
-            quantity,
-            price,
-            unit: 'kg'
-          };
-
-          await demandsApi.createDemand(importData);
-          successCount++;
-        } catch {
-          errorCount++;
-        }
-      }
+      const { successCount, errorCount } = await processCsvRows(dataRows);
 
       if (successCount > 0) {
-        // Invalidate and refetch demands data
         queryClient.invalidateQueries({ queryKey: ['demands'] });
         queryClient.invalidateQueries({ queryKey: ['products'] });
 
@@ -209,7 +246,6 @@ export function TableToolbar({
       });
     } finally {
       setIsImporting(false);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -303,26 +339,30 @@ export function TableToolbar({
     setLocalFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  // Helper function to check if a filter value is active
+  const isFilterActive = (value: any): boolean => {
+    if (typeof value === 'string') {
+      return value.trim() !== '';
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return value !== undefined && value !== null;
+  };
+
   // Helper function to count only active filters
   const getActiveFilterCount = () => {
-    let count = 0;
-    
-    // Date filters
-    if (localFilters.dateFrom && localFilters.dateFrom.trim() !== '') count++;
-    if (localFilters.dateTo && localFilters.dateTo.trim() !== '') count++;
-    
-    // Price filters
-    if (localFilters.priceMin !== undefined && localFilters.priceMin !== null) count++;
-    if (localFilters.priceMax !== undefined && localFilters.priceMax !== null) count++;
-    
-    // Quantity filters
-    if (localFilters.quantityMin !== undefined && localFilters.quantityMin !== null) count++;
-    if (localFilters.quantityMax !== undefined && localFilters.quantityMax !== null) count++;
-    
-    // Product IDs filter
-    if (localFilters.productIds && Array.isArray(localFilters.productIds) && localFilters.productIds.length > 0) count++;
-    
-    return count;
+    const filterFields = [
+      localFilters.dateFrom,
+      localFilters.dateTo,
+      localFilters.priceMin,
+      localFilters.priceMax,
+      localFilters.quantityMin,
+      localFilters.quantityMax,
+      localFilters.productIds
+    ];
+
+    return filterFields.filter(isFilterActive).length;
   };
 
   return (
