@@ -26,6 +26,11 @@ class ServiceManager:
         self.npm_path = None
         self.python_path = None
 
+        # Configuration
+        self.frontend_port = 3000  # Default, will be detected dynamically
+        self.backend_port = 7860   # Default backend port
+        self.hostname = "localhost"  # Default hostname
+
         # Try to set console encoding for better Unicode support
         try:
             if hasattr(sys.stdout, 'reconfigure'):
@@ -113,6 +118,106 @@ class ServiceManager:
             text = text.replace(bad, good)
 
         return text
+
+    def detect_frontend_port(self):
+        """Detect the actual port Next.js is using"""
+        # Next.js typically outputs something like:
+        # "Local:        http://localhost:3000"
+        # or "Local:        http://localhost:3001"
+
+        # Wait a moment for Next.js to start and output port info
+        time.sleep(3)
+
+        # Try to detect from the output that's already been captured
+        # Look for port information in recent output
+        try:
+            # Check if we can peek at the output without consuming it
+            import io
+            if hasattr(self.frontend_process.stdout, 'peek'):
+                # Peek at available data without consuming it
+                available_data = self.frontend_process.stdout.peek(1024)
+                if available_data:
+                    lines = available_data.decode('utf-8', errors='ignore').split('\n')
+                    for line in lines:
+                        if "Local:" in line and "http://" in line:
+                            import re
+                            match = re.search(r'http://[^:]+:(\d+)', line)
+                            if match:
+                                detected_port = int(match.group(1))
+                                self.frontend_port = detected_port
+                                print(f"📍 Detected frontend port: {detected_port}")
+                                return detected_port
+        except Exception as e:
+            print(f"⚠️  Could not peek at frontend output: {e}")
+
+        # Fallback: Check common ports to see which one is actually open
+        import socket
+        for port in [3000, 3001, 3002]:
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    result = s.connect_ex(('localhost', port))
+                    if result == 0:  # Port is open
+                        self.frontend_port = port
+                        print(f"📍 Detected frontend port: {port}")
+                        return port
+            except:
+                pass
+
+        print(f"⚠️  Using default frontend port: {self.frontend_port}")
+        return self.frontend_port
+
+    def detect_backend_port(self):
+        """Detect the actual port the backend is using"""
+        # FastAPI typically outputs something like:
+        # "Uvicorn running on http://0.0.0.0:7860"
+
+        # Wait a moment for FastAPI to start
+        time.sleep(2)
+
+        # Try to detect from the output
+        try:
+            if hasattr(self.backend_process.stdout, 'peek'):
+                available_data = self.backend_process.stdout.peek(1024)
+                if available_data:
+                    lines = available_data.decode('utf-8', errors='ignore').split('\n')
+                    for line in lines:
+                        if "Uvicorn running on" in line and "http://" in line:
+                            import re
+                            match = re.search(r'http://[^:]+:(\d+)', line)
+                            if match:
+                                detected_port = int(match.group(1))
+                                self.backend_port = detected_port
+                                print(f"📍 Detected backend port: {detected_port}")
+                                return detected_port
+        except Exception as e:
+            print(f"⚠️  Could not peek at backend output: {e}")
+
+        # Fallback to checking the configured port
+        import socket
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                result = s.connect_ex(('localhost', self.backend_port))
+                if result == 0:  # Port is open
+                    print(f"📍 Confirmed backend port: {self.backend_port}")
+                    return self.backend_port
+        except:
+            pass
+
+        print(f"⚠️  Using default backend port: {self.backend_port}")
+        return self.backend_port
+
+    def get_network_ip(self):
+        """Get the network IP address for external access"""
+        try:
+            import socket
+            # Create a socket to get the local IP
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))  # Connect to Google DNS
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return "localhost"
 
     def start_frontend(self):
         """Start the Next.js frontend"""
@@ -237,6 +342,16 @@ class ServiceManager:
         # Wait a bit for services to start
         time.sleep(5)
 
+        # Detect actual ports being used
+        if not self.frontend_process is None:
+            self.detect_frontend_port()
+        if not self.backend_process is None:
+            self.detect_backend_port()
+
+        # Get network IP for external access
+        network_ip = self.get_network_ip()
+        self.hostname = network_ip
+
         # Check if processes are still running
         frontend_running = self.frontend_process and self.frontend_process.poll() is None
         backend_running = self.backend_process and self.backend_process.poll() is None
@@ -319,9 +434,15 @@ class ServiceManager:
             if self.wait_for_services():
                 print("\n" + "=" * 50)
                 print("🎉 Services started successfully!")
-                print("📱 Frontend: http://localhost:3000 (or 3001 if 3000 is busy)")
-                print("🔧 Backend:  http://localhost:7860")
-                print("📚 API Docs: http://localhost:7860/docs")
+
+                # Display URLs with detected ports and network access
+                print(f"📱 Frontend (Local):    http://localhost:{self.frontend_port}")
+                print(f"📱 Frontend (Network):  http://{self.hostname}:{self.frontend_port}")
+                print(f"🔧 Backend (Local):     http://localhost:{self.backend_port}")
+                print(f"🔧 Backend (Network):   http://{self.hostname}:{self.backend_port}")
+                print(f"📚 API Docs (Local):    http://localhost:{self.backend_port}/docs")
+                print(f"📚 API Docs (Network):  http://{self.hostname}:{self.backend_port}/docs")
+
                 print("=" * 50)
                 print("Press Ctrl+C to stop all services")
             else:
@@ -359,6 +480,12 @@ def main():
                        help="Start only the backend")
     parser.add_argument("--no-monitor", action="store_true",
                        help="Don't monitor process output")
+    parser.add_argument("--frontend-port", type=int, default=3000,
+                       help="Port for frontend (default: 3000)")
+    parser.add_argument("--backend-port", type=int, default=7860,
+                       help="Port for backend (default: 7860)")
+    parser.add_argument("--hostname", default="localhost",
+                       help="Hostname to use for URLs (default: localhost)")
 
     args = parser.parse_args()
 
@@ -367,6 +494,11 @@ def main():
         return 1
 
     manager = ServiceManager()
+    # Override default ports if specified
+    manager.frontend_port = args.frontend_port
+    manager.backend_port = args.backend_port
+    manager.hostname = args.hostname
+
     return manager.run(
         frontend_only=args.frontend_only,
         backend_only=args.backend_only

@@ -15,12 +15,15 @@ A comprehensive Python script that manages both services with proper error handl
 - ✅ Process monitoring and logging
 - ✅ Graceful shutdown (Ctrl+C)
 - ✅ Status reporting
+- ✅ **Dynamic port detection** (automatically detects actual ports used)
+- ✅ **Network IP detection** (shows both localhost and network URLs)
+- ✅ **Configurable ports and hostname** via command line arguments
 - ✅ Cross-platform compatibility
 
 **Usage:**
 
 ```bash
-# Start both services
+# Start both services (with dynamic port detection)
 python start_services.py
 
 # Start only frontend
@@ -28,6 +31,9 @@ python start_services.py --frontend-only
 
 # Start only backend
 python start_services.py --backend-only
+
+# Custom ports and hostname
+python start_services.py --frontend-port 3001 --backend-port 8000 --hostname 192.168.1.100
 ```
 
 ### 2. Windows Batch Script - `start_services.bat`
@@ -40,7 +46,27 @@ Simple Windows batch file for quick startup on Windows systems.
 start_services.bat
 ```
 
-### 3. Shell Script - `start_services.sh`
+### 3. PowerShell Script - `start_services.ps1`
+
+PowerShell script with parameter support for advanced configuration.
+
+**Usage:**
+
+```powershell
+# Start both services with defaults
+.\start_services.ps1
+
+# Custom configuration
+.\start_services.ps1 -FrontendPort 3001 -BackendPort 8000 -Hostname "192.168.1.100"
+
+# Start only frontend
+.\start_services.ps1 -FrontendOnly
+
+# Start only backend
+.\start_services.ps1 -BackendOnly
+```
+
+### 4. Shell Script - `start_services.sh`
 
 Shell script for Unix-like systems (Linux/Mac).
 
@@ -63,9 +89,14 @@ Shell script for Unix-like systems (Linux/Mac).
 
 After starting both services, you can access:
 
-- **Frontend**: `http://localhost:3000` (or `http://localhost:3001` if 3000 is busy)
-- **Backend API**: `http://localhost:7860`
-- **API Documentation**: `http://localhost:7860/docs`
+- **Frontend (Local)**: `http://localhost:[detected-port]`
+- **Frontend (Network)**: `http://[network-ip]:[detected-port]`
+- **Backend API (Local)**: `http://localhost:[backend-port]`
+- **Backend API (Network)**: `http://[network-ip]:[backend-port]`
+- **API Docs (Local)**: `http://localhost:[backend-port]/docs`
+- **API Docs (Network)**: `http://[network-ip]:[backend-port]/docs`
+
+The script automatically detects the actual ports being used and your network IP address for external access.
 
 ## Troubleshooting
 
