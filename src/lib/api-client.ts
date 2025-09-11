@@ -78,7 +78,7 @@ export const forecastApi = {
   // Generate forecast for product
   async generateForecast(data: ForecastRequest): Promise<ForecastResponse> {
     if (isDevelopment) {
-      return mockApi.generateForecast(data.productId, data.days);
+      return mockApi.generateForecast(data.productId, data.days, data);
     }
     const response = await apiClient.post<ForecastResponse>('/forecast', data);
     return response.data;

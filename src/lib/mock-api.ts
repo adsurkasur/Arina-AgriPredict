@@ -6,6 +6,7 @@ import {
   CreateDemandRequest,
   UpdateDemandRequest,
   ForecastResponse,
+  ForecastRequest,
   ChatResponse,
   Product
 } from '@/types/api';
@@ -231,56 +232,100 @@ export const mockApi = {
   setLocalDemands(demands);
   },
 
-  async generateForecast(productId: string, days: number): Promise<ForecastResponse> {
+  async generateForecast(_productId: string, days: number, _options?: Partial<ForecastRequest>): Promise<ForecastResponse> {
     await delay(2000); // Longer delay to simulate ML processing
     
-    const product = mockProducts.find(p => p.id === productId);
+    const product = mockProducts.find(p => p.id === _productId);
     if (!product) {
       throw new Error('Product not found');
     }
     
-    // Generate mock forecast data
+    // Generate mock forecast data with enhanced features
     const forecastData = Array.from({ length: days }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() + i + 1);
       
-      // Simple mock algorithm - add some randomness to current trend
+      // Enhanced mock algorithm with scenario-based adjustments
       const baseValue = 150 + Math.sin(i / 7) * 20; // Weekly pattern
+      let scenarioMultiplier = 1;
+      
+      if (_options?.scenario === 'optimistic') {
+        scenarioMultiplier = 1.2;
+      } else if (_options?.scenario === 'pessimistic') {
+        scenarioMultiplier = 0.8;
+      }
+      
       const randomVariation = (Math.random() - 0.5) * 30;
-      const predictedValue = Math.max(0, baseValue + randomVariation);
+      const predictedValue = Math.max(0, (baseValue + randomVariation) * scenarioMultiplier);
+      
+      // Generate confidence intervals if requested
+      const confidenceLower = _options?.includeConfidence ? predictedValue * 0.85 : undefined;
+      const confidenceUpper = _options?.includeConfidence ? predictedValue * 1.15 : undefined;
       
       return {
         date: date.toISOString(),
         predictedValue: Math.round(predictedValue),
+        confidenceLower: confidenceLower ? Math.round(confidenceLower) : undefined,
+        confidenceUpper: confidenceUpper ? Math.round(confidenceUpper) : undefined,
+        modelUsed: _options?.models?.[0] || 'ensemble'
       };
     });
     
+    // Enhanced summary with scenario information
+    const scenarioText = _options?.scenario ? ` (${_options.scenario} scenario)` : '';
+    const modelsText = _options?.models ? ` using ${(_options.models).join(', ')}` : '';
+    
     const summary = `
-# Forecast Analysis for ${product.name}
+# Enhanced Forecast Analysis for ${product.name}${scenarioText}
 
-Based on historical data analysis, here are the key insights for the ${days}-day forecast:
+Based on advanced analysis${modelsText}, here are the key insights for the ${days}-day forecast:
 
 ## Key Findings
-- **Average predicted demand**: ${Math.round(forecastData.reduce((sum, d) => sum + d.predictedValue, 0) / days)} kg/day
-- **Peak demand expected**: ${Math.max(...forecastData.map(d => d.predictedValue))} kg
-- **Lowest demand expected**: ${Math.min(...forecastData.map(d => d.predictedValue))} kg
+- **Average predicted demand**: ${Math.round(forecastData.reduce((sum, d) => sum + d.predictedValue, 0) / days)} units/day
+- **Peak demand expected**: ${Math.max(...forecastData.map(d => d.predictedValue))} units
+- **Lowest demand expected**: ${Math.min(...forecastData.map(d => d.predictedValue))} units
+- **Forecast confidence**: ${Math.round(Math.random() * 20 + 80)}%
+
+## Scenario Analysis
+${_options?.scenario === 'optimistic' ? '- Optimistic scenario assumes favorable market conditions' : 
+  _options?.scenario === 'pessimistic' ? '- Pessimistic scenario accounts for potential challenges' : 
+  '- Realistic scenario based on current market trends'}
 
 ## Recommendations
 1. **Stock Management**: Maintain inventory levels around the average predicted demand
 2. **Price Optimization**: Consider dynamic pricing during peak demand periods
 3. **Supply Chain**: Coordinate with suppliers for consistent availability
+4. **Risk Mitigation**: Monitor actual performance against forecast ranges
 
-## Market Trends
-- The forecast shows seasonal patterns typical for ${product.category.toLowerCase()}
-- Weekly cycles indicate higher demand mid-week
-- Consider external factors like weather and festivals that may impact actual demand
+## Model Performance
+${_options?.models ? `Models used: ${(_options.models).join(', ')}` : 'Ensemble model combining multiple algorithms'}
+${_options?.includeConfidence ? 'Confidence intervals included for risk assessment' : ''}
 
 *This forecast is generated using advanced time series analysis and machine learning algorithms.*
     `;
     
+    // Generate revenue projection if selling price is provided
+    const revenueProjection = _options?.sellingPrice ? forecastData.map(point => ({
+      date: point.date,
+      projectedQuantity: point.predictedValue,
+      sellingPrice: _options.sellingPrice!,
+      projectedRevenue: point.predictedValue * _options.sellingPrice!,
+      confidenceLower: point.confidenceLower ? point.confidenceLower * _options.sellingPrice! : undefined,
+      confidenceUpper: point.confidenceUpper ? point.confidenceUpper * _options.sellingPrice! : undefined
+    })) : undefined;
+    
     return {
       forecastData,
+      revenueProjection,
       summary: summary.trim(),
+      modelsUsed: _options?.models || ['ensemble'],
+      confidence: Math.round(Math.random() * 20 + 80) / 100,
+      scenario: _options?.scenario || 'realistic',
+      metadata: {
+        dataPoints: 100, // Mock data points
+        forecastHorizon: days,
+        lastTrainingDate: new Date().toISOString()
+      }
     };
   },
 

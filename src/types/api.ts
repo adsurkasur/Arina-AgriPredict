@@ -52,12 +52,21 @@ export interface UpdateDemandRequest {
 export interface ForecastDataPoint {
   date: string; // ISO string
   predictedValue: number;
+  confidenceLower?: number;
+  confidenceUpper?: number;
+  modelUsed?: string;
 }
 
 export interface ForecastRequest {
   productId: string;
   days: number;
   sellingPrice?: number;
+  // Enhanced options
+  dateFrom?: string;
+  dateTo?: string;
+  models?: string[];
+  includeConfidence?: boolean;
+  scenario?: 'optimistic' | 'pessimistic' | 'realistic';
 }
 
 export interface RevenueProjection {
@@ -65,6 +74,8 @@ export interface RevenueProjection {
   projectedQuantity: number;
   sellingPrice: number;
   projectedRevenue: number;
+  confidenceLower?: number;
+  confidenceUpper?: number;
 }
 
 export interface ForecastResponse {
@@ -72,6 +83,13 @@ export interface ForecastResponse {
   revenueProjection?: RevenueProjection[];
   modelsUsed?: string[];
   summary: string; // AI-generated interpretation in Markdown
+  confidence?: number;
+  scenario?: string;
+  metadata?: {
+    dataPoints: number;
+    forecastHorizon: number;
+    lastTrainingDate: string;
+  };
 }
 
 export interface Message {
