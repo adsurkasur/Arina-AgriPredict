@@ -37,6 +37,7 @@ export function useCreateDemand() {
     mutationFn: (data: CreateDemandRequest) => demandsApi.createDemand(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demands'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success("Record added successfully", {
         description: "The new demand record has been created."
       });
@@ -138,6 +139,9 @@ export function useProducts() {
     queryKey: ['products'],
     queryFn: () => productsApi.getProducts(),
     staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 }
 
@@ -149,6 +153,7 @@ export function useProcessData() {
     mutationFn: (text: string) => demandsApi.processData(text),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['demands'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success("Data processed successfully", {
         description: `Processed ${data.processed} records from your input.`
       });

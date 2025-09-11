@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 
 export async function GET() {
   try {
+    console.log('Products API called');
     const { db } = await connectToDatabase();
 
     // First, let's check if there are any demands at all
@@ -19,6 +20,11 @@ export async function GET() {
 
     // Get all unique products from the demands collection
     const uniqueProducts = await db.collection('demands').aggregate([
+      {
+        $match: {
+          productId: { $exists: true, $nin: [null, ''] }
+        }
+      },
       {
         $group: {
           _id: '$productId',
@@ -64,12 +70,12 @@ export async function GET() {
     ]).toArray();
 
     console.log(`Found ${uniqueProducts.length} unique products`);
-    console.log('Unique products:', uniqueProducts.slice(0, 10)); // Show first 10
-
-    // If no products in database, return empty array
-    if (uniqueProducts.length === 0) {
-      return NextResponse.json([]);
-    }
+    console.log('Raw unique products from aggregation:', uniqueProducts);
+    console.log('Sample demands structure:', sampleDemands.map((d: any) => ({
+      productName: d.productName,
+      productId: d.productId,
+      date: d.date
+    })));
 
     return NextResponse.json(uniqueProducts);
   } catch (error) {

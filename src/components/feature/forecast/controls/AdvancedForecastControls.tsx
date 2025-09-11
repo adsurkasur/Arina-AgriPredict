@@ -74,7 +74,7 @@ export const AdvancedForecastControls: React.FC<AdvancedForecastControlsProps> =
           selectedProductIds={selectedProductIds}
           onProductChange={handleProductChange}
           products={products}
-          disabled={isDisabled}
+          disabled={false}
         />
 
         <Separator />
@@ -85,7 +85,7 @@ export const AdvancedForecastControls: React.FC<AdvancedForecastControlsProps> =
           dateTo={dateTo}
           onDateFromChange={setDateFrom}
           onDateToChange={setDateTo}
-          disabled={isDisabled}
+          disabled={false}
         />
 
         <Separator />
@@ -100,7 +100,7 @@ export const AdvancedForecastControls: React.FC<AdvancedForecastControlsProps> =
           onPriceChange={setSellingPrice}
           onScenarioChange={setScenario}
           onConfidenceChange={setIncludeConfidence}
-          disabled={isDisabled}
+          disabled={false}
         />
 
         <Separator />
@@ -109,7 +109,7 @@ export const AdvancedForecastControls: React.FC<AdvancedForecastControlsProps> =
         <ModelSelector
           selectedModels={selectedModels}
           onModelChange={setSelectedModels}
-          disabled={isDisabled}
+          disabled={false}
         />
 
         <Separator />

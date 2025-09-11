@@ -4,7 +4,14 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// Helper function to extract JSON from markdown code blocks
+// Helper function to generate productId from productName
+function generateProductId(productName: string): string {
+  return productName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .trim();
+}
 function extractJsonFromMarkdown(text: string): string {
   // Remove markdown code block markers
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -129,7 +136,7 @@ If you cannot extract meaningful data, return: {"error": "No agricultural transa
         const demandData = {
           date,
           productName: item.productName,
-          productId: item.productId || item.productName.toLowerCase().replace(/\s+/g, '-'),
+          productId: item.productId || generateProductId(item.productName),
           quantity: Number(item.quantity),
           price: item.price ? Number(item.price) : null,
           transactionType: item.transactionType || (text.toLowerCase().includes('sold') ? 'sale' : 'purchase'),
