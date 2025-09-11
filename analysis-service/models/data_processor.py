@@ -30,13 +30,32 @@ class DataProcessor:
         try:
             self.logger.info(f"Processing {len(historical_data)} historical data points")
 
+            # Handle Pydantic model instances - convert to dict if needed
+            processed_data = []
+            for i, item in enumerate(historical_data):
+                if hasattr(item, 'model_dump'):  # Pydantic v2
+                    processed_data.append(item.model_dump())
+                    self.logger.info(f"Item {i}: Converted Pydantic v2 model")
+                elif hasattr(item, 'dict'):  # Pydantic v1
+                    processed_data.append(item.dict())
+                    self.logger.info(f"Item {i}: Converted Pydantic v1 model")
+                else:
+                    processed_data.append(item)
+                    self.logger.info(f"Item {i}: Already dict - {type(item)}")
+
+            self.logger.info(f"Processed data sample: {processed_data[0] if processed_data else 'None'}")
+
             # Convert to DataFrame
-            df = pd.DataFrame(historical_data)
+            df = pd.DataFrame(processed_data)
+
+            self.logger.info(f"DataFrame columns: {list(df.columns)}")
+            self.logger.info(f"DataFrame shape: {df.shape}")
 
             # Validate required columns
             required_columns = ['date', 'quantity', 'price']
             missing_columns = [col for col in required_columns if col not in df.columns]
             if missing_columns:
+                self.logger.error(f"Missing columns: {missing_columns}")
                 raise ValueError(f"Missing required columns: {missing_columns}")
 
             # Convert date column

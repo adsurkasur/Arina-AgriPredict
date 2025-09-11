@@ -24,15 +24,13 @@ class APITester:
         for i in range(days):
             date = base_date + timedelta(days=i)
             # Generate realistic agricultural data
-            demand = random.randint(80, 150) + random.randint(-15, 15)
+            quantity = random.randint(80, 150) + random.randint(-15, 15)
             price = round(40 + random.uniform(-8, 8), 2)
-            temp = round(20 + random.uniform(-5, 10), 1)
 
             data.append({
                 "date": date.strftime("%Y-%m-%d"),
-                "demand": max(1, demand),
-                "price": max(10, price),
-                "weather_temp": temp
+                "quantity": max(1, quantity),  # API expects 'quantity' not 'demand'
+                "price": max(10, price)
             })
 
         return data
@@ -84,10 +82,11 @@ class APITester:
 
         # Prepare forecast request matching our API structure
         forecast_request = {
+            "product_id": "test_crop",  # Required by API
             "historical_data": historical_data,
-            "forecast_horizon": 7,
+            "days": 7,  # API expects 'days' not 'forecast_horizon'
             "models": ["SMA", "WMA", "ES"],
-            "confidence_level": 0.95
+            "include_confidence": True
         }
 
         try:
@@ -100,16 +99,14 @@ class APITester:
             if response.status_code == 200:
                 data = response.json()
                 print("✅ Forecast endpoint passed!")
-                print(f"   Forecast horizon: {data.get('forecast_horizon')}")
-                print(f"   Models used: {len(data.get('forecasts', {}))}")
-                print(f"   Forecast dates: {len(data.get('forecast_dates', []))}")
+                print(f"   Models used: {len(data.get('models_used', []))}")
+                print(f"   Forecast data points: {len(data.get('forecast_data', []))}")
 
                 # Show sample forecast values
-                forecasts = data.get('forecasts', {})
-                if forecasts:
-                    first_model = list(forecasts.keys())[0]
-                    forecast_values = forecasts[first_model]
-                    print(f"   Sample {first_model} forecast: {forecast_values[:3]}...")
+                forecast_data = data.get('forecast_data', [])
+                if forecast_data:
+                    print(f"   Sample forecast: {forecast_data[0]}")
+                    print(f"   Total forecast points: {len(forecast_data)}")
 
                 return {"success": True, "data": data}
             else:
@@ -130,8 +127,9 @@ class APITester:
 
         # Test with invalid data
         invalid_request = {
+            "product_id": "test_crop",
             "historical_data": [],  # Empty data should cause error
-            "forecast_horizon": 7,
+            "days": 7,  # API expects 'days' not 'forecast_horizon'
             "models": ["SMA"]
         }
 
