@@ -151,7 +151,9 @@ function generateSimpleForecast(historicalData: any[], days: number): ForecastDa
 
     forecast.push({
       date: forecastDate.toISOString(),
-      predictedValue: Math.round(predictedPrice * 100) / 100
+      predictedValue: Math.round(predictedPrice * 100) / 100,
+      confidenceLower: Math.round(predictedPrice * 0.85 * 100) / 100, // -15% confidence interval
+      confidenceUpper: Math.round(predictedPrice * 1.15 * 100) / 100  // +15% confidence interval
     });
   }
 

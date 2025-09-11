@@ -42,6 +42,7 @@ All colors MUST be HSL for consistency and theming support.
     /* Data Visualization Colors */
     --chart-demand: 142 76% 36%;
     --chart-forecast: 142 76% 40%;
+    --chart-confidence: 45 93% 60%;
     --chart-grid: 150 6% 85%;
     --chart-background: 0 0% 100%;
 
@@ -118,6 +119,7 @@ All colors MUST be HSL for consistency and theming support.
 
     --chart-demand: 142 76% 45%;
     --chart-forecast: 142 76% 50%;
+    --chart-confidence: 45 93% 65%;
     --chart-grid: 150 6% 25%;
     --chart-background: 150 15% 10%;
 

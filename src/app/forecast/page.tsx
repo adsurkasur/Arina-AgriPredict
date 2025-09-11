@@ -9,6 +9,7 @@ import { useDemands } from "@/hooks/useApiHooks";
 import { ForecastResponse } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MarkdownRenderer } from "@/components/common/MarkdownRenderer";
 import { Loader2, BarChart3, TrendingUp, Target, Brain, Activity } from "lucide-react";
 
 export default function ForecastPage() {
@@ -100,9 +101,7 @@ export default function ForecastPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none">
-                    <div dangerouslySetInnerHTML={{ __html: forecastData.summary.replace(/\n/g, '<br>') }} />
-                  </div>
+                  <MarkdownRenderer content={forecastData.summary} />
                 </CardContent>
               </Card>
             </TabsContent>

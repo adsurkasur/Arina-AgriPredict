@@ -42,20 +42,38 @@ export function ForecastView({ chartData, showConfidence, hasForecastData }: For
               <Area
                 type="monotone"
                 dataKey="confidenceUpper"
-                stackId="1"
                 stroke="none"
-                fill="hsl(var(--chart-forecast))"
-                fillOpacity={0.1}
+                fill="hsl(var(--chart-confidence))"
+                fillOpacity={0.15}
+                name="Confidence Interval"
               />
             )}
+
+            {/* Confidence lower line */}
             {showConfidence && hasForecastData && (
-              <Area
+              <Line
                 type="monotone"
                 dataKey="confidenceLower"
-                stackId="1"
-                stroke="none"
-                fill="hsl(var(--background))"
-                fillOpacity={1}
+                stroke="hsl(var(--chart-confidence))"
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                dot={false}
+                name="Confidence Lower"
+                connectNulls={false}
+              />
+            )}
+
+            {/* Confidence upper line */}
+            {showConfidence && hasForecastData && (
+              <Line
+                type="monotone"
+                dataKey="confidenceUpper"
+                stroke="hsl(var(--chart-confidence))"
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                dot={false}
+                name="Confidence Upper"
+                connectNulls={false}
               />
             )}
 
@@ -76,9 +94,9 @@ export function ForecastView({ chartData, showConfidence, hasForecastData }: For
                 type="monotone"
                 dataKey="forecastDemand"
                 stroke="hsl(var(--chart-forecast))"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={{ fill: 'hsl(var(--chart-forecast))', strokeWidth: 2, r: 4 }}
+                strokeWidth={3}
+                strokeDasharray="8 4"
+                dot={{ fill: 'hsl(var(--chart-forecast))', strokeWidth: 2, r: 5 }}
                 name="Forecast"
                 connectNulls={false}
               />

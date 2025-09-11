@@ -166,6 +166,15 @@ Available actions:
 Please provide a helpful, contextual response. If the user wants to perform an action, guide them through it.
 Keep responses professional, concise, and focused on agricultural business needs.
 
+**Formatting Guidelines:**
+- Use **bold** text for emphasis and important terms
+- Use *italic* text for product names and specific values
+- Use bullet points (-) for lists and suggestions
+- Use numbered lists (1., 2., 3.) for step-by-step instructions
+- Use \`code\` formatting for technical terms, product IDs, or specific data values
+- Use headers (# ## ###) to organize longer responses
+- Keep responses conversational but well-structured
+
 Response format: Provide a natural, conversational response with any relevant suggestions or next steps.
 `;
 

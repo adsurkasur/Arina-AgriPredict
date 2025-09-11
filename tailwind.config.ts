@@ -41,6 +41,7 @@ export default {
         // Chart and AI colors
         'chart-demand': 'hsl(var(--chart-demand))',
         'chart-forecast': 'hsl(var(--chart-forecast))',
+        'chart-confidence': 'hsl(var(--chart-confidence))',
         'chart-grid': 'hsl(var(--chart-grid))',
         'chart-background': 'hsl(var(--chart-background))',
         'ai-bubble-user': 'hsl(var(--ai-bubble-user))',
