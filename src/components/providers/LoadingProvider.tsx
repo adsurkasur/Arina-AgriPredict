@@ -60,7 +60,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       // Update current path even if not navigating (for initial load, etc.)
       setCurrentPath(pathname);
     }
-  }, [pathname, isNavigating, lastNavigationTime]);
+  }, [pathname, isNavigating, lastNavigationTime, currentPath]);
 
   const startLoading = (message = "Loading AgriPredict...") => {
     const navigationTime = Date.now();

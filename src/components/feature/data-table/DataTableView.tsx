@@ -3,7 +3,7 @@ import { DemandRecord } from '@/types/api';
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { EditDemandDialog } from './EditDemandDialog';
+import { EditDemandDialog } from './edit-demand';
 import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDeleteConfirmationDialog';
 import { useDeleteDemand } from '@/hooks/useApiHooks';
 import { ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';

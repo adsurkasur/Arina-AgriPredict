@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { AdvancedForecastControls } from "@/components/feature/forecast/AdvancedForecastControls";
-import { EnhancedDemandChart } from "@/components/feature/forecast/EnhancedDemandChart";
-import { ExportCapabilities } from "@/components/feature/forecast/ExportCapabilities";
+import { AdvancedForecastControls } from "@/components/feature/forecast/controls";
+import { EnhancedDemandChart } from "@/components/feature/forecast/enhanced-demand-chart";
+import { ExportCapabilities } from "@/components/feature/forecast/export";
 import { AdvancedAnalytics } from "@/components/feature/forecast/AdvancedAnalytics";
-import { RealTimeDataStreaming } from "@/components/feature/forecast/RealTimeDataStreaming";
+import { RealTimeDataStreaming } from "@/components/feature/forecast/realtime";
 import { useDemands } from "@/hooks/useApiHooks";
 import { ForecastResponse } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
