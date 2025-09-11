@@ -92,36 +92,6 @@ export function TableToolbar({
     fileInputRef.current?.click();
   };
 
-  const handleClearData = async () => {
-    if (data.length === 0) {
-      toast.warning("No data to clear", {
-        description: "There are no records to delete."
-      });
-      return;
-    }
-
-    try {
-      // Delete all records
-      const deletePromises = data.map(record =>
-        demandsApi.deleteDemand(record.id)
-      );
-
-      await Promise.all(deletePromises);
-
-      // Refresh the data
-      queryClient.invalidateQueries({ queryKey: ['demands'] });
-
-      toast.success("Data cleared successfully", {
-        description: `Deleted ${data.length} records.`
-      });
-    } catch (error) {
-      console.error('Error clearing data:', error);
-      toast.error("Failed to clear data", {
-        description: "Some records may not have been deleted. Please try again."
-      });
-    }
-  };
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -133,11 +103,40 @@ export function TableToolbar({
       return;
     }
 
-    setIsImporting(true);
+    // Quick file size check to determine import method
+    const fileSizeMB = file.size / (1024 * 1024);
+
+    // If file is larger than 1MB or we can't read it quickly, use bulk import
+    if (fileSizeMB > 1) {
+      await handleBulkImportProcess(file);
+      return;
+    }
+
+    // For smaller files, try to read and determine row count
     try {
       const text = await file.text();
       const lines = text.split('\n').filter(line => line.trim());
-      
+
+      // If more than 100 rows, use bulk import for better performance
+      if (lines.length > 101) { // 100 data rows + 1 header
+        await handleBulkImportProcess(file);
+        return;
+      }
+
+      // For small files, use regular import
+      await handleRegularImportProcess(text);
+    } catch (error) {
+      // If reading fails, fall back to bulk import
+      console.warn('Failed to read file for size check, using bulk import:', error);
+      await handleBulkImportProcess(file);
+    }
+  };
+
+  const handleRegularImportProcess = async (csvText: string) => {
+    setIsImporting(true);
+    try {
+      const lines = csvText.split('\n').filter(line => line.trim());
+
       if (lines.length < 2) {
         toast.error("Invalid CSV format", {
           description: "CSV file must contain headers and at least one data row."
@@ -147,7 +146,7 @@ export function TableToolbar({
 
       const headers = lines[0].split(',').map(h => h.trim());
       const expectedHeaders = ['Date', 'Product', 'Quantity', 'Price'];
-      
+
       if (!expectedHeaders.every(header => headers.includes(header))) {
         toast.error("Invalid CSV format", {
           description: "CSV must have columns: Date, Product, Quantity, Price"
@@ -165,7 +164,7 @@ export function TableToolbar({
           if (values.length !== 4) continue;
 
           const [dateStr, productName, quantityStr, priceStr] = values;
-          
+
           // Parse and validate data
           const date = new Date(dateStr);
           const quantity = parseInt(quantityStr);
@@ -180,7 +179,8 @@ export function TableToolbar({
             date: date.toISOString(),
             productName,
             quantity,
-            price
+            price,
+            unit: 'kg'
           };
 
           await demandsApi.createDemand(importData);
@@ -193,7 +193,8 @@ export function TableToolbar({
       if (successCount > 0) {
         // Invalidate and refetch demands data
         queryClient.invalidateQueries({ queryKey: ['demands'] });
-        
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+
         toast.success("Import completed", {
           description: `Successfully imported ${successCount} records. ${errorCount > 0 ? `${errorCount} records failed.` : ''}`
         });
@@ -212,6 +213,73 @@ export function TableToolbar({
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleBulkImportProcess = async (file: File) => {
+    setIsImporting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/bulk-import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Bulk import failed');
+      }
+
+      // Invalidate and refetch demands data
+      queryClient.invalidateQueries({ queryKey: ['demands'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
+      toast.success("Bulk import completed", {
+        description: `Successfully imported ${result.data.processed} records from ${result.data.totalRows} rows.`
+      });
+
+    } catch (error) {
+      console.error('Bulk import error:', error);
+      toast.error("Bulk import failed", {
+        description: error instanceof Error ? error.message : "Failed to import data"
+      });
+    } finally {
+      setIsImporting(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleClearData = async () => {
+    try {
+      const response = await fetch('/api/demands/clear-all', {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to clear data');
+      }
+
+      // Refresh the data and products
+      queryClient.invalidateQueries({ queryKey: ['demands'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
+      toast.success("All data cleared successfully", {
+        description: `Deleted ${result.data.deletedCount} records from the database.`
+      });
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      toast.error("Failed to clear data", {
+        description: error instanceof Error ? error.message : "Some records may not have been deleted. Please try again."
+      });
     }
   };
 
@@ -401,7 +469,7 @@ export function TableToolbar({
           <Download className="mr-2 h-4 w-4" aria-hidden="true" />
           {isImporting ? 'Importing...' : 'Import'}
         </Button>
-        
+
         <Button variant="outline" size="sm" onClick={handleExport} className="transition-smooth" aria-label="Export sales data">
           <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
           Export
@@ -409,11 +477,12 @@ export function TableToolbar({
 
         <GenericDeleteConfirmationDialog
           title="Clear All Data"
-          description="This will permanently delete all sales records from the database. This action cannot be undone."
-          itemName="All Sales Data"
+          description="This will permanently delete ALL sales records from the entire database. This action cannot be undone."
+          itemName="All Database Sales Data"
           itemDetails={[
-            `Total Records: ${data.length}`,
-            "This includes all historical sales data",
+            "This will delete ALL records from the database",
+            "This includes data not currently displayed on screen",
+            "All historical sales data will be permanently removed",
             "Action cannot be reversed"
           ]}
           confirmText="Delete All Data"

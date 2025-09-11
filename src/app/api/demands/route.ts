@@ -83,7 +83,8 @@ export async function POST(request: NextRequest) {
       productName: body.productName,
       productId,
       quantity: body.quantity,
-      price: body.price
+      price: body.price,
+      unit: body.unit || 'kg'
     };
 
     const result = await db.collection('demands').insertOne(newDemand);

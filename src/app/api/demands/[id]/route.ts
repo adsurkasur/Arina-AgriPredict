@@ -33,7 +33,8 @@ export async function GET(
       productName: demand.productName,
       productId: demand.productId,
       quantity: demand.quantity,
-      price: demand.price
+      price: demand.price,
+      unit: demand.unit || 'kg'
     };
 
     return NextResponse.json(response);
@@ -105,7 +106,8 @@ export async function PUT(
       productName: updatedDemand!.productName,
       productId: updatedDemand!.productId,
       quantity: updatedDemand!.quantity,
-      price: updatedDemand!.price
+      price: updatedDemand!.price,
+      unit: updatedDemand!.unit || 'kg'
     };
 
     return NextResponse.json(response);

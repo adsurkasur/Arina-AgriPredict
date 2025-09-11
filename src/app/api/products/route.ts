@@ -5,6 +5,18 @@ export async function GET() {
   try {
     const { db } = await connectToDatabase();
 
+    // First, let's check if there are any demands at all
+    const totalDemands = await db.collection('demands').countDocuments();
+    console.log(`Total demands in database: ${totalDemands}`);
+
+    // Get a sample of demands to see the structure
+    const sampleDemands = await db.collection('demands').find({}).limit(5).toArray();
+    console.log('Sample demands:', sampleDemands.map(d => ({
+      productName: d.productName,
+      productId: d.productId,
+      date: d.date
+    })));
+
     // Get all unique products from the demands collection
     const uniqueProducts = await db.collection('demands').aggregate([
       {
@@ -50,6 +62,9 @@ export async function GET() {
         $sort: { name: 1 }
       }
     ]).toArray();
+
+    console.log(`Found ${uniqueProducts.length} unique products`);
+    console.log('Unique products:', uniqueProducts.slice(0, 10)); // Show first 10
 
     // If no products in database, return empty array
     if (uniqueProducts.length === 0) {

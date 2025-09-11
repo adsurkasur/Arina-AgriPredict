@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
 import { CalendarIcon, Settings, TrendingUp } from 'lucide-react';
-import { useForecast, useProducts } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ForecastResponse, ForecastRequest } from '@/types/api';
@@ -19,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useForecast, useProducts } from '@/hooks/useApiHooks';
 
 interface AdvancedForecastControlsProps {
   onForecastGenerated: (_forecast: ForecastResponse) => void;
