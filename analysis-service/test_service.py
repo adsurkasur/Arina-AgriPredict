@@ -35,6 +35,21 @@ class APITester:
 
         return data
 
+    def _handle_api_error(self, endpoint_name: str, response, exception: Exception = None) -> Dict[str, Any]:
+        """Helper method to handle API errors consistently"""
+        if exception:
+            print(f"❌ {endpoint_name} error: {str(exception)}")
+            return {"success": False, "error": str(exception)}
+        else:
+            print(f"❌ {endpoint_name} failed with status {response.status_code}")
+            if hasattr(response, 'json'):
+                try:
+                    error_data = response.json()
+                    print(f"   Error details: {error_data}")
+                except:
+                    print(f"   Response text: {response.text}")
+            return {"success": False, "error": f"Status {response.status_code}"}
+
     def test_health_endpoint(self) -> Dict[str, Any]:
         """Test the health check endpoint"""
         print("🔍 Testing health endpoint...")
@@ -47,11 +62,9 @@ class APITester:
                 print(f"   Service: {data.get('service')}")
                 return {"success": True, "data": data}
             else:
-                print(f"❌ Health check failed with status {response.status_code}")
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return self._handle_api_error("Health check", response)
         except Exception as e:
-            print(f"❌ Health check error: {str(e)}")
-            return {"success": False, "error": str(e)}
+            return self._handle_api_error("Health check", None, e)
 
     def test_models_endpoint(self) -> Dict[str, Any]:
         """Test the models endpoint"""
@@ -67,11 +80,9 @@ class APITester:
                     print(f"   - {model}")
                 return {"success": True, "data": data}
             else:
-                print(f"❌ Models endpoint failed with status {response.status_code}")
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return self._handle_api_error("Models endpoint", response)
         except Exception as e:
-            print(f"❌ Models endpoint error: {str(e)}")
-            return {"success": False, "error": str(e)}
+            return self._handle_api_error("Models endpoint", None, e)
 
     def test_forecast_endpoint(self) -> Dict[str, Any]:
         """Test the forecast endpoint with sample data"""
@@ -110,16 +121,9 @@ class APITester:
 
                 return {"success": True, "data": data}
             else:
-                print(f"❌ Forecast endpoint failed with status {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"   Error details: {error_data}")
-                except:
-                    print(f"   Response text: {response.text}")
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return self._handle_api_error("Forecast endpoint", response)
         except Exception as e:
-            print(f"❌ Forecast endpoint error: {str(e)}")
-            return {"success": False, "error": str(e)}
+            return self._handle_api_error("Forecast endpoint", None, e)
 
     def test_error_handling(self) -> Dict[str, Any]:
         """Test error handling with invalid data"""
@@ -153,8 +157,7 @@ class APITester:
                 print(f"⚠️  Expected error but got status {response.status_code}")
                 return {"success": False, "error": "Expected error response"}
         except Exception as e:
-            print(f"❌ Error handling test failed: {str(e)}")
-            return {"success": False, "error": str(e)}
+            return self._handle_api_error("Error handling test", None, e)
 
     def run_all_tests(self) -> bool:
         """Run all API tests"""

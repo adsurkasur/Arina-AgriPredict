@@ -104,15 +104,13 @@ def generate_data_management_dataset(num_rows=10000):
 
     return pd.DataFrame(data)
 
-def generate_catboost_dataset(num_rows=50000):
-    """Generate CatBoost training dataset"""
+    return pd.DataFrame(data)
 
-    # Generate time series data
-    start_date = datetime(2020, 1, 1)
+def _generate_temporal_features(num_rows: int, start_date: datetime) -> dict:
+    """Generate temporal features for the dataset"""
     dates = [start_date + timedelta(days=i) for i in range(num_rows)]
 
-    # Base features
-    data = {
+    return {
         'date': dates,
         'year': [d.year for d in dates],
         'month': [d.month for d in dates],
@@ -124,44 +122,61 @@ def generate_catboost_dataset(num_rows=50000):
         'is_holiday': [random.choice([0, 0, 0, 0, 1]) for _ in range(num_rows)],  # 20% holidays
     }
 
-    # Product features
+def _generate_product_features(num_rows: int) -> dict:
+    """Generate product-related features"""
     products = ['Rice', 'Wheat', 'Corn', 'Soybeans', 'Tomatoes', 'Potatoes', 'Onions', 'Carrots', 'Apples', 'Oranges', 'Bananas', 'Milk', 'Cheese', 'Eggs']
-    data['product_id'] = [random.randint(1, len(products)) for _ in range(num_rows)]
-    data['product_name'] = [products[pid-1] for pid in data['product_id']]
+    product_ids = [random.randint(1, len(products)) for _ in range(num_rows)]
 
-    # Regional features
+    return {
+        'product_id': product_ids,
+        'product_name': [products[pid-1] for pid in product_ids]
+    }
+
+def _generate_regional_features(num_rows: int) -> dict:
+    """Generate regional features"""
     regions = ['North Delhi', 'South Delhi', 'East Delhi', 'West Delhi', 'Central Delhi', 'Gurgaon', 'Noida', 'Faridabad']
-    data['region_id'] = [random.randint(1, len(regions)) for _ in range(num_rows)]
-    data['region_name'] = [regions[rid-1] for rid in data['region_id']]
+    region_ids = [random.randint(1, len(regions)) for _ in range(num_rows)]
 
-    # Weather features
-    data['temperature'] = np.random.normal(25, 8, num_rows).clip(5, 45)  # Celsius
-    data['humidity'] = np.random.normal(65, 15, num_rows).clip(20, 100)  # Percentage
-    data['rainfall'] = np.random.exponential(2, num_rows).clip(0, 50)  # mm
-    data['wind_speed'] = np.random.normal(15, 5, num_rows).clip(0, 40)  # km/h
+    return {
+        'region_id': region_ids,
+        'region_name': [regions[rid-1] for rid in region_ids]
+    }
 
-    # Economic features
-    data['inflation_rate'] = np.random.normal(4.5, 1.5, num_rows).clip(1, 10)  # Percentage
-    data['gdp_growth'] = np.random.normal(6.5, 2, num_rows).clip(-2, 12)  # Percentage
-    data['unemployment_rate'] = np.random.normal(7.5, 2, num_rows).clip(2, 15)  # Percentage
-    data['exchange_rate'] = np.random.normal(83, 3, num_rows).clip(75, 90)  # INR/USD
+def _generate_weather_features(num_rows: int) -> dict:
+    """Generate weather-related features"""
+    return {
+        'temperature': np.random.normal(25, 8, num_rows).clip(5, 45),  # Celsius
+        'humidity': np.random.normal(65, 15, num_rows).clip(20, 100),  # Percentage
+        'rainfall': np.random.exponential(2, num_rows).clip(0, 50),  # mm
+        'wind_speed': np.random.normal(15, 5, num_rows).clip(0, 40),  # km/h
+    }
 
-    # Market features
-    data['market_price'] = np.random.normal(50, 20, num_rows).clip(10, 200)  # Base price
-    data['supply_index'] = np.random.normal(100, 15, num_rows).clip(50, 150)  # Index
-    data['demand_index'] = np.random.normal(100, 20, num_rows).clip(30, 180)  # Index
+def _generate_economic_features(num_rows: int) -> dict:
+    """Generate economic features"""
+    return {
+        'inflation_rate': np.random.normal(4.5, 1.5, num_rows).clip(1, 10),  # Percentage
+        'gdp_growth': np.random.normal(6.5, 2, num_rows).clip(-2, 12),  # Percentage
+        'unemployment_rate': np.random.normal(7.5, 2, num_rows).clip(2, 15),  # Percentage
+        'exchange_rate': np.random.normal(83, 3, num_rows).clip(75, 90),  # INR/USD
+    }
 
-    # Competition features
-    data['competitor_price_avg'] = [price * random.uniform(0.9, 1.1) for price in data['market_price']]
-    data['competitor_count'] = [random.randint(3, 12) for _ in range(num_rows)]
-    data['market_share'] = np.random.normal(15, 5, num_rows).clip(1, 40)  # Percentage
+def _generate_market_features(num_rows: int) -> dict:
+    """Generate market-related features"""
+    market_price = np.random.normal(50, 20, num_rows).clip(10, 200)
 
-    # Historical features (lagged values)
-    base_quantity = np.random.normal(1000, 300, num_rows).clip(100, 3000)
+    return {
+        'market_price': market_price,
+        'supply_index': np.random.normal(100, 15, num_rows).clip(50, 150),
+        'demand_index': np.random.normal(100, 20, num_rows).clip(30, 180),
+        'competitor_price_avg': [price * random.uniform(0.9, 1.1) for price in market_price],
+        'competitor_count': [random.randint(3, 12) for _ in range(num_rows)],
+        'market_share': np.random.normal(15, 5, num_rows).clip(1, 40),
+    }
 
-    # Add seasonal patterns
+def _generate_seasonal_multiplier(months: list) -> list:
+    """Generate seasonal multipliers based on months"""
     seasonal_multiplier = []
-    for month in data['month']:
+    for month in months:
         if month in [3, 4, 5]:  # Summer
             seasonal_multiplier.append(random.uniform(1.1, 1.3))
         elif month in [6, 7, 8, 9]:  # Monsoon
@@ -170,22 +185,34 @@ def generate_catboost_dataset(num_rows=50000):
             seasonal_multiplier.append(random.uniform(0.9, 1.1))
         else:
             seasonal_multiplier.append(1.0)
+    return seasonal_multiplier
 
-    data['quantity_sold_lag_1'] = [q * m * random.uniform(0.9, 1.1) for q, m in zip(base_quantity, seasonal_multiplier)]
-    data['quantity_sold_lag_7'] = [q * random.uniform(0.85, 1.15) for q in data['quantity_sold_lag_1']]
-    data['quantity_sold_lag_30'] = [q * random.uniform(0.8, 1.2) for q in data['quantity_sold_lag_7']]
+def _generate_historical_features(base_quantity: list, seasonal_multiplier: list, market_price: list) -> dict:
+    """Generate historical (lagged) features"""
+    quantity_lag_1 = [q * m * random.uniform(0.9, 1.1) for q, m in zip(base_quantity, seasonal_multiplier)]
+    quantity_lag_7 = [q * random.uniform(0.85, 1.15) for q in quantity_lag_1]
+    quantity_lag_30 = [q * random.uniform(0.8, 1.2) for q in quantity_lag_7]
 
-    # Price lags
-    data['price_lag_1'] = [p * random.uniform(0.95, 1.05) for p in data['market_price']]
-    data['price_lag_7'] = [p * random.uniform(0.9, 1.1) for p in data['price_lag_1']]
-    data['price_lag_30'] = [p * random.uniform(0.85, 1.15) for p in data['price_lag_7']]
+    price_lag_1 = [p * random.uniform(0.95, 1.05) for p in market_price]
+    price_lag_7 = [p * random.uniform(0.9, 1.1) for p in price_lag_1]
+    price_lag_30 = [p * random.uniform(0.85, 1.15) for p in price_lag_7]
 
-    # Target variable (future demand)
+    return {
+        'quantity_sold_lag_1': quantity_lag_1,
+        'quantity_sold_lag_7': quantity_lag_7,
+        'quantity_sold_lag_30': quantity_lag_30,
+        'price_lag_1': price_lag_1,
+        'price_lag_7': price_lag_7,
+        'price_lag_30': price_lag_30,
+    }
+
+def _calculate_target_quantity(data: dict, seasonal_multiplier: list, num_rows: int) -> list:
+    """Calculate target quantity based on various factors"""
     target_quantity = []
     for i in range(num_rows):
         base = data['quantity_sold_lag_1'][i]
 
-        # Add weather influence
+        # Weather influence
         weather_factor = 1.0
         if data['temperature'][i] > 30:
             weather_factor *= 0.9  # Hot weather reduces demand
@@ -195,26 +222,46 @@ def generate_catboost_dataset(num_rows=50000):
         if data['rainfall'][i] > 10:
             weather_factor *= 1.2  # Rain increases vegetable demand
 
-        # Add economic influence
+        # Economic influence
         economic_factor = 1.0
         if data['inflation_rate'][i] > 6:
             economic_factor *= 0.95  # High inflation reduces demand
         if data['gdp_growth'][i] > 8:
             economic_factor *= 1.05  # High growth increases demand
 
-        # Add seasonal influence
+        # Calculate final target
         seasonal_factor = seasonal_multiplier[i]
-
-        # Add market influence
         market_factor = data['demand_index'][i] / 100
-
-        # Add random noise
         noise = random.uniform(0.8, 1.2)
 
         target = base * weather_factor * economic_factor * seasonal_factor * market_factor * noise
         target_quantity.append(round(target, 2))
 
-    data['target_quantity'] = target_quantity
+    return target_quantity
+
+def generate_catboost_dataset(num_rows=50000):
+    """Generate CatBoost training dataset"""
+    start_date = datetime(2020, 1, 1)
+
+    # Generate all feature sets
+    data = {}
+    data.update(_generate_temporal_features(num_rows, start_date))
+    data.update(_generate_product_features(num_rows))
+    data.update(_generate_regional_features(num_rows))
+    data.update(_generate_weather_features(num_rows))
+    data.update(_generate_economic_features(num_rows))
+    data.update(_generate_market_features(num_rows))
+
+    # Generate seasonal patterns
+    seasonal_multiplier = _generate_seasonal_multiplier(data['month'])
+
+    # Generate historical features
+    base_quantity = np.random.normal(1000, 300, num_rows).clip(100, 3000)
+    historical_features = _generate_historical_features(base_quantity, seasonal_multiplier, data['market_price'])
+    data.update(historical_features)
+
+    # Calculate target variable
+    data['target_quantity'] = _calculate_target_quantity(data, seasonal_multiplier, num_rows)
 
     # Convert to DataFrame
     df = pd.DataFrame(data)

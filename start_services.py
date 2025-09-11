@@ -39,47 +39,41 @@ class ServiceManager:
         except Exception:
             pass  # Ignore if reconfigure is not available
 
+    def _check_dependency(self, name: str, command: str, version_flag: str = "--version") -> bool:
+        """Helper method to check if a dependency is available"""
+        path = shutil.which(command)
+        if not path:
+            print(f"❌ {name} not found")
+            return False
+
+        setattr(self, f"{command}_path", path)
+        try:
+            result = subprocess.run([path, version_flag], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"✅ {name} found: {result.stdout.strip()}")
+                return True
+            else:
+                print(f"❌ {name} not found")
+                return False
+        except Exception as e:
+            print(f"❌ Error checking {name}: {e}")
+            return False
+
     def check_dependencies(self):
         """Check if required dependencies are available"""
         print("🔍 Checking dependencies...")
 
-        # Check if Node.js is available
-        node_path = shutil.which("node")
-        if node_path:
-            self.node_path = node_path
-            try:
-                result = subprocess.run([node_path, "--version"], capture_output=True, text=True)
-                if result.returncode == 0:
-                    print(f"✅ Node.js found: {result.stdout.strip()}")
-                else:
-                    print("❌ Node.js not found")
-                    return False
-            except Exception as e:
-                print(f"❌ Error checking Node.js: {e}")
-                return False
-        else:
-            print("❌ Node.js not found")
-            return False
+        # Check all required dependencies
+        dependencies = [
+            ("Node.js", "node"),
+            ("npm", "npm"),
+        ]
 
-        # Check if npm is available
-        npm_path = shutil.which("npm")
-        if npm_path:
-            self.npm_path = npm_path
-            try:
-                result = subprocess.run([npm_path, "--version"], capture_output=True, text=True)
-                if result.returncode == 0:
-                    print(f"✅ npm found: {result.stdout.strip()}")
-                else:
-                    print("❌ npm not found")
-                    return False
-            except Exception as e:
-                print(f"❌ Error checking npm: {e}")
+        for name, command in dependencies:
+            if not self._check_dependency(name, command):
                 return False
-        else:
-            print("❌ npm not found")
-            return False
 
-        # Check if Python is available
+        # Special handling for Python (might be python or python3)
         python_path = shutil.which("python") or sys.executable
         if python_path:
             self.python_path = python_path
@@ -119,91 +113,53 @@ class ServiceManager:
 
         return text
 
-    def detect_frontend_port(self):
-        """Detect the actual port Next.js is using"""
-        # Next.js typically outputs something like:
-        # "Local:        http://localhost:3000"
-        # or "Local:        http://localhost:3001"
+    def _detect_port_from_process(self, process, port_pattern: str, default_port: int) -> int:
+        """Helper method to detect port from process output"""
+        time.sleep(2)  # Wait for process to start
 
-        # Wait a moment for Next.js to start and output port info
-        time.sleep(3)
-
-        # Try to detect from the output that's already been captured
-        # Look for port information in recent output
         try:
-            # Check if we can peek at the output without consuming it
-            import io
-            if hasattr(self.frontend_process.stdout, 'peek'):
-                # Peek at available data without consuming it
-                available_data = self.frontend_process.stdout.peek(1024)
+            if hasattr(process.stdout, 'peek'):
+                available_data = process.stdout.peek(1024)
                 if available_data:
                     lines = available_data.decode('utf-8', errors='ignore').split('\n')
                     for line in lines:
-                        if "Local:" in line and "http://" in line:
+                        if port_pattern in line and "http://" in line:
                             import re
                             match = re.search(r'http://[^:]+:(\d+)', line)
                             if match:
                                 detected_port = int(match.group(1))
-                                self.frontend_port = detected_port
-                                print(f"📍 Detected frontend port: {detected_port}")
+                                print(f"📍 Detected port: {detected_port}")
                                 return detected_port
         except Exception as e:
-            print(f"⚠️  Could not peek at frontend output: {e}")
+            print(f"⚠️  Could not peek at process output: {e}")
 
-        # Fallback: Check common ports to see which one is actually open
+        # Fallback: Check common ports
         import socket
-        for port in [3000, 3001, 3002]:
+        for port in [default_port, default_port + 1, default_port + 2]:
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     result = s.connect_ex(('localhost', port))
                     if result == 0:  # Port is open
-                        self.frontend_port = port
-                        print(f"📍 Detected frontend port: {port}")
+                        print(f"📍 Detected port: {port}")
                         return port
             except:
                 pass
 
-        print(f"⚠️  Using default frontend port: {self.frontend_port}")
+        print(f"⚠️  Using default port: {default_port}")
+        return default_port
+
+    def detect_frontend_port(self):
+        """Detect the actual port Next.js is using"""
+        self.frontend_port = self._detect_port_from_process(
+            self.frontend_process, "Local:", self.frontend_port
+        )
         return self.frontend_port
 
     def detect_backend_port(self):
         """Detect the actual port the backend is using"""
-        # FastAPI typically outputs something like:
-        # "Uvicorn running on http://0.0.0.0:7860"
-
-        # Wait a moment for FastAPI to start
-        time.sleep(2)
-
-        # Try to detect from the output
-        try:
-            if hasattr(self.backend_process.stdout, 'peek'):
-                available_data = self.backend_process.stdout.peek(1024)
-                if available_data:
-                    lines = available_data.decode('utf-8', errors='ignore').split('\n')
-                    for line in lines:
-                        if "Uvicorn running on" in line and "http://" in line:
-                            import re
-                            match = re.search(r'http://[^:]+:(\d+)', line)
-                            if match:
-                                detected_port = int(match.group(1))
-                                self.backend_port = detected_port
-                                print(f"📍 Detected backend port: {detected_port}")
-                                return detected_port
-        except Exception as e:
-            print(f"⚠️  Could not peek at backend output: {e}")
-
-        # Fallback to checking the configured port
-        import socket
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                result = s.connect_ex(('localhost', self.backend_port))
-                if result == 0:  # Port is open
-                    print(f"📍 Confirmed backend port: {self.backend_port}")
-                    return self.backend_port
-        except:
-            pass
-
-        print(f"⚠️  Using default backend port: {self.backend_port}")
+        self.backend_port = self._detect_port_from_process(
+            self.backend_process, "Uvicorn running on", self.backend_port
+        )
         return self.backend_port
 
     def get_network_ip(self):
