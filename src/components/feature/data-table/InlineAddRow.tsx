@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { PlusCircle, Calendar, Bot } from 'lucide-react';
@@ -54,6 +54,11 @@ export function InlineAddRow() {
   const selectedDate = watch('date');
   const productNameValue = watch('productName');
 
+  // Memoize the selected date to prevent unnecessary re-renders of the Calendar component
+  const memoizedSelectedDate = useMemo(() => {
+    return selectedDate;
+  }, [selectedDate]);
+
   // Generate smart defaults based on historical patterns
   const generateSmartDefaults = useCallback(() => {
     const today = new Date();
@@ -100,12 +105,6 @@ export function InlineAddRow() {
     setValue('productName', suggestion, { shouldValidate: true });
     setShowAISuggestions(false);
   };
-
-  useEffect(() => {
-    if (selectedDate) {
-      setValue('date', selectedDate, { shouldValidate: true });
-    }
-  }, [selectedDate, setValue]);
 
   const onSubmit = (data: FormData) => {
     if (!data.date) {
@@ -171,19 +170,19 @@ export function InlineAddRow() {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground",
+                      !memoizedSelectedDate && "text-muted-foreground",
                       errors.date && "border-destructive"
                     )}
                     disabled={isPending}
                   >
                     <Calendar className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
+                    {memoizedSelectedDate ? format(memoizedSelectedDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <CalendarComponent
                     mode="single"
-                    selected={selectedDate}
+                    selected={memoizedSelectedDate}
                     onSelect={(date) => {
                       setValue('date', date!, { shouldValidate: true });
                       setDatePickerOpen(false);

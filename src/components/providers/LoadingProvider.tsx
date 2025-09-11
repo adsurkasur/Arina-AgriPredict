@@ -43,25 +43,24 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
 
   // Track current path changes to detect when navigation is complete
   useEffect(() => {
-    if (pathname !== currentPath && currentPath !== '') {
+    // Only process if we're navigating and the path has actually changed
+    if (isNavigating && pathname !== currentPath) {
       setCurrentPath(pathname);
 
-      // If we were navigating and the path changed, navigation is complete
-      if (isNavigating) { // Removed !isInitialLoad condition to be more robust
-        const navigationDuration = Date.now() - lastNavigationTime;
+      const navigationDuration = Date.now() - lastNavigationTime;
 
-        // Ensure minimum loading time to prevent flickering (100-200ms)
-        const minTime = Math.max(150 - navigationDuration, 0);
+      // Ensure minimum loading time to prevent flickering (100-200ms)
+      const minTime = Math.max(150 - navigationDuration, 0);
 
-        setTimeout(() => {
-          setIsLoading(false);
-          setIsNavigating(false);
-          // Don't reset message when navigation is complete - keep the specific page message
-          // setLoadingMessage("Loading AgriPredict...");
-        }, minTime);
-      }
+      setTimeout(() => {
+        setIsLoading(false);
+        setIsNavigating(false);
+      }, minTime);
+    } else if (!isNavigating && pathname !== currentPath) {
+      // Update current path even if not navigating (for initial load, etc.)
+      setCurrentPath(pathname);
     }
-  }, [pathname, currentPath, isNavigating, lastNavigationTime]);
+  }, [pathname, isNavigating, lastNavigationTime]);
 
   const startLoading = (message = "Loading AgriPredict...") => {
     const navigationTime = Date.now();
