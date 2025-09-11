@@ -83,7 +83,7 @@ export function EnhancedDemandChart({
         confidenceLower: forecastEntry?.confidenceLower || null,
         confidenceUpper: forecastEntry?.confidenceUpper || null,
         totalValue: demandEntry?.totalValue || null,
-        displayDate: format(parseISO(date), 'MMM dd'),
+        displayDate: format(parseISO(date), 'dd/MM/yyyy'),
         dataPoints: demandEntry?.count || 0,
         modelUsed: forecastEntry?.modelUsed || null
       };

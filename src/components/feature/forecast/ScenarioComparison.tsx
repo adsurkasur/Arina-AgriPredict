@@ -69,7 +69,7 @@ export function ScenarioComparison({
     if (!comparisonData.length) return [];
 
     const baseData = comparisonData[0];
-    const dates = baseData.forecastData.map(d => format(parseISO(d.date), 'MMM dd'));
+    const dates = baseData.forecastData.map(d => format(parseISO(d.date), 'dd/MM/yyyy'));
 
     return dates.map((date, index) => {
       const dataPoint: any = { date };

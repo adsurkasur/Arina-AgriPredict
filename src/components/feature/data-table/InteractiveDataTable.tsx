@@ -80,7 +80,7 @@ export function InteractiveDataTable() {
         record.quantity.toString(),
         record.price.toString(),
         `$${record.price.toFixed(2)}`, // formatted price
-        new Date(record.date).toLocaleDateString(), // formatted date
+        new Date(record.date).toLocaleDateString('en-GB'), // formatted date dd/mm/yyyy
       ].join(' ').toLowerCase();
 
       return searchableText.includes(searchTerm);

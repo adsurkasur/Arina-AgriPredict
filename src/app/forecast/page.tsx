@@ -121,7 +121,7 @@ export default function ForecastPage() {
                       {forecastData.revenueProjection.slice(0, 10).map((item, index) => (
                         <div key={index} className="flex justify-between items-center p-2 border rounded">
                           <span className="text-sm text-muted-foreground">
-                            {new Date(item.date).toLocaleDateString()}
+                            {new Date(item.date).toLocaleDateString('en-GB')}
                           </span>
                           <div className="text-right">
                             <div className="font-medium">

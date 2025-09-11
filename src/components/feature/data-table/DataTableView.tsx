@@ -37,10 +37,9 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
-    const shortYear = year.toString().slice(-2);
     
-    // Use dd/mm/yy format for more compact display
-    return `${day}/${month}/${shortYear}`;
+    // Use dd/mm/yyyy format for display
+    return `${day}/${month}/${year}`;
   };
 
   const getSortIcon = (columnKey: string) => {
@@ -136,7 +135,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{format(new Date(record.date), 'PPP')}</p>
+                          <p>{format(new Date(record.date), 'dd/MM/yyyy')}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -174,7 +173,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
                           `Quantity: ${record.quantity}`,
                           `Unit: ${record.unit || 'N/A'}`,
                           `Price: $${record.price}`,
-                          `Date: ${format(new Date(record.date), 'MMM dd, yyyy')}`
+                          `Date: ${format(new Date(record.date), 'dd/MM/yyyy')}`
                         ]}
                         confirmText="Delete Record"
                         mutation={deleteMutation}

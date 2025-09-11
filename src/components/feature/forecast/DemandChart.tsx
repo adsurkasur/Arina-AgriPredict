@@ -71,7 +71,7 @@ export function DemandChart({
         actualDemand: demandEntry?.actualDemand || null,
         forecastDemand: forecastEntry?.forecastDemand || null,
         totalValue: demandEntry?.totalValue || null,
-        displayDate: format(parseISO(date), 'MMM dd'),
+        displayDate: format(parseISO(date), 'dd/MM/yyyy'),
       };
     }).sort((a, b) => a.date.localeCompare(b.date));
 

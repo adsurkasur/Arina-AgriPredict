@@ -212,7 +212,7 @@ export function AdvancedForecastControls({
                   disabled={forecastMutation.isPending}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFrom ? format(dateFrom, "PPP") : "Pick start date"}
+                  {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Pick start date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -239,7 +239,7 @@ export function AdvancedForecastControls({
                   disabled={forecastMutation.isPending}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateTo ? format(dateTo, "PPP") : "Pick end date"}
+                  {dateTo ? format(dateTo, "dd/MM/yyyy") : "Pick end date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">

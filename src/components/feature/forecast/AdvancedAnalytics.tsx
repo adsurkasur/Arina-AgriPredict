@@ -150,7 +150,7 @@ export function AdvancedAnalytics({
     if (!forecastData.forecastData.length) return [];
 
     return forecastData.forecastData.map((point, index) => ({
-      date: new Date(point.date).toLocaleDateString(),
+      date: new Date(point.date).toLocaleDateString('en-GB'),
       demand: point.predictedValue,
       confidence: (point.confidenceUpper && point.confidenceLower) ? (point.confidenceUpper - point.confidenceLower) / 2 : 0,
       revenue: forecastData.revenueProjection?.[index]?.projectedRevenue || 0
@@ -346,7 +346,7 @@ export function AdvancedAnalytics({
                   </div>
 
                   <div className="text-xs text-muted-foreground">
-                    Last trained: {new Date(model.lastTrained).toLocaleDateString()}
+                    Last trained: {new Date(model.lastTrained).toLocaleDateString('en-GB')}
                   </div>
                 </CardContent>
               </Card>

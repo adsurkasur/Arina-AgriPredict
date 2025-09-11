@@ -315,7 +315,7 @@ export function AutomatedAlerts({
                     <span className="text-sm font-medium">{alert.title}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {alert.timestamp.toLocaleDateString()}
+                    {alert.timestamp.toLocaleDateString('en-GB')}
                   </span>
                 </div>
               ))}

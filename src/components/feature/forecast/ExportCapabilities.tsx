@@ -168,12 +168,12 @@ KEY METRICS
 
 REVENUE PROJECTION
 ${forecastData.revenueProjection?.map(r =>
-  `${new Date(r.date).toLocaleDateString()}: $${r.projectedRevenue.toLocaleString()} (${r.projectedQuantity} units)`
+  `${new Date(r.date).toLocaleDateString('en-GB')}: $${r.projectedRevenue.toLocaleString()} (${r.projectedQuantity} units)`
 ).join('\n') || 'No revenue data available'}
 
 DETAILED FORECAST
 ${forecastData.forecastData.map(d =>
-  `${new Date(d.date).toLocaleDateString()}: ${d.predictedValue} units${d.confidenceLower ? ` (Range: ${d.confidenceLower}-${d.confidenceUpper})` : ''}`
+  `${new Date(d.date).toLocaleDateString('en-GB')}: ${d.predictedValue} units${d.confidenceLower ? ` (Range: ${d.confidenceLower}-${d.confidenceUpper})` : ''}`
 ).join('\n')}
 
 ---
@@ -379,7 +379,7 @@ View full report: ${window.location.href}
                   const revenue = forecastData.revenueProjection?.[index];
                   return (
                     <tr key={index} className="border-b">
-                      <td className="p-2">{new Date(point.date).toLocaleDateString()}</td>
+                      <td className="p-2">{new Date(point.date).toLocaleDateString('en-GB')}</td>
                       <td className="p-2">{point.predictedValue}</td>
                       {includeConfidence && (
                         <td className="p-2">

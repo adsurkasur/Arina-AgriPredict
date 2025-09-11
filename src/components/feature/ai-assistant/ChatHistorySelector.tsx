@@ -163,7 +163,7 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                             {session.name}
                           </p>
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                            <span>{format(new Date(session.createdAt), 'MMM d')}</span>
+                            <span>{format(new Date(session.createdAt), 'dd/MM/yyyy')}</span>
                             <span>•</span>
                             <span>{session.messages.length} msg</span>
                           </div>
@@ -190,7 +190,7 @@ export function ChatHistorySelector({ isCollapsed }: ChatHistorySelectorProps) {
                         description="Are you sure you want to delete this chat session? This action cannot be undone and all messages in this conversation will be permanently removed."
                         itemName={session.name}
                         itemDetails={[
-                          `Created: ${format(new Date(session.createdAt), 'MMM d, yyyy')}`,
+                          `Created: ${format(new Date(session.createdAt), 'dd/MM/yyyy')}`,
                           `Messages: ${session.messages.length}`
                         ]}
                         onConfirm={() => handleDeleteChat(chatId, session.name)}

@@ -179,7 +179,7 @@ export function InlineAddRow() {
                     disabled={isPending}
                   >
                     <Calendar className="mr-2 h-4 w-4" />
-                    {memoizedSelectedDate ? format(memoizedSelectedDate, "PPP") : "Pick a date"}
+                    {memoizedSelectedDate ? format(memoizedSelectedDate, "dd/MM/yyyy") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

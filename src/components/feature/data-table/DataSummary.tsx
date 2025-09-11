@@ -33,8 +33,8 @@ export function DataSummary() {
     // Date range
     const dates = records.map(r => parseISO(r.date)).sort((a, b) => a.getTime() - b.getTime());
     const dateRange = {
-      start: dates[0] ? format(dates[0], 'MMM dd, yyyy') : null,
-      end: dates[dates.length - 1] ? format(dates[dates.length - 1], 'MMM dd, yyyy') : null
+      start: dates[0] ? format(dates[0], 'dd/MM/yyyy') : null,
+      end: dates[dates.length - 1] ? format(dates[dates.length - 1], 'dd/MM/yyyy') : null
     };
 
     // Top product by revenue
