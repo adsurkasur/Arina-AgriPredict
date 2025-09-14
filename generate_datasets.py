@@ -157,7 +157,7 @@ def _generate_economic_features(num_rows: int) -> dict:
         'inflation_rate': np.random.normal(4.5, 1.5, num_rows).clip(1, 10),  # Percentage
         'gdp_growth': np.random.normal(6.5, 2, num_rows).clip(-2, 12),  # Percentage
         'unemployment_rate': np.random.normal(7.5, 2, num_rows).clip(2, 15),  # Percentage
-        'exchange_rate': np.random.normal(83, 3, num_rows).clip(75, 90),  # INR/USD
+        'exchange_rate': np.random.normal(15000, 500, num_rows).clip(14000, 16000),  # IDR/USD
     }
 
 def _generate_market_features(num_rows: int) -> dict:
@@ -301,7 +301,7 @@ def main():
     print("\n📊 Data Management Dataset:")
     print(f"Shape: {dm_df.shape}")
     print(f"Date range: {dm_df['date'].min()} to {dm_df['date'].max()}")
-    print(f"Total revenue range: ${dm_df['total_revenue'].min():.2f} - ${dm_df['total_revenue'].max():.2f}")
+    print(f"Total revenue range: Rp {dm_df['total_revenue'].min():,.0f} - Rp {dm_df['total_revenue'].max():,.0f}")
 
     print("\n🤖 CatBoost Training Dataset:")
     print(f"Shape: {cb_df.shape}")

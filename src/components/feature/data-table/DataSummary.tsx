@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, DollarSign, Package, Calendar, BarChart3 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { formatCurrency } from '@/lib/utils';
 
 export function DataSummary() {
   const { data: demandsData, isLoading } = useDemands({ limit: 1000 });
@@ -118,7 +119,7 @@ export function DataSummary() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary.totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.totalRevenue)}</div>
             <p className="text-xs text-muted-foreground">
               From {summary.totalRecords} sales records
             </p>

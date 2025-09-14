@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SummaryMetricsProps } from './types';
+import { formatCurrency } from '@/lib/utils';
 
 export function SummaryMetrics({ metrics }: SummaryMetricsProps) {
   return (
@@ -17,7 +18,7 @@ export function SummaryMetrics({ metrics }: SummaryMetricsProps) {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Total Revenue</span>
-                <span className="font-medium">${metric.totalRevenue.toLocaleString()}</span>
+                <span className="font-medium">{formatCurrency(metric.totalRevenue)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Confidence</span>

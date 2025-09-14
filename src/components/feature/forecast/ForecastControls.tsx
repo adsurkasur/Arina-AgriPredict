@@ -111,7 +111,7 @@ export function ForecastControls({ onForecastGenerated, onProductChange, onForec
         {/* Selling Price */}
         <div className="space-y-2">
           <Label htmlFor="selling-price" className="text-sm font-medium">
-            Selling Price ($ per {selectedProduct?.unit || 'unit'})
+            Selling Price (Rp per {selectedProduct?.unit || 'unit'})
           </Label>
           <Input
             id="selling-price"

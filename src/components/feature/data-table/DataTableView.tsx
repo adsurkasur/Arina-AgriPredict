@@ -8,6 +8,7 @@ import { GenericDeleteConfirmationDialog } from '@/components/common/GenericDele
 import { useDeleteDemand } from '@/hooks/useApiHooks';
 import { ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/utils';
 
 
 
@@ -24,13 +25,6 @@ interface DataTableViewProps {
 
 export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) {
   const deleteMutation = useDeleteDemand();
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   // Compact date formatting for table display
   const formatCompactDate = (date: Date) => {
@@ -172,7 +166,7 @@ export function DataTableView({ data, sortConfig, onSort }: DataTableViewProps) 
                         itemDetails={[
                           `Quantity: ${record.quantity}`,
                           `Unit: ${record.unit || 'N/A'}`,
-                          `Price: $${record.price}`,
+                          `Price: ${formatCurrency(record.price)}`,
                           `Date: ${format(new Date(record.date), 'dd/MM/yyyy')}`
                         ]}
                         confirmText="Delete Record"

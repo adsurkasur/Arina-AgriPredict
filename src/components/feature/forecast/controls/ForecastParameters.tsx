@@ -39,7 +39,7 @@ export const ForecastParameters: React.FC<ForecastParametersProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Selling Price ($)</Label>
+          <Label className="text-sm font-medium">Selling Price (Rp)</Label>
           <Input
             type="number"
             min="0"

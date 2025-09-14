@@ -331,6 +331,7 @@ curl "http://localhost:3000/api/demands?search=rice"
 - ✅ Revenue projections calculated when price provided
 
 ### Performance
+
 - ✅ Data loading completes within 30 seconds
 - ✅ Forecast generation completes within 10 seconds
 - ✅ Page loads and interactions are responsive
@@ -363,6 +364,7 @@ curl "http://localhost:3000/api/demands?search=rice"
 ### Debug Steps
 
 1. **Check Service Status**:
+
    ```bash
    # Check if services are running
    python start_services.py --help
@@ -374,6 +376,7 @@ curl "http://localhost:3000/api/demands?search=rice"
    - Database: Check MongoDB logs
 
 3. **API Testing**:
+
    ```bash
    # Test individual APIs
    curl http://localhost:3000/api/demands
@@ -391,6 +394,7 @@ curl "http://localhost:3000/api/demands?search=rice"
 ## 📞 Support
 
 If you encounter issues:
+
 1. Check the troubleshooting section above
 2. Review service logs for error messages
 3. Verify all prerequisites are met

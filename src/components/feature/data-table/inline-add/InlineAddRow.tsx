@@ -113,7 +113,7 @@ export const InlineAddRow: React.FC<InlineAddRowProps> = ({
 
             <NumericInput
               id="price"
-              label="Price ($)"
+              label="Price (Rp)"
               value={undefined} // Controlled by react-hook-form
               onChange={(value) => setValue('price', value, { shouldValidate: true })}
               placeholder="0.00"

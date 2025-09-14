@@ -17,7 +17,7 @@ export function PriceField({
 }: PriceFieldProps) {
   return (
     <FormField
-      label="Price ($)"
+      label="Price (Rp)"
       id="edit-price"
       error={error}
     >
