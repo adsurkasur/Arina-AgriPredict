@@ -125,7 +125,7 @@ export default function HomePage() {
                 height={16}
                 className="opacity-60"
               />
-              <span className="text-sm">© 2025 AgriPredict. Empowering farmers with data-driven insights.</span>
+              <span className="text-sm">© 2025 AgriPredict &quot;Developed by Ade Surya Ananda&quot;</span>
             </div>
           </div>
         </div>

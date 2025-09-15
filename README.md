@@ -617,3 +617,7 @@ For support or questions, please open an issue in the repository.
 
 **Status**: ✅ Fully functional and production-ready
 **Last Updated**: September 2025
+
+---
+
+© 2025 AgriPredict "Developed by Ade Surya Ananda"

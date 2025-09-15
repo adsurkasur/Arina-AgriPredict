@@ -148,7 +148,7 @@ export function Sidebar({ className }: SidebarProps) {
         <Separator className="mb-4 transition-all duration-300" />
         <div className="px-3 pb-4">
           <div className="text-xs text-muted-foreground">
-            {!isCollapsed && "© 2025 AgriPredict"}
+            {!isCollapsed && "© 2025 AgriPredict &quot;Developed by Ade Surya Ananda&quot;"}
           </div>
         </div>
       </div>
