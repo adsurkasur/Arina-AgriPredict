@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ForecastRequest, ForecastResponse, ForecastDataPoint } from '@/types/api';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { verifyIdToken } from '@/lib/auth';
 
 const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:7860';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -16,9 +17,9 @@ async function validateForecastRequest(body: ForecastRequest): Promise<{ isValid
   return { isValid: true };
 }
 
-async function fetchHistoricalData(db: any, productId: string): Promise<any[]> {
+async function fetchHistoricalData(db: any, productId: string, userId: string): Promise<any[]> {
   return await db.collection('demands')
-    .find({ productId })
+    .find({ productId, userId })
     .sort({ date: -1 })
     .limit(100)
     .toArray();
@@ -89,6 +90,18 @@ async function generateFallbackForecast(historicalData: any[], productId: string
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const decodedToken = await verifyIdToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+    const userId = decodedToken.uid;
+
     const { db } = await connectToDatabase();
     const body: ForecastRequest = await request.json();
 
@@ -99,7 +112,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch historical data
-    const historicalData = await fetchHistoricalData(db, body.productId);
+    const historicalData = await fetchHistoricalData(db, body.productId, userId);
     if (historicalData.length === 0) {
       return NextResponse.json(
         { error: 'No historical data found for this product' },

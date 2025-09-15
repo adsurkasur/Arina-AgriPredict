@@ -10,6 +10,8 @@ import {
   ChatResponse,
   Product,
 } from '@/types/api';
+import { auth } from './firebase';
+import { getIdToken } from 'firebase/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
 
@@ -34,6 +36,19 @@ apiClient.interceptors.response.use(
     return Promise.reject(apiError);
   }
 );
+
+// Request interceptor to add auth token
+apiClient.interceptors.request.use(async (config) => {
+  if (auth.currentUser) {
+    try {
+      const token = await getIdToken(auth.currentUser);
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch (error) {
+      console.error('Error getting ID token:', error);
+    }
+  }
+  return config;
+});
 
 // Demands API
 export const demandsApi = {

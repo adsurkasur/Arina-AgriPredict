@@ -8,6 +8,7 @@ export interface DemandRecord {
   quantity: number;
   price: number;
   unit: string;
+  userId?: string;
 }
 
 export interface DemandResponse {

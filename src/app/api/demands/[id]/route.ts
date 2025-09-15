@@ -34,7 +34,8 @@ export async function GET(
       productId: demand.productId,
       quantity: demand.quantity,
       price: demand.price,
-      unit: demand.unit || 'kg'
+      unit: demand.unit || 'kg',
+      userId: demand.userId
     };
 
     return NextResponse.json(response);

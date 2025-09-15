@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider, useTheme } from "./ThemeProvider";
 import { LoadingProvider } from "./LoadingProvider";
+import { AuthProvider } from "./AuthProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "@/styles/toast.css";
@@ -46,10 +47,12 @@ export function ClientProviders({ children }: ClientProvidersProps) {
       <ThemeProvider>
         <Suspense fallback={null}>
           <LoadingProvider>
-            <TooltipProvider>
-              {children}
-              <ThemedToastContainer />
-            </TooltipProvider>
+            <AuthProvider>
+              <TooltipProvider>
+                {children}
+                <ThemedToastContainer />
+              </TooltipProvider>
+            </AuthProvider>
           </LoadingProvider>
         </Suspense>
       </ThemeProvider>

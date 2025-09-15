@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { DemandRecord, CreateDemandRequest } from '@/types/api';
+import { verifyIdToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Verify authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const decodedToken = await verifyIdToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+    const userId = decodedToken.uid;
+
     const { db } = await connectToDatabase();
     const { searchParams } = new URL(request.url);
 
@@ -16,7 +29,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
-    const query: any = {};
+    const query: any = { userId };
     if (search) {
       query.$or = [
         { productName: { $regex: search, $options: 'i' } },
@@ -61,6 +74,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const decodedToken = await verifyIdToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+    const userId = decodedToken.uid;
+
     const { db } = await connectToDatabase();
     const body: CreateDemandRequest = await request.json();
 
@@ -84,7 +109,8 @@ export async function POST(request: NextRequest) {
       productId,
       quantity: body.quantity,
       price: body.price,
-      unit: body.unit || 'kg'
+      unit: body.unit || 'kg',
+      userId
     };
 
     const result = await db.collection('demands').insertOne(newDemand);

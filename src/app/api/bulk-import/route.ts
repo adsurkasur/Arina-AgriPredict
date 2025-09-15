@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { DemandRecord } from '@/types/api';
+import { verifyIdToken } from '@/lib/auth';
 
 // Helper function to generate productId from productName
 function generateProductId(productName: string): string {
@@ -30,8 +31,9 @@ function parseCSV(csvContent: string): { headers: string[], rows: string[][] } {
 function validateAndTransformRow(
   row: string[],
   headers: string[],
-  rowIndex: number
-): Omit<DemandRecord, 'id'> | null {
+  rowIndex: number,
+  userId: string
+): { date: string; productName: string; productId: string; quantity: number; price: number; unit: string; userId: string } | null {
   if (row.length !== headers.length) {
     console.warn(`Row ${rowIndex + 1}: Column count mismatch`);
     return null;
@@ -81,12 +83,25 @@ function validateAndTransformRow(
     productId: generateProductId(productName),
     quantity,
     price,
-    unit: 'kg'
+    unit: 'kg',
+    userId
   };
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const decodedToken = await verifyIdToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+    const userId = decodedToken.uid;
+
     const { db } = await connectToDatabase();
 
     // Get the uploaded file
@@ -125,7 +140,7 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
       const batchResults = batch.map((row, index) =>
-        validateAndTransformRow(row, headers, i + index)
+        validateAndTransformRow(row, headers, i + index, userId)
       ).filter(result => result !== null) as Omit<DemandRecord, 'id'>[];
 
       if (batchResults.length > 0) {
@@ -178,11 +193,24 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint to check import status (optional)
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Verify authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const decodedToken = await verifyIdToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+    const userId = decodedToken.uid;
+
     const { db } = await connectToDatabase();
 
     const stats = await db.collection('demands').aggregate([
+      { $match: { userId } },
       {
         $group: {
           _id: null,

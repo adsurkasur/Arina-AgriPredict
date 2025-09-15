@@ -6,8 +6,11 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useNavigation } from "@/hooks/useNavigation";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { toast } from "@/lib/toast";
 import { ChatHistorySelector } from "@/components/feature/ai-assistant";
 import {
@@ -15,8 +18,13 @@ import {
   TrendingUp,
   MessageSquare,
   Moon,
-  Sun
+  Sun,
+  LogIn,
+  LogOut,
+  User
 } from "lucide-react";
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const navigation = [
   {
@@ -45,9 +53,20 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const { navigateTo } = useNavigation();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast.success('Logged out successfully!');
+    } catch (error: any) {
+      toast.error('Error logging out: ' + error.message);
+    }
+  };
 
   return (
     <div
@@ -146,12 +165,33 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Footer */}
       <div className="transition-all duration-300">
         <Separator className="mb-4 transition-all duration-300" />
+        {!isCollapsed && (
+          <div className="px-3 pb-2">
+            {user ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span className="text-sm truncate">{user.email}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button variant="ghost" onClick={() => setAuthModalOpen(true)} className="w-full">
+                <LogIn className="h-4 w-4 mr-2" />
+                Log In
+              </Button>
+            )}
+          </div>
+        )}
         <div className="px-3 pb-4">
           <div className="text-xs text-muted-foreground">
             {!isCollapsed && "© 2025 AgriPredict &quot;Developed by Ade Surya Ananda&quot;"}
           </div>
         </div>
       </div>
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </div>
   );
 }
