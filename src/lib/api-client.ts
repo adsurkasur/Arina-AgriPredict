@@ -9,7 +9,7 @@ import {
   ChatRequest,
   ChatResponse,
   Product,
-} from '@/types/api';
+} from '../types/api';
 import { auth } from './firebase';
 import { getIdToken } from 'firebase/auth';
 
