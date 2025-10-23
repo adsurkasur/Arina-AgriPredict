@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useCreateDemand, useProducts } from '@/hooks/useApiHooks';
 import { FormData, SmartDefaultsHookResult, ProductSuggestionsHookResult, FormSubmissionHookResult } from './types';
@@ -6,13 +6,18 @@ import { FormData, SmartDefaultsHookResult, ProductSuggestionsHookResult, FormSu
 export const useSmartDefaults = (
   setValue: (_name: keyof FormData, _value: any, _options?: any) => void
 ): SmartDefaultsHookResult => {
+  const hasSetDefaults = useRef(false);
+
   const generateDefaults = useCallback(() => {
+    if (hasSetDefaults.current) return;
+
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
 
     // Set yesterday as default date for data entry
     setValue('date', yesterday, { shouldValidate: true });
+    hasSetDefaults.current = true;
 
     // Could add more smart defaults here based on historical data
     // For example: most common product, average prices, etc.
@@ -126,7 +131,8 @@ export const useInlineAddForm = (
   // Apply smart defaults when component mounts
   useEffect(() => {
     generateDefaults();
-  }, [generateDefaults]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // generateDefaults uses a ref to prevent multiple executions
 
   const handleSuggestionClick = useCallback((suggestion: string) => {
     setValue('productName', suggestion, { shouldValidate: true });
