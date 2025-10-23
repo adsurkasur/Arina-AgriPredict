@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  <- Removed: This was blocking src/lib from git
 lib64/
 parts/
 sdist/
