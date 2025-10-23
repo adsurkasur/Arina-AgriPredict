@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../../lib/mongodb';
-import { DemandRecord, UpdateDemandRequest } from '../../../../types/api';
+import { connectToDatabase } from '@/lib/mongodb';
+import { DemandRecord, UpdateDemandRequest } from '@/types/api';
 import { ObjectId } from 'mongodb';
 
 export async function GET(

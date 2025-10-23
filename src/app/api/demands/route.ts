@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../lib/mongodb';
-import { DemandRecord, CreateDemandRequest } from '../../../types/api';
-import { verifyIdToken } from '../../../lib/auth';
+import { connectToDatabase } from '@/lib/mongodb';
+import { DemandRecord, CreateDemandRequest } from '@/types/api';
+import { verifyIdToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {

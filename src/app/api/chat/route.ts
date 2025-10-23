@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../lib/mongodb';
-import { ChatRequest, ChatResponse } from '../../../types/api';
+import { connectToDatabase } from '@/lib/mongodb';
+import { ChatRequest, ChatResponse } from '@/types/api';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);

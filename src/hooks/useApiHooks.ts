@@ -1,18 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '../lib/toast';
+import { toast } from '@/lib/toast';
 import {
   demandsApi,
   forecastApi,
   chatApi,
   productsApi
-} from '../lib/api-client';
+} from '@/lib/api-client';
 import {
   DemandQueryParams,
   CreateDemandRequest,
   UpdateDemandRequest,
   ForecastRequest,
   ChatRequest
-} from '../types/api';
+} from '@/types/api';
 
 // Helper function to extract error message
 const getErrorMessage = (error: unknown): string => {
