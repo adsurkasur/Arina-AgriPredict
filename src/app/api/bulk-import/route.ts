@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { DemandRecord } from '@/types/api';
-import { verifyIdToken } from '@/lib/auth';
+import { connectToDatabase } from '../../../lib/mongodb';
+import { DemandRecord } from '../../../types/api';
+import { verifyIdToken } from '../../../lib/auth';
 
 // Helper function to generate productId from productName
 function generateProductId(productName: string): string {

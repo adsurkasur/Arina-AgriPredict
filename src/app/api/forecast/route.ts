@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { ForecastRequest, ForecastResponse, ForecastDataPoint } from '@/types/api';
+import { connectToDatabase } from '../../../lib/mongodb';
+import { ForecastRequest, ForecastResponse, ForecastDataPoint } from '../../../types/api';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { verifyIdToken } from '@/lib/auth';
+import { verifyIdToken } from '../../../lib/auth';
 
 const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:7860';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
