@@ -36,7 +36,44 @@ A comprehensive AI-powered platform for agricultural demand forecasting and data
 - **Accessibility**: WCAG compliant with proper ARIA labels
 - **State Management**: Persistent state with Zustand
 
-## 🛠️ Tech Stack
+## � Deployment
+
+### Vercel Deployment
+
+1. **Connect your repository** to Vercel
+2. **Configure environment variables** in Vercel dashboard:
+   - Go to Project Settings → Environment Variables
+   - Add all required variables from `.env.example`
+3. **Deploy**: Vercel will automatically build and deploy your app
+
+### Environment Variables for Vercel
+
+**Important**: Since `.env*` files are gitignored, you must manually set these in Vercel:
+
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+- `GEMINI_API_KEY`
+- `MONGODB_URI`
+- `ANALYSIS_SERVICE_URL`
+
+### Troubleshooting Vercel Builds
+
+If you encounter build errors:
+
+1. **Check environment variables** are properly set in Vercel
+2. **Verify Firebase configuration** matches your project
+3. **Ensure all dependencies** are listed in `package.json`
+4. **Check build logs** for specific error messages
+
+## �🛠️ Tech Stack
 
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS
 - **Backend**: Vercel Serverless Functions, Python FastAPI
@@ -585,9 +622,42 @@ curl "http://localhost:3000/api/demands?search=rice"
 
 ### Environment Variables
 
+#### Required Environment Variables
+
+**Firebase Configuration (Client-side):**
+- `NEXT_PUBLIC_FIREBASE_API_KEY`: Your Firebase API key
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`: Your Firebase auth domain
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`: Your Firebase project ID
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`: Your Firebase storage bucket
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`: Your Firebase messaging sender ID
+- `NEXT_PUBLIC_FIREBASE_APP_ID`: Your Firebase app ID
+- `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`: Your Firebase measurement ID (optional)
+
+**Firebase Admin Configuration (Server-side):**
+- `FIREBASE_PROJECT_ID`: Your Firebase project ID
+- `FIREBASE_CLIENT_EMAIL`: Your Firebase service account email
+- `FIREBASE_PRIVATE_KEY`: Your Firebase service account private key
+
+**API Configuration:**
 - `GEMINI_API_KEY`: Your Google Gemini API key
 - `MONGODB_URI`: MongoDB connection string
 - `ANALYSIS_SERVICE_URL`: URL for the Python analysis service
+- `NEXT_PUBLIC_API_BASE_URL`: Base URL for API calls (defaults to `/api`)
+
+### Setup Instructions
+
+1. **Copy environment template:**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **Fill in your actual values** in `.env.local`
+
+3. **For Vercel deployment:**
+   - Go to your Vercel project dashboard
+   - Navigate to Settings → Environment Variables
+   - Add all the required environment variables listed above
+   - Redeploy your application
 
 ### Analysis Service
 

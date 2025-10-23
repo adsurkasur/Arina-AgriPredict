@@ -68,3 +68,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local development files
+ai-context.md

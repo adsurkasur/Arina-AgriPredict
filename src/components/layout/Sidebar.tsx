@@ -21,7 +21,8 @@ import {
   Sun,
   LogIn,
   LogOut,
-  User
+  User,
+  Truck
 } from "lucide-react";
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -44,6 +45,12 @@ const navigation = [
     href: "/assistant",
     icon: MessageSquare,
     description: "Get AI-powered insights"
+  },
+  {
+    name: "Tracking and Route Optimization",
+    href: "/tracking",
+    icon: Truck,
+    description: "Track deliveries and optimize routes"
   }
 ];
 
