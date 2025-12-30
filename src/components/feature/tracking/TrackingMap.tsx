@@ -1,11 +1,8 @@
 "use client";
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-
-// Import Leaflet CSS for client-side only
-if (typeof window !== 'undefined') {
-  require('leaflet/dist/leaflet.css');
-}
+import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -42,8 +39,23 @@ const getMarkerIcon = (type: string) => {
 };
 
 export default function TrackingMap() {
+  const [isMounted, setIsMounted] = useState(false);
+  
   // Jakarta coordinates as center
   const center: [number, number] = [-6.2088, 106.8456];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch by only rendering on client
+  if (!isMounted) {
+    return (
+      <div className="w-full h-full bg-muted animate-pulse rounded-lg flex items-center justify-center">
+        Loading map...
+      </div>
+    );
+  }
 
   return (
     <MapContainer

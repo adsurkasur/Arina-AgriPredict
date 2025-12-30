@@ -194,7 +194,7 @@ export function Sidebar({ className }: SidebarProps) {
         )}
         <div className="px-3 pb-4">
           <div className="text-xs text-muted-foreground">
-            {!isCollapsed && "© 2025 AgriPredict &quot;Developed by Ade Surya Ananda&quot;"}
+            {!isCollapsed && "© 2025 AgriPredict - Developed by Ade Surya Ananda"}
           </div>
         </div>
       </div>

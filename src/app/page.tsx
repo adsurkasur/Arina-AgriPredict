@@ -114,10 +114,10 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => navigateTo('/tracking')}>
+            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => navigateTo('/tracking')}>
               <CardContent className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                  <Route className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                  <Route className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Route Optimization</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -137,7 +137,7 @@ export default function HomePage() {
                 height={16}
                 className="opacity-60"
               />
-              <span className="text-sm">© 2025 AgriPredict &quot;Developed by Ade Surya Ananda&quot;</span>
+              <span className="text-sm">© 2025 AgriPredict - Developed by Ade Surya Ananda</span>
             </div>
           </div>
         </div>
