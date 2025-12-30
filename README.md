@@ -114,7 +114,10 @@ If you encounter build errors:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    MONGODB_URI=your_mongodb_connection_string
-   ANALYSIS_SERVICE_URL=http://localhost:8000
+   # For local development:
+   ANALYSIS_SERVICE_URL=http://localhost:7860
+   # For production (Hugging Face Spaces):
+   # ANALYSIS_SERVICE_URL=https://adsurkasur-agripredict-analysis.hf.space
    ```
 
 4. **Start the development server**
@@ -642,6 +645,8 @@ curl "http://localhost:3000/api/demands?search=rice"
 - `GEMINI_API_KEY`: Your Google Gemini API key
 - `MONGODB_URI`: MongoDB connection string
 - `ANALYSIS_SERVICE_URL`: URL for the Python analysis service
+  - Local: `http://localhost:7860`
+  - Production: `https://adsurkasur-agripredict-analysis.hf.space`
 - `NEXT_PUBLIC_API_BASE_URL`: Base URL for API calls (defaults to `/api`)
 
 ### Setup Instructions

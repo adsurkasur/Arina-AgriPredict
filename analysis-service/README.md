@@ -35,9 +35,14 @@ python run.py run
 ```
 
 The API will be available at:
-- **Service**: http://localhost:7860
-- **Documentation**: http://localhost:7860/docs
-- **Health Check**: http://localhost:7860/health
+- **Local Service**: http://localhost:7860
+- **Local Documentation**: http://localhost:7860/docs
+- **Local Health Check**: http://localhost:7860/health
+
+### Production (Hugging Face Spaces)
+- **Live Service**: https://adsurkasur-agripredict-analysis.hf.space
+- **Live Documentation**: https://adsurkasur-agripredict-analysis.hf.space/docs
+- **Live Health Check**: https://adsurkasur-agripredict-analysis.hf.space/health
 
 ### 3. Test the Service
 ```bash
