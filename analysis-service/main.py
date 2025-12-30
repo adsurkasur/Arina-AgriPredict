@@ -145,17 +145,23 @@ def get_data_processor() -> DataProcessor:
     return DataProcessor()
 
 # API Endpoints
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
+@app.get("/")
+async def root():
+    """Root endpoint - provides service info for HuggingFace Spaces"""
     return {
-        "status": "healthy",
-        "service": "analysis-service",
-        "timestamp": datetime.utcnow().isoformat(),
-        "version": "1.0.0"
+        "service": "AgriPredict Analysis Service",
+        "status": "running",
+        "version": "1.0.0",
+        "description": "Advanced agricultural demand forecasting using ensemble ML models",
+        "endpoints": {
+            "health": "/health",
+            "docs": "/docs",
+            "forecast": "/forecast",
+            "compare": "/compare"
+        },
+        "timestamp": datetime.utcnow().isoformat()
     }
 
-# API Endpoints
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
