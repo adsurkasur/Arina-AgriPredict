@@ -119,8 +119,16 @@ export function InteractiveDataTable() {
   }
 
   if (error) {
+    // Check if it's an authentication error
+    const errorAny = error as any;
+    const isAuthError = errorAny.code === '401' || errorAny.message?.toLowerCase().includes('unauthorized');
     return (
-      <ErrorDisplay message={error.message || 'Unknown error'} />
+      <ErrorDisplay 
+        message={isAuthError 
+          ? 'Please log in to access your sales data' 
+          : errorAny.message || 'Unknown error'
+        } 
+      />
     );
   }
 

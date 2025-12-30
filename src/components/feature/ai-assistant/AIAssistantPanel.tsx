@@ -12,6 +12,19 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Send } from 'lucide-react';
 import Image from 'next/image';
 
+// Helper function to extract error message
+const getErrorMessage = (error: unknown): string => {
+  if (typeof error === 'object' && error !== null) {
+    if ('message' in error && typeof (error as any).message === 'string') {
+      return (error as any).message;
+    }
+    if ('error' in error && typeof (error as any).error === 'string') {
+      return (error as any).error;
+    }
+  }
+  return 'An unexpected error occurred. Please try again.';
+};
+
 export function AIAssistantPanel() {
   const [inputMessage, setInputMessage] = useLocalStorage('ai-assistant-input', '');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -55,8 +68,16 @@ export function AIAssistantPanel() {
       };
 
       addChatMessage(aiMessage);
-    } catch (error) {
-      // Error is handled by the mutation hook
+    } catch (error: any) {
+      // Display error message in chat
+      const errorContent = getErrorMessage(error);
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `⚠️ **Error:** ${errorContent}\n\nPlease try again or rephrase your question.`,
+        timestamp: new Date().toISOString(),
+      };
+      addChatMessage(errorMessage);
       console.error('Chat error:', error);
     } finally {
       setAiTyping(false);

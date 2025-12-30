@@ -61,8 +61,8 @@ export default function TrackingMap() {
     <MapContainer
       center={center}
       zoom={14}
-      style={{ height: '100%', width: '100%' }}
-      className="rounded-lg"
+      style={{ height: '100%', width: '100%', zIndex: 0 }}
+      className="rounded-lg [&_.leaflet-pane]:z-[1] [&_.leaflet-control]:z-[2]"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
