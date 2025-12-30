@@ -1,4 +1,3 @@
-import React from 'react';
 import { ResponsiveContainer, AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { MetricCard } from './MetricCard';
 import { ChartContainer } from './ChartContainer';

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import { ComparisonRequest, ComparisonResponse, ModelComparisonResult, ForecastDataPoint } from '@/types/api';
+import { ComparisonRequest, ComparisonResponse, ModelComparisonResult } from '@/types/api';
 import { verifyIdToken } from '@/lib/auth';
 
 const ANALYSIS_SERVICE_URL = process.env.ANALYSIS_SERVICE_URL || 'http://localhost:7860';

@@ -11,6 +11,13 @@ const nextConfig = {
     domains: [],
   },
   serverExternalPackages: ['firebase', 'firebase-admin'],
+  // Turbopack configuration (Next.js 16+ default)
+  turbopack: {
+    resolveAlias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+  // Webpack fallback for compatibility
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

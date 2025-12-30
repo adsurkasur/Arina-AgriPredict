@@ -1,5 +1,6 @@
 import "../index.css";
 import { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { ClientProviders } from "@/components/providers/ClientProviders";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {children}
           </MainLayout>
         </ClientProviders>
+        <Analytics />
       </body>
     </html>
   );

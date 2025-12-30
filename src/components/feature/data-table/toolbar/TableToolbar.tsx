@@ -1,4 +1,3 @@
-import React from 'react';
 import { SearchBar } from './SearchBar';
 import { FilterPanel } from './FilterPanel';
 import { DataActions } from './DataActions';

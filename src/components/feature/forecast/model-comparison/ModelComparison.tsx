@@ -13,11 +13,6 @@ import {
   BarChart,
   Bar,
   Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,10 +33,7 @@ import {
   Trophy,
   TrendingUp,
   BarChart3,
-  Target,
-  Activity,
   AlertCircle,
-  CheckCircle2,
   Info,
   ChevronDown,
   ChevronUp,

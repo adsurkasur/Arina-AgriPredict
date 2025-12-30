@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useGlobalLoading } from '@/hooks/useGlobalLoading';
-import { ArrowRight, TrendingUp, Database, MessageSquare, MapPin, Route } from 'lucide-react';
+import { ArrowRight, TrendingUp, Database, MessageSquare, Route } from 'lucide-react';
 
 export default function HomePage() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);

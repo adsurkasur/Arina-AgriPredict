@@ -1,4 +1,3 @@
-import React from 'react';
 import { StreamControls } from './StreamControls';
 import { MetricsDashboard } from './MetricsDashboard';
 import { DataVisualization } from './DataVisualization';

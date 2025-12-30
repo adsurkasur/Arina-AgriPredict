@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, FileText, FileSpreadsheet, FileJson, Image } from 'lucide-react';
 import { toast } from '@/lib/toast';

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useChat } from '@/hooks/useApiHooks';
 import { useAppStore } from '@/store/zustand-store';
 import { useLocalStorage } from '@/hooks/useLocalStorage';

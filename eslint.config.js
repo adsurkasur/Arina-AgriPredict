@@ -13,7 +13,7 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   // Global ignore patterns
-  { ignores: ["dist", ".next", ".next/types", "node_modules", "tailwind.config.ts"] },
+  { ignores: ["dist", ".next", ".next/types", "node_modules", "tailwind.config.ts", "**/plotly.js-dist-min/**", "**/plotly*.min.js", "analysis-service/**", "**/venv/**", "**/__pycache__/**"] },
 
   // Base configurations
   js.configs.recommended,

@@ -1,4 +1,3 @@
-import React from 'react';
 import { TrendingUp, Target } from 'lucide-react';
 import { useForecast } from '@/hooks/useApiHooks';
 import { useProducts } from '@/hooks/useApiHooks';

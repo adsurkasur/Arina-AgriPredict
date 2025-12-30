@@ -20,18 +20,18 @@ RUN groupadd -r appuser && useradd --no-log-init -r -g appuser -u 1001 appuser
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies with security best practices
+# Install Python dependencies (install globally, not with --user)
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir --user -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt
+
+# Create app-specific temp directory before switching user
+RUN mkdir -p /app/tmp && chown appuser:appuser /app/tmp
 
 # Copy application code
 COPY --chown=appuser:appuser . .
 
 # Switch to non-root user
 USER appuser
-
-# Create directory for any temp files with proper permissions
-RUN mkdir -p /tmp && chmod 755 /tmp
 
 # Expose port
 EXPOSE 7860

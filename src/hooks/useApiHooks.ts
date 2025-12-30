@@ -123,13 +123,6 @@ export function useModelComparison() {
     },
   });
 }
-    onError: (error: unknown) => {
-      toast.error("Error generating forecast", {
-        description: getErrorMessage(error)
-      });
-    },
-  });
-}
 
 // Chat hooks
 export function useChat() {
