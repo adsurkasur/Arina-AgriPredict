@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useGlobalLoading } from '@/hooks/useGlobalLoading';
-import { ArrowRight, TrendingUp, Database, MessageSquare } from 'lucide-react';
+import { ArrowRight, TrendingUp, Database, MessageSquare, MapPin, Route } from 'lucide-react';
 
 export default function HomePage() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -77,39 +77,51 @@ export default function HomePage() {
           </div>
 
           {/* Features Grid */}
-          <div className="mt-20 grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300">
+          <div className="mt-20 grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => navigateTo('/data')}>
               <CardContent className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                   <Database className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Data Management</h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Efficiently manage your sales data and agricultural records with our intuitive interface.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300">
+            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => navigateTo('/forecast')}>
               <CardContent className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                   <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">AI Forecasting</h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Leverage advanced AI algorithms to predict demand and optimize your crop planning.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300">
+            <Card className="border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => navigateTo('/assistant')}>
               <CardContent className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                   <MessageSquare className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">AI Assistant</h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Get intelligent insights and recommendations powered by our AI assistant.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => navigateTo('/tracking')}>
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                  <Route className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Route Optimization</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Track deliveries and optimize distribution routes for maximum efficiency.
                 </p>
               </CardContent>
             </Card>
