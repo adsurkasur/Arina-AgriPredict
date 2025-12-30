@@ -96,6 +96,45 @@ export interface ForecastResponse {
   };
 }
 
+// Model Comparison Types
+export interface ModelMetrics {
+  mae: number | null;
+  rmse: number | null;
+  mape: number | null;
+  bias: number | null;
+  mase: number | null;
+  rSquared: number | null;
+}
+
+export interface ModelComparisonResult {
+  modelId: string;
+  modelName: string;
+  forecastData: ForecastDataPoint[];
+  metrics: ModelMetrics;
+  weight: number;
+  computationTimeMs: number | null;
+}
+
+export interface ComparisonRequest {
+  productId: string;
+  days: number;
+  includeEnsemble?: boolean;
+}
+
+export interface ComparisonResponse {
+  models: ModelComparisonResult[];
+  bestModel: string;
+  ranking: string[];
+  summary: string;
+  metadata: {
+    productId: string;
+    dataPoints: number;
+    forecastHorizon: number;
+    modelsCompared: number;
+    generatedAt: string;
+  };
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';

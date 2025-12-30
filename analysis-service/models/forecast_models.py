@@ -1,19 +1,27 @@
 """
 Forecasting models for AgriPredict Analysis Service
+Includes comprehensive accuracy metrics: MAE, RMSE, MAPE, Bias, MASE, R-Squared
+Supports weighted ensemble based on model performance
 """
 
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
+from typing import List, Dict, Any, Optional, Tuple
+from dataclasses import dataclass, field
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import traceback
+import os
+import json
 
 # Import ML libraries (lazy loading to avoid startup issues)
 STATS_MODELS_AVAILABLE = True
 CATBOOST_AVAILABLE = True
+CATBOOST_MODEL_LOADED = False
+_catboost_model = None
+_catboost_feature_names = None
+_catboost_metrics = None
 
 def _import_statsmodels():
     """Lazy import of statsmodels"""
@@ -36,12 +44,118 @@ def _import_catboost():
         CATBOOST_AVAILABLE = False
         logger.warning("CatBoost not available")
 
+def _load_catboost_model():
+    """Load trained CatBoost model"""
+    global _catboost_model, _catboost_feature_names, _catboost_metrics, CATBOOST_MODEL_LOADED
+    
+    if CATBOOST_MODEL_LOADED:
+        return _catboost_model is not None
+    
+    try:
+        import joblib
+        model_path = os.path.join(os.path.dirname(__file__), 'catboost_model.pkl')
+        
+        if os.path.exists(model_path):
+            model_data = joblib.load(model_path)
+            _catboost_model = model_data.get('model')
+            _catboost_feature_names = model_data.get('feature_names', [])
+            _catboost_metrics = model_data.get('metrics', {})
+            CATBOOST_MODEL_LOADED = True
+            logger.info(f"Loaded trained CatBoost model from {model_path}")
+            logger.info(f"Model metrics: {_catboost_metrics}")
+            return True
+        else:
+            logger.warning(f"CatBoost model not found at {model_path}")
+            CATBOOST_MODEL_LOADED = True  # Mark as attempted
+            return False
+    except Exception as e:
+        logger.error(f"Failed to load CatBoost model: {e}")
+        CATBOOST_MODEL_LOADED = True
+        return False
+
 from utils.logger import setup_logger
 from utils.config import settings
 
 logger = setup_logger(__name__)
 
-logger = setup_logger(__name__)
+
+class ForecastMetrics:
+    """Comprehensive forecast accuracy metrics calculator"""
+    
+    @staticmethod
+    def calculate_all_metrics(y_true: np.ndarray, y_pred: np.ndarray, 
+                               y_train: Optional[np.ndarray] = None) -> Dict[str, Optional[float]]:
+        """
+        Calculate all forecast accuracy metrics
+        
+        Args:
+            y_true: Actual values
+            y_pred: Predicted values
+            y_train: Training data (for MASE calculation)
+            
+        Returns:
+            Dictionary with all metrics
+        """
+        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+        
+        y_true = np.array(y_true).flatten()
+        y_pred = np.array(y_pred).flatten()
+        
+        # Remove any NaN or infinite values
+        mask = np.isfinite(y_true) & np.isfinite(y_pred)
+        y_true = y_true[mask]
+        y_pred = y_pred[mask]
+        
+        if len(y_true) == 0 or len(y_true) != len(y_pred):
+            return {
+                'mae': None, 'rmse': None, 'mape': None,
+                'bias': None, 'mase': None, 'r_squared': None
+            }
+        
+        try:
+            # MAE - Mean Absolute Error
+            mae = mean_absolute_error(y_true, y_pred)
+            
+            # RMSE - Root Mean Squared Error
+            rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+            
+            # MAPE - Mean Absolute Percentage Error (handle zero values)
+            non_zero_mask = y_true != 0
+            if np.any(non_zero_mask):
+                mape = np.mean(np.abs((y_true[non_zero_mask] - y_pred[non_zero_mask]) / y_true[non_zero_mask])) * 100
+            else:
+                mape = None
+            
+            # Bias - Mean Forecast Error (MFE)
+            bias = np.mean(y_pred - y_true)
+            
+            # MASE - Mean Absolute Scaled Error
+            mase = None
+            if y_train is not None and len(y_train) > 1:
+                y_train = np.array(y_train).flatten()
+                naive_errors = np.abs(np.diff(y_train))
+                scaling_factor = np.mean(naive_errors)
+                if scaling_factor > 0:
+                    mase = mae / scaling_factor
+            
+            # R-Squared
+            r_squared = r2_score(y_true, y_pred)
+            
+            return {
+                'mae': round(float(mae), 4),
+                'rmse': round(float(rmse), 4),
+                'mape': round(float(mape), 4) if mape is not None else None,
+                'bias': round(float(bias), 4),
+                'mase': round(float(mase), 4) if mase is not None else None,
+                'r_squared': round(float(r_squared), 4)
+            }
+        except Exception as e:
+            logger.error(f"Error calculating metrics: {e}")
+            return {
+                'mae': None, 'rmse': None, 'mape': None,
+                'bias': None, 'mase': None, 'r_squared': None
+            }
+
 
 @dataclass
 class ForecastResult:
@@ -50,13 +164,20 @@ class ForecastResult:
     confidence_lower: Optional[List[float]] = None
     confidence_upper: Optional[List[float]] = None
     model_name: str = ""
+    metrics: Optional[Dict[str, Optional[float]]] = field(default_factory=dict)
+    weight: float = 1.0  # Weight for ensemble (based on accuracy)
 
 class ForecastEngine:
-    """Main forecasting engine with multiple models"""
+    """Main forecasting engine with multiple models and weighted ensemble"""
 
     def __init__(self):
         self.logger = logger
         self.executor = ThreadPoolExecutor(max_workers=4)
+        self.model_weights = {}  # Store model weights based on historical performance
+        self.model_metrics = {}  # Store metrics for each model
+        
+        # Try to load CatBoost model on init
+        _load_catboost_model()
 
     async def generate_forecast(
         self,
@@ -64,7 +185,8 @@ class ForecastEngine:
         days: int,
         models: List[str],
         include_confidence: bool = True,
-        scenario: str = "realistic"
+        scenario: str = "realistic",
+        calculate_metrics: bool = True
     ) -> Dict[str, Any]:
         """
         Generate forecast using specified models
@@ -86,6 +208,10 @@ class ForecastEngine:
             scenario_multiplier = self._get_scenario_multiplier(scenario)
             adjusted_df = self._apply_scenario_adjustment(df, scenario_multiplier)
 
+            # Calculate metrics using holdout validation if we have enough data
+            if calculate_metrics and len(adjusted_df) > days + 10:
+                self._calculate_model_metrics(adjusted_df, days, models)
+
             # Generate model forecasts
             model_results = await self._generate_model_forecasts(adjusted_df, days, models, include_confidence)
 
@@ -93,23 +219,71 @@ class ForecastEngine:
             if not model_results:
                 model_results = self._handle_fallback_forecast(adjusted_df, days)
 
-            # Generate ensemble if requested
+            # Generate weighted ensemble if requested
             if self._should_generate_ensemble(models):
-                ensemble_result = self._generate_ensemble_forecast(model_results, days, include_confidence)
+                ensemble_result = self._generate_weighted_ensemble_forecast(model_results, days, include_confidence)
                 model_results['Ensemble'] = ensemble_result
 
-            # Prepare final forecast data
+            # Prepare final forecast data with metrics
             final_forecast = self._prepare_forecast_data(model_results, adjusted_df, days)
 
             return {
                 "forecast_data": final_forecast,
                 "models_used": list(model_results.keys()),
-                "scenario": scenario
+                "scenario": scenario,
+                "model_metrics": self.model_metrics,
+                "model_weights": self.model_weights
             }
 
         except Exception as e:
             self.logger.error(f"Forecast generation failed: {str(e)}")
             raise
+    
+    def _calculate_model_metrics(self, df: pd.DataFrame, forecast_days: int, models: List[str]):
+        """Calculate accuracy metrics for each model using holdout validation"""
+        try:
+            # Use last 'forecast_days' as holdout set
+            train_df = df.iloc[:-forecast_days].copy()
+            test_df = df.iloc[-forecast_days:].copy()
+            
+            if len(train_df) < 10:
+                self.logger.warning("Not enough data for metric calculation")
+                return
+            
+            y_true = test_df['price'].values
+            y_train = train_df['price'].values
+            
+            for model_name in models:
+                if model_name.lower() == 'ensemble':
+                    continue
+                    
+                try:
+                    method_name = f'_generate_{model_name.lower()}_forecast'
+                    if hasattr(self, method_name):
+                        result = getattr(self, method_name)(train_df.copy(), forecast_days, False)
+                        if result and result.values:
+                            y_pred = np.array(result.values[:len(y_true)])
+                            metrics = ForecastMetrics.calculate_all_metrics(y_true, y_pred, y_train)
+                            self.model_metrics[model_name] = metrics
+                            
+                            # Calculate weight based on MAE (lower is better)
+                            if metrics.get('mae') is not None and metrics['mae'] > 0:
+                                self.model_weights[model_name] = 1.0 / metrics['mae']
+                            else:
+                                self.model_weights[model_name] = 1.0
+                except Exception as e:
+                    self.logger.warning(f"Failed to calculate metrics for {model_name}: {e}")
+                    self.model_weights[model_name] = 1.0
+            
+            # Normalize weights
+            total_weight = sum(self.model_weights.values())
+            if total_weight > 0:
+                self.model_weights = {k: v / total_weight for k, v in self.model_weights.items()}
+                
+            self.logger.info(f"Calculated model weights: {self.model_weights}")
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating model metrics: {e}")
 
     def _apply_scenario_adjustment(self, df: pd.DataFrame, multiplier: float) -> pd.DataFrame:
         """Apply scenario multiplier to price data"""
@@ -358,7 +532,7 @@ class ForecastEngine:
         days: int,
         include_confidence: bool = True
     ) -> ForecastResult:
-        """CatBoost forecast (placeholder for future training)"""
+        """CatBoost forecast using trained model"""
         try:
             # Lazy import CatBoost
             _import_catboost()
@@ -369,35 +543,123 @@ class ForecastEngine:
             if len(df) < 10:
                 raise ValueError("Insufficient data for CatBoost")
 
-            # For now, use a simple fallback since model isn't trained yet
-            # This will be replaced with actual trained model later
-            self.logger.info("Using CatBoost placeholder (model not trained yet)")
+            # Try to load the trained model
+            model_loaded = _load_catboost_model()
+            
+            if model_loaded and _catboost_model is not None:
+                # Use trained model for prediction
+                self.logger.info("Using trained CatBoost model")
+                values = self._predict_with_catboost(df, days)
+            else:
+                # Fallback to trend-based forecast if model not available
+                self.logger.info("Using CatBoost trend-based fallback (no trained model)")
+                values = self._catboost_trend_fallback(df, days)
 
-            # Simple trend-based forecast as placeholder
-            recent_trend = df['price'].pct_change().mean()
-            last_price = df['price'].iloc[-1]
-
-            values = []
-            for i in range(days):
-                trend_factor = 1 + (recent_trend * (i + 1) / days)
-                predicted_price = last_price * trend_factor
-                values.append(float(predicted_price))
-
-            # Simple confidence intervals
+            # Calculate confidence intervals based on historical volatility
             std_dev = df['price'].std()
-            confidence_lower = [v - std_dev for v in values] if include_confidence else None
-            confidence_upper = [v + std_dev for v in values] if include_confidence else None
+            volatility_factor = std_dev / df['price'].mean() if df['price'].mean() > 0 else 0.1
+            
+            confidence_lower = None
+            confidence_upper = None
+            if include_confidence:
+                # Widen confidence intervals over time
+                confidence_lower = []
+                confidence_upper = []
+                for i, v in enumerate(values):
+                    width = std_dev * (1 + 0.1 * i)  # Increasing uncertainty
+                    confidence_lower.append(max(0, v - width))
+                    confidence_upper.append(v + width)
 
             return ForecastResult(
                 values=values,
                 confidence_lower=confidence_lower,
                 confidence_upper=confidence_upper,
-                model_name="CatBoost"
+                model_name="CatBoost",
+                metrics=_catboost_metrics if _catboost_metrics else {}
             )
 
         except Exception as e:
             self.logger.error(f"CatBoost forecast failed: {str(e)}")
             raise
+    
+    def _predict_with_catboost(self, df: pd.DataFrame, days: int) -> List[float]:
+        """Generate predictions using trained CatBoost model"""
+        try:
+            values = []
+            last_date = df['date'].max()
+            last_price = df['price'].iloc[-1]
+            
+            # Create a simple feature set for prediction
+            # Since we don't have all the features the model was trained on,
+            # we'll use the available data and fill in defaults
+            for i in range(days):
+                forecast_date = last_date + timedelta(days=i+1)
+                
+                # Build features similar to training data
+                features = {
+                    'year': forecast_date.year,
+                    'month': forecast_date.month,
+                    'day': forecast_date.day,
+                    'day_of_week': forecast_date.weekday(),
+                    'week_of_year': forecast_date.isocalendar()[1],
+                    'quarter': (forecast_date.month - 1) // 3 + 1,
+                    'is_weekend': 1 if forecast_date.weekday() >= 5 else 0,
+                    'is_holiday': 0,  # Simplified
+                }
+                
+                # Add lag features from historical data
+                if len(df) > 0:
+                    features['price_lag_1'] = df['price'].iloc[-1] if len(df) >= 1 else last_price
+                    features['price_lag_7'] = df['price'].iloc[-7] if len(df) >= 7 else last_price
+                    features['price_lag_30'] = df['price'].iloc[-30] if len(df) >= 30 else last_price
+                    features['quantity_sold_lag_1'] = df['quantity'].iloc[-1] if 'quantity' in df.columns and len(df) >= 1 else 100
+                    features['quantity_sold_lag_7'] = df['quantity'].iloc[-7] if 'quantity' in df.columns and len(df) >= 7 else 100
+                    features['quantity_sold_lag_30'] = df['quantity'].iloc[-30] if 'quantity' in df.columns and len(df) >= 30 else 100
+                    
+                    # Rolling statistics
+                    features['market_price'] = df['price'].mean()
+                    features['supply_index'] = 100  # Default
+                    features['demand_index'] = 100  # Default
+                
+                # Create DataFrame for prediction
+                feature_df = pd.DataFrame([features])
+                
+                # Fill missing features with defaults
+                for feat in _catboost_feature_names:
+                    if feat not in feature_df.columns:
+                        feature_df[feat] = 0
+                
+                # Reorder columns to match training
+                feature_df = feature_df.reindex(columns=_catboost_feature_names, fill_value=0)
+                
+                # Make prediction
+                try:
+                    pred = _catboost_model.predict(feature_df)[0]
+                    values.append(float(pred))
+                except Exception as e:
+                    self.logger.warning(f"CatBoost prediction failed for day {i+1}: {e}")
+                    values.append(last_price)
+            
+            return values
+            
+        except Exception as e:
+            self.logger.error(f"CatBoost prediction failed: {e}")
+            return self._catboost_trend_fallback(df, days)
+    
+    def _catboost_trend_fallback(self, df: pd.DataFrame, days: int) -> List[float]:
+        """Fallback trend-based forecast for CatBoost"""
+        recent_trend = df['price'].pct_change().mean()
+        if pd.isna(recent_trend):
+            recent_trend = 0
+        last_price = df['price'].iloc[-1]
+
+        values = []
+        for i in range(days):
+            trend_factor = 1 + (recent_trend * (i + 1) / days)
+            predicted_price = last_price * trend_factor
+            values.append(float(predicted_price))
+        
+        return values
 
     def _generate_fallback_forecast(self, df: pd.DataFrame, days: int) -> ForecastResult:
         """Fallback forecast using simple average"""
@@ -433,29 +695,68 @@ class ForecastEngine:
         days: int,
         include_confidence: bool = True
     ) -> ForecastResult:
-        """Generate ensemble forecast from multiple models"""
+        """Generate simple average ensemble forecast from multiple models (deprecated, use weighted)"""
+        return self._generate_weighted_ensemble_forecast(model_results, days, include_confidence)
+    
+    def _generate_weighted_ensemble_forecast(
+        self,
+        model_results: Dict[str, ForecastResult],
+        days: int,
+        include_confidence: bool = True
+    ) -> ForecastResult:
+        """Generate weighted ensemble forecast based on model accuracy"""
         try:
             if not model_results:
                 raise ValueError("No model results available for ensemble")
 
-            # Collect valid predictions
-            valid_predictions = self._collect_valid_predictions(model_results, days)
+            # Collect valid predictions with weights
+            valid_predictions = []
+            weights = []
+            
+            for model_name, result in model_results.items():
+                if model_name.lower() == 'ensemble':
+                    continue
+                if len(result.values) >= days:
+                    valid_predictions.append(result.values[:days])
+                    # Get weight from calculated weights or use default
+                    weight = self.model_weights.get(model_name, 1.0 / len(model_results))
+                    weights.append(weight)
+            
             if not valid_predictions:
                 raise ValueError("No valid predictions for ensemble")
+            
+            # Normalize weights
+            total_weight = sum(weights)
+            if total_weight > 0:
+                weights = [w / total_weight for w in weights]
+            else:
+                weights = [1.0 / len(weights)] * len(weights)
 
-            # Calculate ensemble predictions
-            ensemble_values = self._calculate_ensemble_values(valid_predictions, days)
+            # Calculate weighted ensemble predictions
+            ensemble_values = []
+            for i in range(days):
+                weighted_sum = sum(
+                    values[i] * weight 
+                    for values, weight in zip(valid_predictions, weights)
+                )
+                ensemble_values.append(weighted_sum)
 
-            # Calculate confidence intervals if needed
+            # Calculate weighted confidence intervals if needed
             confidence_bounds = None
             if include_confidence:
-                confidence_bounds = self._calculate_ensemble_confidence(model_results, ensemble_values, days)
+                confidence_bounds = self._calculate_weighted_ensemble_confidence(
+                    model_results, ensemble_values, days, weights
+                )
+
+            # Aggregate metrics from component models
+            ensemble_metrics = self._aggregate_ensemble_metrics(model_results)
 
             return ForecastResult(
                 values=ensemble_values,
                 confidence_lower=confidence_bounds[0] if confidence_bounds else None,
                 confidence_upper=confidence_bounds[1] if confidence_bounds else None,
-                model_name="Ensemble"
+                model_name="Ensemble",
+                metrics=ensemble_metrics
             )
 
         except Exception as e:
@@ -493,9 +794,81 @@ class ForecastEngine:
             confidence_upper = [np.mean([upper[i] for upper in all_upper]) for i in range(days)]
         else:
             # Fallback confidence intervals based on standard deviation
-            std_dev = np.std(ensemble_values)
+            std_dev = np.std(ensemble_values) if len(ensemble_values) > 1 else np.mean(ensemble_values) * 0.1
             confidence_lower = [v - std_dev for v in ensemble_values]
             confidence_upper = [v + std_dev for v in ensemble_values]
+
+        return confidence_lower, confidence_upper
+    
+    def _calculate_weighted_ensemble_confidence(
+        self,
+        model_results: Dict[str, ForecastResult],
+        ensemble_values: List[float],
+        days: int,
+        weights: List[float]
+    ) -> Tuple[List[float], List[float]]:
+        """Calculate weighted confidence intervals for ensemble"""
+        all_lower = []
+        all_upper = []
+        model_weights_list = []
+        
+        for model_name, result in model_results.items():
+            if model_name.lower() == 'ensemble':
+                continue
+            if result.confidence_lower and len(result.confidence_lower) >= days:
+                all_lower.append(result.confidence_lower[:days])
+                all_upper.append(result.confidence_upper[:days])
+                model_weights_list.append(self.model_weights.get(model_name, 1.0))
+        
+        if all_lower and all_upper:
+            # Normalize weights
+            total_weight = sum(model_weights_list)
+            if total_weight > 0:
+                model_weights_list = [w / total_weight for w in model_weights_list]
+            
+            confidence_lower = []
+            confidence_upper = []
+            for i in range(days):
+                lower_weighted = sum(
+                    lower[i] * w for lower, w in zip(all_lower, model_weights_list)
+                )
+                upper_weighted = sum(
+                    upper[i] * w for upper, w in zip(all_upper, model_weights_list)
+                )
+                confidence_lower.append(lower_weighted)
+                confidence_upper.append(upper_weighted)
+        else:
+            # Fallback
+            std_dev = np.std(ensemble_values) if len(ensemble_values) > 1 else np.mean(ensemble_values) * 0.1
+            confidence_lower = [v - std_dev for v in ensemble_values]
+            confidence_upper = [v + std_dev for v in ensemble_values]
+        
+        return confidence_lower, confidence_upper
+    
+    def _aggregate_ensemble_metrics(self, model_results: Dict[str, ForecastResult]) -> Dict[str, Optional[float]]:
+        """Aggregate metrics from component models for ensemble"""
+        aggregated = {
+            'mae': [], 'rmse': [], 'mape': [], 'bias': [], 'mase': [], 'r_squared': []
+        }
+        
+        for model_name, result in model_results.items():
+            if model_name.lower() == 'ensemble':
+                continue
+            metrics = self.model_metrics.get(model_name, {})
+            for key in aggregated:
+                if metrics.get(key) is not None:
+                    aggregated[key].append(metrics[key])
+        
+        # Calculate weighted averages
+        final_metrics = {}
+        for key, values in aggregated.items():
+            if values:
+                final_metrics[key] = round(np.mean(values), 4)
+            else:
+                final_metrics[key] = None
+        
+        final_metrics['component_models'] = len(model_results) - 1  # Exclude ensemble itself
+        return final_metrics
 
         return confidence_lower, confidence_upper
 

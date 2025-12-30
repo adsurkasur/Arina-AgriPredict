@@ -11,7 +11,8 @@ import {
   CreateDemandRequest,
   UpdateDemandRequest,
   ForecastRequest,
-  ChatRequest
+  ChatRequest,
+  ComparisonRequest
 } from '@/types/api';
 
 // Helper function to extract error message
@@ -98,6 +99,30 @@ export function useForecast() {
         description: `Generated ${data.forecastData.length} day forecast.`
       });
     },
+    onError: (error: unknown) => {
+      toast.error("Error generating forecast", {
+        description: getErrorMessage(error)
+      });
+    },
+  });
+}
+
+// Model Comparison hook
+export function useModelComparison() {
+  return useMutation({
+    mutationFn: (data: ComparisonRequest) => forecastApi.compareModels(data),
+    onSuccess: (data) => {
+      toast.success("Model comparison complete", {
+        description: `Compared ${data.models.length} models. Best: ${data.bestModel.toUpperCase()}`
+      });
+    },
+    onError: (error: unknown) => {
+      toast.error("Error comparing models", {
+        description: getErrorMessage(error)
+      });
+    },
+  });
+}
     onError: (error: unknown) => {
       toast.error("Error generating forecast", {
         description: getErrorMessage(error)

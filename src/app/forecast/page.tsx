@@ -5,20 +5,26 @@ import { EnhancedDemandChart } from "@/components/feature/forecast/enhanced-dema
 import { ExportCapabilities } from "@/components/feature/forecast/export";
 import { AdvancedAnalytics } from "@/components/feature/forecast/AdvancedAnalytics";
 import { RealTimeDataStreaming } from "@/components/feature/forecast/realtime";
-import { useDemands } from "@/hooks/useApiHooks";
-import { ForecastResponse } from "@/types/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModelComparison } from "@/components/feature/forecast/model-comparison";
+import { useDemands, useModelComparison } from "@/hooks/useApiHooks";
+import { ForecastResponse, ComparisonResponse } from "@/types/api";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer";
-import { Loader2, BarChart3, TrendingUp, Target, Brain, Activity } from "lucide-react";
+import { Loader2, BarChart3, TrendingUp, Target, Brain, Activity, GitCompare, Play } from "lucide-react";
 
 export default function ForecastPage() {
   const [forecastData, setForecastData] = useState<ForecastResponse | null>(null);
+  const [comparisonData, setComparisonData] = useState<ComparisonResponse | null>(null);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Get all demand data for chart display
   const { data: allDemandsData } = useDemands({ limit: 1000 });
+  
+  // Model comparison mutation
+  const modelComparison = useModelComparison();
 
   const handleForecastGenerated = (forecast: ForecastResponse) => {
     setForecastData(forecast);
@@ -32,6 +38,25 @@ export default function ForecastPage() {
 
   const handleProductChange = (productIds: string[]) => {
     setSelectedProductIds(productIds);
+    // Reset comparison when product changes
+    setComparisonData(null);
+  };
+
+  const handleRunComparison = () => {
+    if (selectedProductIds.length === 0) return;
+    
+    modelComparison.mutate(
+      {
+        productId: selectedProductIds[0], // Compare for first selected product
+        days: forecastData?.forecastData?.length || 30,
+        includeEnsemble: true,
+      },
+      {
+        onSuccess: (data) => {
+          setComparisonData(data);
+        },
+      }
+    );
   };
 
   return (
@@ -76,8 +101,12 @@ export default function ForecastPage() {
         {/* Enhanced Results Dashboard */}
         {forecastData && (
           <Tabs defaultValue="summary" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="summary">Summary</TabsTrigger>
+              <TabsTrigger value="comparison">
+                <GitCompare className="h-4 w-4 mr-1" />
+                Compare
+              </TabsTrigger>
               <TabsTrigger value="revenue">Revenue</TabsTrigger>
               <TabsTrigger value="models">Models</TabsTrigger>
               <TabsTrigger value="insights">Insights</TabsTrigger>
@@ -104,6 +133,90 @@ export default function ForecastPage() {
                   <MarkdownRenderer content={forecastData.summary} />
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="comparison" className="space-y-4">
+              {!comparisonData && !modelComparison.isPending && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <GitCompare className="h-5 w-5 mr-2" />
+                      Model Comparison
+                    </CardTitle>
+                    <CardDescription>
+                      Compare all 6 forecasting models (SMA, WMA, ES, ARIMA, CatBoost, Ensemble) 
+                      to see which performs best on your data.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                      <GitCompare className="h-16 w-16 text-muted-foreground/50" />
+                      <div className="text-center">
+                        <h3 className="text-lg font-semibold">Run Model Comparison</h3>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                          This will evaluate all forecasting models on your historical data using 
+                          holdout validation and calculate comprehensive accuracy metrics 
+                          (MAE, RMSE, MAPE, Bias, MASE, R²).
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={handleRunComparison} 
+                        disabled={selectedProductIds.length === 0}
+                        size="lg"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Compare Models
+                      </Button>
+                      {selectedProductIds.length === 0 && (
+                        <p className="text-sm text-amber-600 dark:text-amber-400">
+                          Please select a product first
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {modelComparison.isPending && (
+                <Card>
+                  <CardContent className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center space-y-4">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <div className="text-center">
+                        <h3 className="text-lg font-semibold">Comparing Models</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Evaluating SMA, WMA, ES, ARIMA, CatBoost, and Ensemble models...
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {comparisonData && (
+                <ModelComparison 
+                  comparisonData={comparisonData}
+                  isLoading={false}
+                  error={null}
+                />
+              )}
+
+              {modelComparison.isError && (
+                <Card className="border-destructive">
+                  <CardContent className="pt-6">
+                    <div className="text-center text-destructive">
+                      <p>Failed to compare models. Please try again.</p>
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={handleRunComparison}
+                      >
+                        Retry Comparison
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="revenue" className="space-y-4">

@@ -9,6 +9,8 @@ import {
   ChatRequest,
   ChatResponse,
   Product,
+  ComparisonRequest,
+  ComparisonResponse,
 } from '@/types/api';
 import { auth } from './firebase';
 import { getIdToken } from 'firebase/auth';
@@ -89,6 +91,12 @@ export const forecastApi = {
   // Generate forecast for product
   async generateForecast(data: ForecastRequest): Promise<ForecastResponse> {
     const response = await apiClient.post<ForecastResponse>('/forecast', data);
+    return response.data;
+  },
+  
+  // Compare all forecasting models
+  async compareModels(data: ComparisonRequest): Promise<ComparisonResponse> {
+    const response = await apiClient.post<ComparisonResponse>('/forecast/compare', data);
     return response.data;
   },
 };
