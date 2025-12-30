@@ -1,4 +1,6 @@
-# Python
+# ============================================
+# PYTHON
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -6,11 +8,8 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
-downloads/
 eggs/
 .eggs/
-# lib/  <- Removed: This was blocking src/lib from git
 lib64/
 parts/
 sdist/
@@ -19,9 +18,31 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# ============================================
+# NODE / JAVASCRIPT / TYPESCRIPT
+# ============================================
+# Dependency directories
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
+dist-ssr/
+build/
+coverage/
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -29,45 +50,68 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-
-# Build output
-.next/
-out/
-build/
-dist/
-dist-ssr/
-coverage/
-
 # TypeScript build cache
 *.tsbuildinfo
 
-# Environment files
-.env*
-
-# Dependency directories
-node_modules/
-
-# Package manager lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-bun.lockb
-
-node_modules
-dist
-dist-ssr
+# Vite/other build artifacts
 *.local
 
-# Editor directories and files
+# ============================================
+# DATA & ML MODELS
+# ============================================
+# Data files (excluding test data CSVs)
+data/*.xlsx
+data/*.json
+*.pkl
+*.pickle
+*.joblib
+*.model
+*.h5
+*.pt
+*.pth
+
+# ============================================
+# ENVIRONMENT & CONFIGURATION
+# ============================================
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+
+# ============================================
+# EDITOR & IDE
+# ============================================
 .vscode/*
 !.vscode/extensions.json
 .idea
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+
+# JetBrains IDEs
+*.iml
+*.iws
+*.ipr
+.vscode-test/
+
+# VS Code
+.history/
+.ionide/
+
+# Visual Studio
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Local development files
+# ============================================
+# LOCAL DEVELOPMENT
+# ============================================
 ai-context.md
